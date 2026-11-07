@@ -16,5 +16,15 @@ jobs:
         with:
           node-version: '22'
       - run: python -m pip install -r requirements-lock.txt
-      - run: python -B -m unittest test_updates test_workflow test_editor_ai test_server test_review
+      - name: Python tests
+        shell: pwsh
+        run: |
+          $output = & python -B -m unittest test_updates test_workflow test_editor_ai test_server test_review 2>&1
+          $result = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
+          if ($result -ne 0) {
+            $message = ($output -join "`n").Replace('%','%25').Replace("`r",'%0D').Replace("`n",'%0A')
+            Write-Host "::error title=Python test details::$message"
+            exit $result
+          }
       - run: node --test test_workflow_ui.js
