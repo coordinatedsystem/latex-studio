@@ -1,7 +1,7 @@
 {
-  "version": "1.0.0",
-  "file": "distribution/LaTeX-Studio-1.0.0-win64-Setup.exe",
-  "size": 74181221,
-  "sha256": "4f0a3d4734e384dd71122276d0bce0d6513d860ab59fdbd0b594616f0d2279a0",
-  "notes": "首个完整安装版：本地编辑、PDF、宏包管理、AI 审阅与安全更新。"
+  "version": "1.0.1",
+  "file": "distribution/LaTeX-Studio-1.0.1-win64-Setup.exe",
+  "size": 74181522,
+  "sha256": "a83d05d1487c0979bff2ec45436caeadb9e1b7af67b8e909e3c5e3ababc74001",
+  "notes": "修复首次大提交导致版本检查失败的问题；增加检查进度反馈。"
 }

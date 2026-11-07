@@ -39,6 +39,6 @@ def main():
     if setup.stat().st_size>=100*1024*1024:raise ValueError('Installer exceeds repository publication limit; use release assets instead')
     checksum=sha(setup);(output/'SHA256SUMS.txt').write_text(checksum+'  '+setup.name+'\n','utf8')
     updates=repo/'updates';updates.mkdir(exist_ok=True)
-    (updates/'latest.json').write_text(json.dumps({'version':version,'file':'distribution/'+setup.name,'size':setup.stat().st_size,'sha256':checksum,'notes':'首个完整安装版：本地编辑、PDF、宏包管理、AI 审阅与安全更新。'},ensure_ascii=False,indent=2),'utf8')
+    (updates/'latest.json').write_text(json.dumps({'version':version,'file':'distribution/'+setup.name,'size':setup.stat().st_size,'sha256':checksum,'notes':'LaTeX Studio '+version+'：本地编辑、PDF、宏包管理、AI 审阅与安全更新。'},ensure_ascii=False,indent=2),'utf8')
     audit(repo);print('Installer ready:',setup.name,setup.stat().st_size,'bytes',flush=True)
 if __name__=='__main__':main()

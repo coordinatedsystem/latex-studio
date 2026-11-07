@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "files": [
     {
       "path": "Launch.vbs",
@@ -13,8 +13,8 @@
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 487,
-      "sha256": "77411465ff85e645465f7950e759dc542c99bed2888127ea3fe6cd3d3b9767a6"
+      "size": 661,
+      "sha256": "ad22be4a3f42624012bc70360be59c2c5b352ff0147efe41ba24f6b29d15042a"
     },
     {
       "path": "app/launch.ps1",
@@ -29,7 +29,7 @@
     {
       "path": "app/README.md",
       "size": 4593,
-      "sha256": "86ad2aa39a591c460722e9ddab54465f7984c06aa9122f32c4e71f6553567d1e"
+      "sha256": "447ee8dddfa9854e1c455740c1987fb8fe8ce1af6ad386618fcbd2bdd0f23102"
     },
     {
       "path": "app/server.py",
@@ -103,8 +103,8 @@
     },
     {
       "path": "app/studio_updates.py",
-      "size": 7816,
-      "sha256": "032c928cb3200ca4f1d33d868bdcb1bd9a3798fb323b7198a4f405552196291a"
+      "size": 7832,
+      "sha256": "6baf63e133b43eae27acbedc4faf605100e7de274c3304dfa21728ff7b0b9f21"
     },
     {
       "path": "app/studio_usage.py",
@@ -123,8 +123,8 @@
     },
     {
       "path": "app/version.json",
-      "size": 122,
-      "sha256": "2314e28bd923c1b0649119f4b46c3987b7a8e77a847fe723d6c1efd4740d2d2e"
+      "size": 128,
+      "sha256": "850b5a21a2ebc7616c0a0def5956693fed84c61599b0239c507d5f461d8bce89"
     },
     {
       "path": "app/assets/studio.ico",
@@ -3103,8 +3103,8 @@
     },
     {
       "path": "app/web/updates.js",
-      "size": 4335,
-      "sha256": "b266010cfc65f3a16c46fe48191d9fcb33392e8fb49084b213879fc8dc4b4830"
+      "size": 4547,
+      "sha256": "b21632419cc582378e02aec2ad749f3ce6e3bd9f036c1161ae483a7ad6c0179f"
     },
     {
       "path": "app/web/viewer-bridge.js",

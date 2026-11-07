@@ -69,7 +69,7 @@ class Updates:
             if self.job['running']:raise ValueError('已有更新任务正在进行')
             self.job.update(running=True,stage='正在检查',error=None)
         try:
-            commit=self.json('commits/main')['sha']
+            commit=self.json('git/ref/heads/main')['object']['sha']
             release=self.validate(self.json('contents/updates/latest.json?ref='+commit,True),commit)
             with self.lock:self.release=release;self.installer=None;self.job.update(stage='发现新版本' if release['available'] else '已是最新版本')
         except Exception as e:

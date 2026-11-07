@@ -10,7 +10,7 @@ async function showUpdates(){
   $('#updateCheck').disabled=s.job.running;$('#updateDownload').hidden=!s.release?.available||s.ready;$('#updateDownload').disabled=s.job.running;$('#updateInstall').hidden=!s.ready;
  };
  const watch=fn=>async()=>{try{render(await fn())}catch(e){if($('#updateStatus'))$('#updateStatus').textContent=e.message}};
- $('#updateCheck').onclick=watch(()=>api('updates/check',{}));
+ $('#updateCheck').onclick=async()=>{$('#updateCheck').disabled=true;$('#updateStatus').textContent='正在检查…';try{render(await api('updates/check',{}))}catch(e){$('#updateStatus').textContent=e.message}finally{if($('#updateCheck'))$('#updateCheck').disabled=false}};
  $('#updateDownload').onclick=watch(async()=>{const next=await api('updates/download',{});clearInterval(updatePoll);updatePoll=setInterval(async()=>{try{const next=await api('updates');render(next);if(!next.job.running)clearInterval(updatePoll)}catch{clearInterval(updatePoll)}},700);return next;});
  $('#updateInstall').onclick=async()=>{try{await saveAll();await api('updates/install',{});$('#updateStatus').textContent='安装向导已打开，完成后重新启动应用'}catch(e){$('#updateStatus').textContent=e.message}};
  $('#updateSave').onclick=watch(async()=>{const value=await api('updates/settings',{automatic:$('#updateAutomatic').checked,token:$('#updateToken').value});$('#updateToken').value='';toast('更新设置已保存');return value});

@@ -2,11 +2,11 @@
 
 面向 Windows 的本地 LaTeX 写作工具：源码编辑、PDF 预览、宏包管理与可审阅的 AI 修改，在同一个工作区完成。
 
-当前版本：**1.0.0** · Windows 10 / 11 x64 · 公开仓库
+当前版本：**1.0.1** · Windows 10 / 11 x64 · 公开仓库
 
 ## 安装
 
-从 [安装包目录](distribution/) 下载 `LaTeX-Studio-1.0.0-win64-Setup.exe`。使用旁边的 `SHA256SUMS.txt` 核对文件，再双击安装。默认位置为 `D:\LaTeXStudio`，也可选择其他专用目录。
+从 [安装包目录](distribution/) 下载 `LaTeX-Studio-1.0.1-win64-Setup.exe`。使用旁边的 `SHA256SUMS.txt` 核对文件，再双击安装。默认位置为 `D:\LaTeXStudio`，也可选择其他专用目录。
 
 安装包包含独立 Python、Tectonic 编译器、PDF 渲染组件、离线前端与基础 TeX 资源；无需另装 Python、Node.js 或 LaTeX。界面不依赖公共 CDN。未缓存的宏包需要联网下载。
 
@@ -44,7 +44,7 @@ AI 服务默认需要用户自行配置。密钥由 Windows DPAPI 加密，绑�
 
 更新清单位于 [`updates/latest.json`](updates/latest.json)。检查时固定 GitHub 提交，下载该提交中的安装包，并验证版本、文件名、长度和 SHA256。校验失败不允许运行；安装前再次核对文件。安装始终由用户点击，不会静默替换文档。
 
-当前通过仓库的 `distribution/` 提供安装包，避免创建 Releases 还需另一组写入凭据。后续版本可迁移为 GitHub Releases；源码版本标签仍使用 `v1.0.0` 形式。
+当前通过仓库的 `distribution/` 提供安装包，避免创建 Releases 还需另一组写入凭据。后续版本可迁移为 GitHub Releases；源码版本标签仍使用 `v1.0.1` 形式。
 
 ## 开发
 
@@ -52,7 +52,7 @@ AI 服务默认需要用户自行配置。密钥由 Windows DPAPI 加密，绑�
 
 `version.json` 是版本信息的唯一来源：`version` 使用语义版本，`build` 标识内部兼容性，`channel` 当前为 `stable`。
 
-下次发布先运行 `python tools/set_version.py 1.0.1 --build studio-16`，补充更新记录，再构建和测试。构建脚本会写出 SHA256 清单和对应版本清单；提交后创建同名 `v1.0.1` 标签并推送。
+下次发布先运行 `python tools/set_version.py 1.0.2 --build studio-17`，补充更新记录，再构建和测试。构建脚本会写出 SHA256 清单和对应版本清单；提交后创建同名 `v1.0.2` 标签并推送。
 
 构建入口见 [`tools/build_release.py`](tools/build_release.py)，安装脚本为 [`installer/LaTeXStudio.iss`](installer/LaTeXStudio.iss)。发布前运行 `python tools/audit_release.py .`，并实际测试独立安装与升级保留数据。
 
