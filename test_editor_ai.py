@@ -6,7 +6,7 @@ from studio_editor_ai import EditorAI,error_target,excerpt,environment_problem
 
 class EditorAITests(unittest.TestCase):
     def setUp(self):
-        self.tmp=tempfile.TemporaryDirectory(prefix='studio-editor-test-');self.base=Path(self.tmp.name)
+        self.tmp=tempfile.TemporaryDirectory(prefix='studio-editor-test-');self.base=Path(self.tmp.name).resolve()
         self.root=self.base/'project';self.root.mkdir();self.original=b'\xef\xbb\xbf\\documentclass{article}\r\n\\begin{document}\r\n\\textbff{Hello} \\empph{World}\r\n\\end{document}\r\n'
         (self.root/'main.tex').write_bytes(self.original)
         self.storage=SimpleNamespace(data=self.base/'data',cache=self.base/'cache',runtime=self.base/'runtime',tex_cache=self.base/'cache/tectonic');self.ai=EditorAI(self.storage)

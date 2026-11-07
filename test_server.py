@@ -30,7 +30,7 @@ class WorkspaceTests(unittest.TestCase):
 
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='latex-studio-test-')
-        server.ROOT = Path(self.temp.name)
+        server.ROOT = Path(self.temp.name).resolve()
         server.APP = server.ROOT / 'latex-studio'
         server.APP.mkdir()
         (server.APP / 'web').mkdir()

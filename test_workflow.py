@@ -38,7 +38,7 @@ class UsageTests(unittest.TestCase):
         from studio_usage import usage_for
         from unittest.mock import patch
         from types import SimpleNamespace
-        data=Path(self.tmp.name);usage_for(data).configure(1)
+        data=Path(self.tmp.name).resolve();usage_for(data).configure(1)
         assistant=Assistant(data);assistant.job={'requestCount':0}
         with patch('studio_ai.request_json',return_value={'usage':{'total_tokens':20}}) as network:
             assistant.request('mock',{})
@@ -52,7 +52,7 @@ class UsageTests(unittest.TestCase):
 class SyncTests(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
-        self.base=Path(self.tmp.name);self.root=self.base/'project';self.root.mkdir();self.data=self.base/'data';(self.root/'main.tex').write_text('hello\nworld','utf8')
+        self.base=Path(self.tmp.name).resolve();self.root=self.base/'project';self.root.mkdir();self.data=self.base/'data';(self.root/'main.tex').write_text('hello\nworld','utf8')
         self.pdf=self.base/'preview.pdf';writer=PdfWriter();writer.add_blank_page(width=600,height=800);writer.write(self.pdf)
         self.sync=self.data/'previews'/(project_id(self.root)+'.synctex.gz');self.sync.parent.mkdir(parents=True)
         self.sync.write_bytes(gzip.compress(('Input:1:'+str(self.root/'main.tex')+'\nInput:2:'+str(self.base/'external.tex')+'\nUnit:1\nMagnification:1000\n{1\ng1,1:6553600,6553600\ng1,2:6553600,13107200\ng2,999:6553600,6553600\n}\n').encode()))
