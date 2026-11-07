@@ -1,0 +1,71 @@
+/* A document-first writing desk. Colour is limited to selection and small panels. */
+#aiPage .ai-container{padding:23px 28px 18px;max-width:1600px;margin:auto}
+#aiPage .ai-heading{margin-bottom:13px;min-height:40px}#aiPage .ai-heading h1{font-size:28px;letter-spacing:0;font-weight:600}
+#aiPage .ai-heading-actions button{font-size:14px;padding:8px 12px;border-radius:7px}
+#writingWorkbench{--wb-line:#d0d8e3;--wb-green:#0f62fe}
+#writingWorkbench .writing-steps{height:35px;padding:0 3px;margin-bottom:15px;border:0;background:#fff!important;gap:12px;border-radius:0}
+#writingWorkbench .writing-steps li{font-size:14px;gap:8px;font-weight:450;white-space:nowrap}
+#writingWorkbench .writing-steps li>span{width:24px;height:24px;border-color:#cbd3df;font-size:12px;flex-shrink:0}
+#writingWorkbench .writing-steps li.current{font-weight:550}
+#writingWorkbench .writing-steps li.current>span{background:#0f62fe;color:#fff;border-color:#0f62fe}
+#writingWorkbench .writing-steps li.done>span{background:#edf3ff;color:#111;border-color:#c8d8f2}
+#writingWorkbench .writing-steps li:not(:last-child):after{content:'';height:1px;background:#dce2eb;flex:1;margin-right:8px;margin-left:8px}
+#writingWorkbench .writing-grid{grid-template-columns:minmax(0,1fr) clamp(350px,29vw,400px);gap:20px;height:calc(100dvh - 215px);min-height:440px;max-height:1250px}
+#writingWorkbench .writing-canvas,#writingWorkbench .writing-review{border-color:#cfd8e4;border-radius:13px;box-shadow:0 2px 9px #1e3c6205}
+#writingWorkbench .writing-canvas-head{min-height:53px;padding:8px 13px;background:#fff!important;gap:8px}
+#writingWorkbench .writing-segment{border:0;background:#f1f4f8!important;padding:3px;border-radius:7px;gap:2px}
+#writingWorkbench .writing-segment button{padding:7px 11px;font-size:14px;font-weight:450}
+#writingWorkbench .writing-segment button.active{background:#fff!important;box-shadow:0 1px 4px #1a35551a;border-color:transparent!important}
+#writingWorkbench .writing-view-tabs{gap:9px;align-self:stretch}
+#writingWorkbench .writing-view-tabs button{border-radius:0;padding:6px 1px;font-size:13px!important;border-bottom:2px solid transparent;background:transparent!important;box-shadow:none;color:#111!important}
+#writingWorkbench .writing-view-tabs button.active{border-bottom-color:#0f62fe!important;background:transparent!important}
+#writingWorkbench .writing-content-toolbar{padding:7px 12px;min-height:44px;background:#fff!important;border-color:#d9e0ea}
+#writingWorkbench .writing-content-toolbar button,#writingWorkbench .writing-content-toolbar select{font-size:14px}
+#writingWorkbench .writing-content-toolbar .writing-icon{font-size:21px!important;background:#f4f6f9;border:1px solid #e2e7ee}
+#writingWorkbench .writing-chip{background:#edf3ff!important;border-color:#d1def2!important;color:#111!important;font-size:13px;font-weight:400}
+#writingWorkbench .writing-content,#writingWorkbench .writing-comparison{background:#f2f5fa!important}
+#writingWorkbench .writing-pdf-scroll{padding:25px 35px 36px}
+#writingWorkbench .writing-pdf-sheet{box-shadow:0 5px 23px #18365312}
+#writingWorkbench .writing-pdf-sheet.selected{border-color:#8daee6!important;box-shadow:0 0 0 2px #0f62fe0e,0 5px 23px #18365312}
+#writingWorkbench .writing-pdf-sheet figcaption{background:#fff;border:1px solid #c5d6f1;color:#111;font-size:13px;font-weight:450;box-shadow:0 2px 7px #23426910}
+#writingWorkbench .writing-thumbnails{background:#f7f9fc!important;border-color:#d5deeb}
+#writingWorkbench .writing-thumbnails button.selected{background:#edf3ff!important;border-color:#0f62fe!important}
+#writingWorkbench .writing-canvas-footer{background:#fff!important;padding:7px 13px;color:#111;font-weight:400}
+.writing-panel-heading{display:flex;align-items:center;gap:10px;padding:10px 15px;min-height:52px;border-bottom:1px solid #d5dfec;background:#f4f8ff;flex-shrink:0}
+.writing-panel-heading h2{margin:0;font-size:18px;font-weight:550;color:#111}.writing-panel-symbol{display:grid;place-items:center;width:29px;height:29px;border:1px solid #d3e0f5;border-radius:8px;background:#eaf1ff;color:#111}
+#writingPhaseNumber{margin-left:auto;color:#111;font-size:13px;font-weight:400}
+#writingWorkbench .writing-request{padding:14px 15px 15px;background:#fff!important;border-bottom-color:#d9e0ea}
+#writingWorkbench .writing-request-heading{margin-bottom:11px}#writingWorkbench .writing-request-heading h2{font-size:14px;font-weight:500}
+#writingWorkbench .writing-request-heading button{font-size:13px!important;font-weight:400}
+#writingWorkbench .writing-options{gap:10px;margin-bottom:10px}#writingWorkbench .writing-options label{font-size:13px;font-weight:400}
+#writingWorkbench .writing-options select{padding:7px 6px;font-size:14px;border-color:#c8d2e0}
+#writingWorkbench #writingInstruction{min-height:64px;padding:10px 11px;font-size:14px;line-height:1.7;border-color:#c8d2e0;background:#fff}
+#writingWorkbench .writing-request.compact{padding:11px 15px}#writingWorkbench .writing-request.compact .writing-request-heading{margin:0}
+#writingWorkbench .writing-result-heading{min-height:40px;padding:9px 15px;background:#fff!important;border-color:#e0e5ed}
+#writingWorkbench .writing-result-heading h2{font-size:14px;font-weight:500}
+#writingWorkbench[data-empty=true] .writing-result-heading{display:none}
+#writingWorkbench .writing-results{padding:10px;scrollbar-gutter:stable}
+#writingWorkbench .writing-result-empty{min-height:0;padding:8px 4px;gap:8px}
+#writingWorkbench .writing-result-empty>span{display:grid;place-items:center;width:28px;height:28px;background:#edf3ff;border:1px solid #d6e3f7;border-radius:8px;font-size:20px;color:#111}
+#writingWorkbench .writing-result-empty strong{font-size:15px;font-weight:500;color:#111}
+.writing-presets{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;width:100%}
+#writingWorkbench .writing-presets button{border:1px solid #cfd9e8;border-radius:7px;padding:7px 9px;font-size:13px;color:#111;background:#fff;font-weight:400}
+#writingWorkbench .writing-presets button:hover{border-color:#9eb9e2;background:#f2f6ff}
+#writingWorkbench .writing-presets button[aria-pressed=true]{border-color:#a8c0e8;background:#edf3ff}
+#writingWorkbench .writing-edit{border-color:#d4deeb;border-radius:9px}
+#writingWorkbench .writing-edit.chosen{border-color:#b3c9ea}#writingWorkbench .writing-edit.chosen>label{background:#f2f6ff!important}
+#writingWorkbench .writing-edit label>span,#writingWorkbench .writing-summary{font-size:14px;line-height:1.8}
+#writingWorkbench .writing-status{background:#fff!important;border-top-color:#e1e6ee;font-size:14px;min-height:31px;padding:6px 14px}
+#writingWorkbench .writing-next-action{padding:10px 14px 14px;border-color:#d6dfec;gap:9px;background:#fff}
+#writingWorkbench .writing-action-meta{font-size:13px;min-height:18px}
+#writingWorkbench #writingActionHint{font-size:13px;max-width:65%;color:#111}
+#writingWorkbench #writingCost{font-size:12px;background:#f4f6f9!important;border-color:#dbe2ed!important}
+#writingWorkbench #writingPrimaryAction{min-height:41px;font-size:15px;border-radius:8px;padding:10px 12px}
+#writingWorkbench .writing-task-progress{background:#f4f8ff;font-size:14px;border-color:#d7e2f1}
+#writingWorkbench .writing-task-progress progress{accent-color:#0f62fe}
+#writingWorkbench .writing-compare-images figcaption{background:#f4f5f7!important;color:#111;font-size:14px}
+#writingWorkbench .writing-compare-images figure+figure figcaption{background:#edf7f1!important}
+#writingWorkbench .writing-history-panel{background:#fff}#writingWorkbench .writing-history-panel header{background:#f4f8ff;border-color:#d6dfec}
+#writingWorkbench .writing-history-panel header strong{font-size:16px}#writingWorkbench #writingHistoryList>button{border-color:#d0dbe9}
+@media(max-width:1100px){#aiPage .ai-container{padding:17px 17px 18px}#writingWorkbench .writing-grid{gap:14px;grid-template-columns:minmax(0,1fr) 345px;height:calc(100dvh - 185px)}#writingWorkbench .writing-canvas-head{flex-wrap:wrap;gap:6px}#writingWorkbench .writing-pdf-scroll{padding:21px}#writingWorkbench .writing-view-tabs{min-height:28px;gap:10px}}
+@media(max-width:800px){#aiPage .ai-container{padding:16px 13px}#aiPage .ai-heading{flex-wrap:wrap;gap:10px}#aiPage .ai-heading h1{font-size:23px}#aiPage .ai-heading-actions{gap:6px}#aiPage .ai-heading-actions button{font-size:13px;padding:7px 9px}#writingWorkbench .writing-grid{grid-template-columns:1fr;height:auto;max-height:none;min-height:0;gap:16px}#writingWorkbench .writing-canvas{height:64dvh;min-height:400px}#writingWorkbench .writing-review{min-height:490px;max-height:760px}#writingWorkbench .writing-steps{gap:5px}#writingWorkbench .writing-steps li{gap:5px;font-size:12px}#writingWorkbench .writing-steps li:not(:last-child):after{margin:0 3px}#writingWorkbench .writing-steps li>span{width:21px;height:21px}#writingWorkbench .writing-pdf-scroll{padding:18px}#writingWorkbench .writing-content-toolbar{padding:6px 8px}#writingWorkbench .writing-view-tabs button{font-size:12px!important}}

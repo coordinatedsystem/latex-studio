@@ -1,0 +1,111 @@
+/* White surfaces, near-black content, and a single blue action colour. */
+:root {
+  --ink:#111111;--muted:#414141;--line:#d0d0d0;--soft:#f5f5f5;
+  --accent:#0f62fe;--accent-soft:#edf4ff;
+  --monet-sky:#f5f5f5;--monet-cloud:#fff;--monet-meadow:#f5f5f5;--monet-gold:#f5f5f5;
+}
+body,button,input,select,textarea,dialog,kbd {color:var(--ink)}
+/* Interface text only: document pages, editor syntax, and diff marks keep their semantics. */
+.app-header,.main-toolbar,.sidebar,.sidebar-tabs,.document-tabs,.editor-subbar,.preview-heading,
+.statusbar,.hub-page,#aiPage,.app-navigation,.package-searchbar,.package-stats,
+.writing-canvas-head,.writing-content-toolbar,.writing-request,.writing-result-heading,
+.writing-canvas-footer,.writing-status,.writing-compare-toolbar,.editor-ai-compose,
+.editor-ai-review-footer,.editor-ai-effect-toolbar,.editor-tool-panel-heading,.writing-steps,
+.writing-compare-images figcaption,.editor-ai-effect figcaption,.ai-steps,.ai-workflow,.ai-review-footnote,
+.vision-controls,.glossary-table th,.editor-tools-menu summary {background:#fff!important;border-color:var(--line)}
+.hub-page,#aiPage {background:#fff!important}
+.app-navigation button,.package-filters button,.writing-segment button,.writing-view-tabs button,
+.review-tabs button,.editor-tool-tabs button,.log-switch,.file-row,.document-tab {color:#111!important}
+.app-navigation button.active,.package-filters button.active,.writing-view-tabs button.active,
+.review-tabs button.active,.editor-tool-tabs button.active,#logPanel .log-switch.active,
+#editorAiStatus[aria-expanded=true],.file-row.active,.editor-tools-menu[open] summary {background:#f0f0f0!important;border-color:#b8b8b8}
+.app-navigation button:hover,.project-action:hover,.recent-open:hover,.package-row:hover,
+.package-row:focus-within,.writing-view-tabs button:hover:not(:disabled) {background:#f6f6f6!important}
+.document-tab.active {background:#fff!important;border-top-color:#0f62fe}
+.document-tab.active:before,.package-row:before {background:#0f62fe}
+.file-row.active {border-left-color:#0f62fe!important}
+.sidebar-tabs button,.local-indicator,.file-row svg,.folder-row svg,.preview-heading svg {color:#111!important}
+.sidebar-tabs button.active {border-bottom-color:#0f62fe!important}
+.writing-canvas,.writing-review,.writing-canvas-head,.writing-content-toolbar,.writing-request,
+.package-list,.package-stats,.project-action,.recent-card,.environment-card,.editor-tool-panel,
+.writing-segment,.writing-edit,.ai-workflow,.vision-controls,.editor-ai-context,.editor-ai-round {
+  border-color:#d0d0d0;
+}
+button.active:not(.primary),.icon-button.active,.text-tool.active {background:#f0f0f0!important;color:#111!important;border-color:#c4c4c4!important}
+.action-symbol.mint,.action-symbol.blue,.action-symbol.lavender,.package-symbol,
+.environment-icon,.ai-task-icon,.ai-workflow-star,.ai-empty-art,.review-test-symbol,
+.writing-segment,.writing-chip,.editor-ai-context,#editorAiBadge,.category-label,.core-label,
+.state-badge,.state-badge.success,.package-scroll-top,.review-severity,.review-terms-used {
+  background:#f3f3f3!important;color:#111!important;border-color:#d4d4d4!important;
+}
+.brand-mark {background:#0f62fe;color:#fff}
+.brand-mark span {color:#fff}
+.ai-nav-star,.action-arrow,.environment-icon,.package-symbol svg {color:#111}
+.package-description p,.package-description code,.package-location,.package-stats span,
+.package-pagination,.package-footnote,.environment-info,.environment-info code,.recent-open code,
+.recent-date,.recent-path,.project-action>span:not(.action-symbol),.subtle,.file-detail,
+.search-hint,.search-result code,.copy-example,.settings-note,.field-row,.hub-empty,
+.review-muted,.review-placeholder,.review-footnote,.review-card h3,.review-stats strong,
+.review-stats span,.review-issue p,.review-issue strong,.review-issue small,.review-clear,
+.review-file-list,.review-file-list button,.review-test-cards p,.review-test-summary,
+.review-vision-summary,.review-probe-success p,.review-probe-success pre,.selftest-grid>div,
+.vision-controls h3,.vision-controls p,.vision-controls .secondary,.glossary-toolbar>span,
+.glossary-table th,.glossary-table td input,.ai-container,.ai-heading p,.ai-fields label,
+.ai-language,.ai-settings-block>label,.ai-settings-block p,.ai-settings-intro,
+.ai-source-info,.ai-meta,.ai-notes-label,.ai-notes-label span,.ai-send-hint,.ai-review-footnote,
+.ai-section-label,.ai-section-label>span:first-child,.ai-task-grid small,.ai-workflow small,
+.ai-summary,.ai-issue strong,.ai-issue p,.ai-change-toolbar,.ai-change-toolbar button,
+.ai-edit-code small,.ai-edit-code .after small,.ai-edit-code pre,.ai-dictionary,.ai-no-edits,
+.ai-review-actions>span,.ai-diff-legend,.ai-diff-note,.ai-empty p,.ai-empty h2,.ai-steps li,
+.writing-steps li,.writing-steps li.current,.writing-steps li.done,.writing-page-input,
+.writing-options label,.writing-summary,.writing-edit label>span,.writing-status,
+.writing-canvas-footer,.writing-compare-toolbar>span,.writing-result-empty strong,
+.writing-result-empty>span,.writing-empty>span,.writing-empty strong,.writing-thumbnails span,
+.writing-review-actions .text-button,.writing-request-heading button,.writing-content-toolbar .text-button,
+.writing-segment button.active,.writing-compare-images figcaption,.editor-ai-effect figcaption,
+.editor-ai-context,.editor-ai-round,.editor-ai-error,.writing-error,.writing-rejected,
+.editor-ai-review-footer,.text-button,.ai-section-label .text-button,.ai-editor-button {
+  color:#111!important;
+}
+.writing-content,.writing-comparison,.editor-ai-effect,.writing-thumbnails,.layout-page-preview,
+.pdf-frame-wrap,.empty-state,.writing-compare-scroll {background:#f5f5f5!important}
+.writing-steps li>span {background:#fff;border-color:#bcbcbc;color:#111}
+.writing-steps li.current>span {background:#0f62fe;border-color:#0f62fe;color:#fff}
+.writing-steps li.done>span {background:#f3f3f3;border-color:#bcbcbc;color:#111}
+.writing-pdf-sheet.selected,.writing-edit.focused,.writing-thumbnails button.selected,
+.layout-page.active,.ai-task-grid button.selected,.ai-workflow.selected {border-color:#0f62fe!important}
+.writing-pdf-sheet.selected {box-shadow:0 0 0 3px #0f62fe20,0 3px 15px #00000012}
+.writing-thumbnails button.selected,.layout-page.active,.ai-task-grid button.selected,.ai-workflow.selected,
+.writing-edit.chosen>label,.writing-edit>label,.ai-progress,.ai-dictionary,.ai-editor-button,
+#editorAiRepair,.editor-ai-round,.editor-ai-round.passed,.editor-ai-error,.writing-error,.writing-rejected {
+  background:#f7f7f7!important;
+}
+.writing-pdf-sheet figcaption,.writing-pdf-sheet:not(.selected) figcaption {background:#fff;color:#111;border-top:2px solid #0f62fe}
+.writing-thumbnails button.current {box-shadow:0 0 0 2px #0f62fe30}
+.writing-edit.chosen {border-color:#bcbcbc}
+.writing-source-selected {background:#0f62fe18}.writing-source-focus {background:#0f62fe30}
+.writing-source-selected-text {border-color:#0f62fe}.writing-pdf-highlight {background:#0f62fe20;border-color:#0f62fe}
+.writing-overlay-line {border-color:#0f62fe}.writing-overlay-line:after {background:#0f62fe;color:#fff}
+.writing-slider input,input[type=checkbox],progress {accent-color:#0f62fe}
+/* Saturated colour is confined to primary actions and tiny status indicators. */
+body .primary {background:#0f62fe!important;border-color:#0f62fe!important;color:#fff!important}
+body .primary :is(span,strong,svg,kbd) {color:#fff!important}
+body .primary kbd {background:#ffffff1f;border-color:#ffffff55}
+body .primary:hover:not(:disabled) {background:#0043ce!important;border-color:#0043ce!important}
+body .primary:active:not(:disabled) {background:#002d9c!important}
+body .primary:disabled {background:#ededed!important;border-color:#d2d2d2!important;color:#555!important;opacity:1}
+body .primary:disabled :is(span,strong,svg,kbd) {color:#555!important}
+.secondary,.command-button,.reader-switch {background:#fff;color:#111;border-color:#c4c4c4}
+.secondary:hover:not(:disabled),.package-scroll-top:hover {background:#f0f0f0!important;border-color:#a8a8a8!important}
+.compile-split>button:not(.primary) {background:#fff!important;border-color:#c4c4c4!important;color:#111!important}
+.ai-dot.connected,.engine-dot,.status-dot:not(.dirty):not(.error),.nav-progress {background:#00852b}
+.state-badge:before {background:#00852b}
+.spinner {border-color:#d6d6d6;border-top-color:#0f62fe}
+.divider {background:#e2e2e2;border-color:#d0d0d0}.divider:hover,.divider:focus-visible {background:#0f62fe}
+.package-list,.file-tree,.search-results,.editor-tool-body,.writing-results,.writing-history-panel>div {scrollbar-color:#aaa transparent}
+.package-list::-webkit-scrollbar-thumb,.file-tree::-webkit-scrollbar-thumb,.editor-tool-body::-webkit-scrollbar-thumb {background-color:#aaa}
+.package-list::-webkit-scrollbar-thumb:hover,.file-tree::-webkit-scrollbar-thumb:hover {background-color:#888}
+input::placeholder,textarea::placeholder {color:#545454!important}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,
+.package-list:focus-visible {outline:2px solid #0f62fe!important;outline-offset:2px}
+/* Preserve the red/green distinction in code changes and problem markers. */

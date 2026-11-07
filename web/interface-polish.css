@@ -1,0 +1,59 @@
+/* Consistent UI typography; restrained movement and denser package browsing. */
+code,pre,.search-result code,.copy-example,.ai-edit-code pre,.ai-dictionary,
+#logOutput,.package-job pre,.editor-ai-round pre,#writingWorkbench .writing-edit-diff del,#writingWorkbench .writing-edit-diff ins,
+.ai-section-label>span:first-child,.ai-composer textarea,#pageEditSource,.review-toolbar input,.review-issue strong,.review-file-list button,.glossary-import-text,.review-probe-success pre {
+  font-family:var(--ui-font);font-weight:400;font-variant-ligatures:normal;
+}
+.package-description code,.recent-open code,.environment-info code,.health-list code,
+.dependency-list code,.package-location,.package-pagination,.package-pagination button,
+.package-stats span,.package-row-actions>button,.package-description p {
+  font-size:14px;
+}
+.category-label{font-size:13px}.core-label{font-size:12px}
+.subtle,.file-detail,.search-hint,.review-muted,.writing-status,.writing-canvas-footer,
+.settings-note,#writingHistoryList span,#writingHistoryList time{font-size:14px!important}
+.interaction-tooltip{font-family:var(--ui-font);font-size:13px}
+.package-container{padding-top:25px;padding-bottom:24px}
+.package-title{margin-bottom:16px}.package-title>button{margin-top:0;font-size:14px}
+.package-stats{margin-bottom:14px;gap:10px}.package-stats>div{padding:12px 17px}
+.package-stats span{margin-bottom:6px}.package-stats strong{font-size:27px}
+.package-searchbar{position:sticky;top:0;z-index:5;padding:8px 0;margin-bottom:8px;background:#fcfdfbf5;backdrop-filter:blur(10px);border-bottom:1px solid transparent}
+.package-location{margin-bottom:9px;line-height:1.5}.package-location svg{width:15px;height:15px}
+.package-list-window{position:relative;isolation:isolate}
+.package-list{max-height:clamp(240px,calc(100dvh - 420px),560px);overflow:auto;overscroll-behavior-y:contain;scrollbar-gutter:stable;scroll-behavior:smooth;border-radius:10px}
+.package-list:focus-visible{outline:2px solid #92aeb8;outline-offset:3px}
+.package-list[data-scrolled=true]{box-shadow:inset 0 8px 10px -11px #28473b99,0 1px 3px #18291f09}
+.package-row{padding:9px 15px;gap:12px;min-height:82px;position:relative}
+.package-row:before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0;background:#8ba67d;opacity:0}
+.package-row:hover,.package-row:focus-within{background:#f0f5f7}.package-row:focus-within:before,.package-row:hover:before{opacity:1}
+.package-description>div{min-height:22px}.package-description strong{font-size:16px;font-weight:550;line-height:1.4}
+.package-description p{font-family:var(--ui-font);font-weight:400;line-height:1.4;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#242b28}
+.package-description code{display:block;margin-top:0;line-height:1.4;color:#354139;letter-spacing:0}
+.package-symbol{width:33px;height:35px;border-radius:8px;background:#e9f0e2}.package-symbol svg{width:19px;height:19px}
+.package-status{margin:0 4px;min-width:60px}.package-status .state-badge{font-size:13px;padding:4px 7px;font-weight:500}
+.package-row-actions{gap:3px}.package-row-actions>button{min-height:32px;padding:5px 8px}.package-row-actions .tiny{width:30px;padding:5px}.package-row-actions .primary{padding:6px 10px}
+.package-pagination{margin-top:13px;gap:15px}.package-pagination button{min-height:34px;padding:5px 13px}
+.package-scroll-top{position:absolute;right:17px;bottom:13px;z-index:3;width:35px;height:35px;padding:0;border:1px solid #afc3b2;border-radius:10px;background:#f6faef;box-shadow:0 3px 12px #203c2b20;color:#16251c;font-size:21px}
+.package-scroll-top:hover{background:#e6efda;border-color:#849d76}
+.package-list[aria-busy=true]{cursor:progress}.package-list[aria-busy=true] .package-row{opacity:.7}
+.package-list,.file-tree,.search-results,.editor-tool-body,.writing-results,.writing-history-panel>div{scrollbar-width:thin;scrollbar-color:#aebfb4 transparent}
+.package-list::-webkit-scrollbar,.file-tree::-webkit-scrollbar,.editor-tool-body::-webkit-scrollbar{width:9px;height:9px}
+.package-list::-webkit-scrollbar-thumb,.file-tree::-webkit-scrollbar-thumb,.editor-tool-body::-webkit-scrollbar-thumb{border:2px solid transparent;background:#adbdaf;background-clip:padding-box;border-radius:9px}
+.package-list::-webkit-scrollbar-thumb:hover,.file-tree::-webkit-scrollbar-thumb:hover{background-color:#829a87}
+@media(prefers-reduced-motion:no-preference){
+  button{transition:background-color .15s,border-color .15s,box-shadow .15s,transform .12s}
+  button:active:not(:disabled){transform:translateY(1px)}
+  .package-row,.package-row:before,.package-symbol{transition:background-color .16s,opacity .16s,transform .16s}
+  .package-row:hover .package-symbol{transform:translateY(-1px)}
+  .hub-page{animation:studioSurfaceIn .18s ease-out}
+  dialog[open]{animation:studioDialogIn .17s ease-out}dialog[open]::backdrop{animation:studioBackdropIn .17s ease-out}
+  .editor-tool-panel,.writing-history-panel{animation:studioDrawerIn .18s ease-out}
+  .package-scroll-top{animation:studioSurfaceIn .15s ease-out}
+  @keyframes studioSurfaceIn{from{opacity:.55;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes studioDialogIn{from{opacity:.5;transform:translateY(8px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes studioDrawerIn{from{opacity:.5;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes studioBackdropIn{from{opacity:0}to{opacity:1}}
+}
+@media(prefers-reduced-motion:reduce){.package-list{scroll-behavior:auto}.hub-page,dialog[open],.editor-tool-panel,.writing-history-panel,.package-scroll-top{animation:none!important}}
+@media(max-width:1050px){.package-row{padding:9px 11px;gap:9px}.package-row-actions>button{padding:5px}.package-description code{font-size:13px}.package-status{min-width:50px;margin:0}.package-list{max-height:48dvh;min-height:230px}}
+@media(max-width:650px){.package-row{min-height:90px;align-items:flex-start;flex-wrap:wrap}.package-description{flex-basis:calc(100% - 90px)}.package-description p{white-space:normal}.package-row-actions{padding-left:42px;margin-top:0;gap:6px}.package-status{margin-left:auto}.package-description code{font-size:14px;white-space:normal}.package-list{max-height:52dvh}.package-stats>div{padding:10px 12px}}

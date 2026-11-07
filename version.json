@@ -1,0 +1,6 @@
+{
+  "version": "1.0.0",
+  "build": "studio-15",
+  "channel": "stable",
+  "repository": "coordinatedsystem/latex-studio"
+}

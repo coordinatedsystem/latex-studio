@@ -1,0 +1,63 @@
+# LaTeX Studio
+
+面向 Windows 的本地 LaTeX 写作工具：源码编辑、PDF 预览、宏包管理与可审阅的 AI 修改，在同一个工作区完成。
+
+当前版本：**1.0.0** · Windows 10 / 11 x64 · 公开仓库
+
+## 安装
+
+从 [安装包目录](distribution/) 下载 `LaTeX-Studio-1.0.0-win64-Setup.exe`。使用旁边的 `SHA256SUMS.txt` 核对文件，再双击安装。默认位置为 `D:\LaTeXStudio`，也可选择其他专用目录。
+
+安装包包含独立 Python、Tectonic 编译器、PDF 渲染组件、离线前端与基础 TeX 资源；无需另装 Python、Node.js 或 LaTeX。界面不依赖公共 CDN。未缓存的宏包需要联网下载。
+
+程序尚未购买 Windows 代码签名证书，安装程序的发布者可能显示为“未知”。SHA256 用来核对下载文件，不等同于代码签名。
+
+## 主要功能
+
+- Monaco 源码编辑、项目搜索、上下文、章节大纲、历史版本差异与恢复。
+- PDF.js 预览，源码与 PDF 双向定位；Ctrl＋双击 PDF 定位源码附近。
+- 多项目管理、导入、共享宏包搜索、下载、验证和缓存管理。
+- PDF 页面或源码范围的排版、纠错、润色和翻译，支持多页选择。
+- AI 修改遵循“获取建议 → 预览候选结果 → 确认应用”，可查看差异和撤销。
+- 编辑器内的 AI 修复面板、有限轮次的编译验证、每日请求限额。
+- 白底深色文字，少量蓝绿点缀；支持减少动画偏好。
+
+## 文件与隐私
+
+```text
+安装目录/
+  app/       程序
+  python/    独立运行环境
+  runtime/   编译器
+  projects/  文档项目（可在设置中迁移）
+  cache/     宏包与临时文件（可在设置中迁移）
+  data/      本机设置、加密凭据与历史记录
+```
+
+AI 服务默认需要用户自行配置。密钥由 Windows DPAPI 加密，绑定当前 Windows 账户；只在向用户选择的服务发出请求时使用。打开 AI 页面、选择任务和查看修改不会自动调用模型。远程 AI 请求会发送用户选择的文本或页面及相关上下文，请按文档保密要求选择服务。
+
+**仓库、安装包不包含个人 API 密钥、SSH 私钥、会话令牌、实验报告、AI 对话或本地修改记录。** 更新和重新安装保留 `data/`、项目和缓存。卸载也保留这些用户目录。
+
+## 版本与更新
+
+打开“设置 → 版本与更新”。默认手动检查，可开启启动时检查。公开仓库可直接检查更新，无需 GitHub 凭据。若未来改为私有，可配置仅限本仓库 **Contents: Read-only** 的 GitHub 凭据；它与 AI 密钥分开加密保存。不要把凭据写入源码或发到 issue / 聊天。
+
+更新清单位于 [`updates/latest.json`](updates/latest.json)。检查时固定 GitHub 提交，下载该提交中的安装包，并验证版本、文件名、长度和 SHA256。校验失败不允许运行；安装前再次核对文件。安装始终由用户点击，不会静默替换文档。
+
+当前通过仓库的 `distribution/` 提供安装包，避免创建 Releases 还需另一组写入凭据。后续版本可迁移为 GitHub Releases；源码版本标签仍使用 `v1.0.0` 形式。
+
+## 开发
+
+安装 Python 3.10 以上，执行 `python -m pip install -r requirements.txt`，准备 `vendor/` 中的离线前端组件。编译器与资源按 Tectonic 的许可获取。用 `bootstrap_install.py --home <安装根目录>` 写入本机路径后，以 `app/launch.ps1` 启动。
+
+`version.json` 是版本信息的唯一来源：`version` 使用语义版本，`build` 标识内部兼容性，`channel` 当前为 `stable`。
+
+下次发布先运行 `python tools/set_version.py 1.0.1 --build studio-16`，补充更新记录，再构建和测试。构建脚本会写出 SHA256 清单和对应版本清单；提交后创建同名 `v1.0.1` 标签并推送。
+
+构建入口见 [`tools/build_release.py`](tools/build_release.py)，安装脚本为 [`installer/LaTeXStudio.iss`](installer/LaTeXStudio.iss)。发布前运行 `python tools/audit_release.py .`，并实际测试独立安装与升级保留数据。
+
+## 第三方组件
+
+Monaco Editor、PDF.js、Tectonic、Python、pypdf、pdfplumber、pypdfium2、Inter、思源黑体，以及它们的依赖保留各自许可证。详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。微软雅黑只读取系统已安装字体，不随包分发。
+
+本仓库公开可读；项目自有代码保留所有权利，尚未授予开源许可。第三方组件沿用各自许可证。

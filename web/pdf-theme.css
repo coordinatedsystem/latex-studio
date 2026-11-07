@@ -1,0 +1,17 @@
+@import url("/fonts.css");
+@font-face{font-family:"Studio Rounded";src:local("YouYuan"),local("幼圆");font-display:swap}
+:root{color-scheme:light!important;--main-color:#111!important;--body-bg-color:#f1f4f1!important;--toolbar-bg-color:#fff!important;--toolbar-icon-bg-color:#222!important;--toolbar-icon-hover-bg-color:#111!important;--button-hover-color:#edf3ee!important;--button-active-color:#e1eee5!important;--field-bg-color:#fff!important;--field-color:#111!important;--field-border-color:#c9d3cc!important;--toggled-btn-bg-color:#e4f0e8!important;--toggled-btn-color:#111!important;--sidebar-bg-color:#fafcf9!important;--doorhanger-bg-color:#fff!important;--doorhanger-border-color:#e0e8e1!important;--progressBar-color:#438765!important;--toolbarSidebar-bg-color:#fff!important;--separator-color:#e4eae5!important}
+#toolbarContainer{box-shadow:none!important;border-bottom:1px solid #e3e9e4!important}
+#viewerContainer{background:#f1f4f1!important}
+#viewer .page{border:0!important;box-shadow:0 2px 10px #27462f13!important;margin:18px auto!important}
+#toolbarViewer,.toolbarButton,.dropdownToolbarButton,select,input,.menuContainer,#viewsManager{font-family:"Studio Digits","Studio Source Han", 'Inter','Microsoft YaHei UI','Microsoft YaHei',sans-serif!important;color:#111315!important;font-weight:400!important}
+.toolbarButton:hover{background-color:#edf3ee!important;border-radius:7px}
+#openFile,#secondaryOpenFile,#editorModeButtons,#editorModeSeparator{display:none!important}
+.toolbarButton:focus-visible{outline:2px solid #85ae96!important}
+#sidebarContainer{border-right:1px solid #e2e9e3!important}
+
+#toolbarContainer{border-bottom-color:#bdcac1!important}
+#sidebarContainer{border-right-color:#bdcac1!important}
+#toolbarViewer input,#toolbarViewer select,#numPages{font-size:13px!important}
+
+:root{--body-bg-color:#e9f0f4!important;--toolbar-bg-color:#fcfcf8!important;--sidebar-bg-color:#f2f6f8!important;--toggled-btn-bg-color:#e9efd9!important;--field-border-color:#bdcdd2!important;--progressBar-color:#75895c!important}#viewerContainer{background:#e9f0f4!important}

@@ -1,0 +1,113 @@
+/* Shared interface typography and contrast. Syntax and document rendering retain their own fonts. */
+:root {
+  --ui-font: "Studio YaHei", "Inter", "Microsoft YaHei", "Microsoft YaHei UI", sans-serif;
+  --ink: #111315;
+  --muted: #555d64;
+  --line: #cbd4cf;
+  font-family:"Studio YaHei",  var(--ui-font);
+  font-size: 15px;
+  font-weight: 500;
+  font-optical-sizing: auto;
+}
+body, button, input, select, textarea, dialog, kbd { font-family:"Studio YaHei",  var(--ui-font); }
+button, input, select { font-weight: 550; }
+body { color: var(--ink); }
+h1, h2, h3, strong { color: var(--ink); }
+.brand strong { font-weight: 720; letter-spacing: -.6px; }
+.app-header { min-height: 68px; border-color: #c5cec9; }
+.app-navigation { border-color: #cdd7d0; background: #f8faf9; }
+.app-navigation button, .app-navigation button.active, .review-tabs button, .review-tabs button.active { color: #15191b; }
+.app-navigation button.active, .review-tabs button.active { font-weight: 650; }
+.header-actions { gap: 7px; }
+.main-toolbar, .sidebar, .sidebar-tabs, .document-tabs, .editor-subbar, .preview-heading, .statusbar, .log-heading, .log-panel { border-color: #cbd4ce; }
+.main-toolbar { min-height: 57px; }
+.document-tab { min-height: 43px; }
+.file-row { min-height: 39px; }
+.sidebar-tabs { min-height: 46px; }
+.divider { background: #d0d9d3; }
+.divider:hover, .divider:focus-visible { background: #80ad94; }
+.toolbar-separator, .mini-separator, .footer-separator { background: #c4cec7; }
+.ai-composer, .ai-review, .review-card, .review-stats, .package-list, .package-stats,
+.project-action, .recent-card, .environment-card, .package-searchbar, .preview-message-card {
+  border-color: #c7d2cb;
+  box-shadow: 0 1px 3px #18291f09;
+}
+.review-tabs { border-color: #c7d1ca; }
+.ai-review-heading, .ai-steps, .ai-review-actions, .ai-review-footnote, .ai-issue,
+.review-issue, .review-file-list, .reference-filter, .glossary-table td,
+.package-row, .recent-card, .dependency-list > div { border-color: #d8e0db; }
+.ai-task-grid button, .layout-page, .ai-edit, .selftest-grid > div { border-color: #ccd7cf; }
+.ai-task-grid button.selected, .layout-page.active { border-color: #6f9f80; }
+.ai-workflow, .vision-controls { border-color: #d2c5e0; }
+.ai-fields select, .ai-language select, .ai-composer textarea, .ai-settings-block input:not([type=checkbox]),
+.review-toolbar input, .reference-filter input, .reference-filter select, .glossary-toolbar > input,
+.glossary-import-text, .package-query, .search-box, .command-input, .field input, .field select {
+  border-color: #bac8bf;
+  color: #15191b;
+}
+input::placeholder, textarea::placeholder { color: #636c72 !important; font-weight: 500; opacity: 1; }
+.secondary, .command-button, .reader-switch { border-color: #c0ccc3; color: #171b1d; }
+.hub-container h1, .home-hero h1, .ai-heading h1, .review-tool-header h2, .review-card h3,
+.review-stats strong, .package-stats strong, .project-action strong, .recent-open strong,
+.environment-card h3, .package-description strong, .ai-task-grid strong, .ai-workflow strong,
+.ai-section-label, .ai-empty h2, .ai-summary, .ai-edit-title strong, .ai-issue p,
+.review-issue p, .ai-fields label, .ai-notes-label, .glossary-table td input { color: #121618; }
+.review-stats strong { font-family:"Studio YaHei",  var(--ui-font); font-weight: 650; }
+.home-hero p, .ai-heading p, .review-tool-header p, .project-action > span:not(.action-symbol):not(.action-arrow),
+.ai-task-grid small, .ai-workflow small, .ai-empty p, .ai-source-info, .ai-fields label,
+.package-description p, .review-footnote, .review-placeholder, .review-clear, .review-muted,
+.review-test-cards p, .ai-send-hint, .ai-review-footnote, .ai-issue strong, .review-issue strong,
+.layout-page strong, .layout-page small, .glossary-toolbar > span, .glossary-table th,
+.review-stats span, .review-file-list, .ai-meta, .ai-issues summary, .ai-step-results p,
+.ai-input-footer, .ai-change-toolbar, .ai-review-actions > span, .package-location,
+.package-description code, .package-pagination, .package-footnote, .recent-open code, .recent-date,
+.environment-info, .environment-card p, .ai-settings-intro, .ai-settings-block p,
+.vision-controls p, .review-vision-summary { color: #505960; font-weight: 500; }
+.eyebrow { color: #4e5b53; font-weight: 600; }
+.review-issue strong, .ai-issue strong { font-family:"Studio YaHei",  var(--ui-font); font-weight: 550; }
+.layout-page-number, .review-test-summary, .review-probe-success p { font-family:"Studio YaHei",  var(--ui-font); color: #25382b; }
+.ai-task-icon, .ai-workflow-star, .review-test-symbol, .review-severity, .state-badge { font-weight: 600; }
+.ai-edit-code pre, .ai-dictionary, #logOutput, .package-job pre { font-family: "Studio YaHei", Consolas, "Microsoft YaHei", monospace; }
+.ai-steps li { color: #5f6963; font-weight: 550; }
+.ai-steps li:before { color: #4c6253; border-color: #b8c9be; }
+.ai-steps li.current, .ai-steps li.done { color: #285b3d; }
+.ai-steps li:after { color: #94a69a; }
+.ai-edit-code small, .ai-edit-code .after small { color: #596760; font-weight: 600; }
+.ai-review-heading { row-gap: 10px; }
+.review-stats > div { border-color: #d8e0db; }
+.selftest-grid > div { color: #15291c; font-weight: 550; }
+.review-card-heading .text-button, .ai-section-label .text-button { color: #334b3a; font-weight: 550; }
+.glossary-table td input:hover { border-color: #bdcdc1; }
+.ai-task-grid button { padding: 13px 6px; }
+.ai-task-grid small { line-height: 1.6; }
+.ai-steps { padding-left: 16px; padding-right: 16px; }
+.ai-steps li { white-space: normal; }
+.layout-page { padding: 9px 6px; }
+.layout-page small { line-height: 1.65; }
+.primary { font-weight: 600; }
+@media (max-width:1100px) {
+  .app-header { gap: 14px; }
+  .app-navigation { margin-left: 10px; }
+  .app-navigation button { padding: 7px 9px; }
+  .ai-layout { grid-template-columns: minmax(330px,.95fr) minmax(350px,1.05fr); }
+  .ai-task-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .ai-review-heading > div { gap: 8px; }
+}
+@media (max-width:850px) {
+  .brand strong { font-size: 19px; }
+  .app-navigation { margin-left: auto; gap: 1px; }
+  .app-navigation button { padding: 6px 7px; }
+  .header-actions { gap: 2px; }
+  .ai-layout { grid-template-columns: 1fr; }
+  .ai-review { position: static; }
+  .ai-task-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+@media (max-width:600px) {
+  .brand strong { font-size: 16px; }
+  .brand { gap: 7px; }
+  .brand-mark { width: 28px; height: 28px; }
+  .app-header { gap: 8px; padding: 0 10px; }
+  .app-navigation button { font-size: 12px; padding: 6px; }
+  .header-actions .icon-button:last-child { display: none; }
+  .ai-task-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}

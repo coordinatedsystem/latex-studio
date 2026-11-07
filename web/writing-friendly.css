@@ -1,0 +1,39 @@
+/* A single next action, short contextual feedback, and recoverable local tasks. */
+#writingWorkbench .writing-request-actions[hidden],#writingPreview,#writingApply,#writingContinue {display:none!important;}
+.writing-review {position:relative;}
+.writing-next-action {display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:11px 12px;border-top:1px solid #c6d2cc;background:#fff;flex-shrink:0;}
+.writing-action-meta {display:flex;align-items:center;justify-content:space-between;gap:9px;width:100%;font-size:12px;min-height:22px;}
+#writingActionHint {line-height:1.7;max-width:68%;color:#253d30;}
+#writingCost {font-size:11px;padding:3px 6px;white-space:normal;text-align:right;margin-left:auto;}
+#writingPrimaryAction {flex:1;min-width:170px;background:#dbe7bd;border-color:#819260;color:#151a16;padding:10px 12px;border-radius:7px;}
+#writingRetryPages {flex-basis:100%;padding:6px 10px;font-size:12px;}
+#writingRegenerate {font-size:12px;padding:3px 0;}#writingUsage {font-size:11px;margin-left:auto;}
+.writing-review-actions {padding:0 12px;border-top:0;}.writing-review-actions:has(#writingUndo[hidden]) {display:none;}
+#writingUndo:not([hidden]) {padding:8px;margin:0 0 8px;border:1px solid #cbbd94;background:#fcf7e9;}
+.writing-task-progress {padding:9px 12px;background:#f2f6f8;border-bottom:1px solid #cedade;display:flex;flex-direction:column;gap:5px;font-size:12px;flex-shrink:0;}
+.writing-task-progress progress {width:100%;height:5px;accent-color:#71875a;}
+.writing-page-states {display:flex;gap:6px;flex-wrap:wrap;margin:0 0 9px;font-size:11px;}
+.writing-page-states>span {padding:4px 6px;background:#f2f4f5;border:1px solid #d1dadd;border-radius:5px;}
+.writing-page-states .completed {background:#edf3e2;border-color:#c6d5ad;}.writing-page-states .failed {background:#fcf0e5;border-color:#dbbda0;}
+.writing-page-states .running {background:#e8f2fa;border-color:#b0cddd;}.writing-page-states button {font-size:11px!important;padding:0 0 0 4px;text-decoration:underline;}
+.writing-error {margin-top:6px;}.writing-error>span {display:block;}.writing-error>button {margin-top:5px;padding:3px 0;font-size:12px!important;text-decoration:underline;}
+.writing-error details {font-size:12px;margin-top:6px;}.writing-error summary {cursor:pointer;}.writing-error pre {white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.6 var(--ui-font);margin:7px 0 0;}
+.writing-history-panel {position:absolute;inset:0;z-index:8;background:#fcfdfb;display:flex;flex-direction:column;}
+.writing-history-panel header {display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid #c5d4d9;background:#edf4f7;}
+.writing-history-panel header button {font-size:22px!important;}.writing-history-panel>div {padding:12px;overflow:auto;min-height:0;}
+#writingHistoryList>button {display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:7px;width:100%;padding:12px;border:1px solid #c4d2cd;border-radius:8px;background:#fff;margin-bottom:9px;white-space:normal;}
+#writingHistoryList>button:hover {background:#f1f6f7;}#writingHistoryList strong {font-size:13px;}#writingHistoryList span,#writingHistoryList time {font-size:12px;}
+#writingHistoryList p {font-size:13px;padding:20px;text-align:center;}
+.writing-pdf-sheet {cursor:default;}.writing-page-tile>input {width:17px;height:17px;cursor:pointer;}
+.writing-pdf-scroll.focus-page-scroll {justify-content:flex-start;}.writing-pdf-sheet.focus-page {max-width:none;flex:none;}
+#writingPdfHighlight {font:700 12px var(--heading-font);border-width:2px;min-width:14px;min-height:14px;overflow:visible;}
+.writing-image-window {position:relative;overflow:hidden;background:#fff;}
+.writing-image-window.focus-crop>img {position:absolute;max-width:none;display:block;height:auto;}
+.writing-change-marker {position:absolute;border:2px solid #778f53;background:#c8de9c25;pointer-events:none;min-width:4px;min-height:4px;}
+.writing-change-marker:before {content:attr(data-number);position:absolute;left:-2px;top:-19px;padding:1px 5px;min-width:18px;border-radius:4px;background:#526c40;color:#fff;font-size:11px;line-height:17px;font-family:var(--heading-font);text-align:center;white-space:nowrap;}
+#writingBeforeMarker {border-color:#ad7753;background:#e3b49c22;}#writingBeforeMarker:before {background:#8b5e40;}
+#writingSelectCurrentPage,#writingResetPageFocus {margin-left:0!important;white-space:nowrap;}
+.writing-image-window.focus-crop {min-height:80px;}
+@media(max-width:800px){.writing-action-meta{flex-wrap:wrap;}#writingActionHint{max-width:100%;}.writing-history-panel{max-height:100%;}.writing-next-action{position:sticky;bottom:0;}}
+
+.settings-section h3{font-size:15px;margin:5px 0 12px}.settings-section+.settings-section{border-top:1px solid #cad5cd;margin-top:18px;padding-top:16px}.settings-section .field-row input:not([type=checkbox]):not([type=number]){width:76%;max-width:76%;font-size:13px}.settings-note{font-size:12px!important;margin:7px 0!important}.settings-error{font-size:13px;color:#842b21;padding:9px;background:#fff1e9;border-radius:5px}

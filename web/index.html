@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light"><title>LaTeX Studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231b725c'/%3E%3Ctext x='8' y='29' font-family='Georgia' font-style='italic' font-size='28' fill='white'%3EL%3C/text%3E%3C/svg%3E">
+  <link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/fonts.css">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/ai-studio.css">
+  <link rel="stylesheet" href="/review-studio.css">
+  <link rel="stylesheet" href="/ui-polish.css">
+  <link rel="stylesheet" href="/page-edits.css">
+  <link rel="stylesheet" href="/writing-workbench.css"><link rel="stylesheet" href="/monet-theme.css"><link rel="stylesheet" href="/writing-friendly.css">
+  <link rel="stylesheet" href="/editor-ai.css">
+  <link rel="stylesheet" href="/interface-polish.css">
+  <link rel="stylesheet" href="/neutral-theme.css"><link rel="stylesheet" href="/workflow-tools.css"><link rel="stylesheet" href="/hub-design.css"><link rel="stylesheet" href="/writing-design.css"><link rel="stylesheet" href="/updates.css">
+</head>
+<body data-view="home">
+  <header class="app-header">
+    <div class="brand"><span class="brand-mark">L<span>ᴛ</span></span><strong>LaTeX Studio</strong></div>
+    <nav class="app-navigation" aria-label="工作区"><button data-action="home" data-nav="home" class="active">项目</button><button data-action="editorView" data-nav="editor">编辑器</button><button data-action="packages" data-nav="packages">宏包管理<span id="packageNavDot" class="nav-progress" hidden></span></button><button data-action="ai" data-nav="ai">AI 助手<span class="ai-nav-star">✦</span></button></nav>
+    <div class="header-actions"><button data-action="palette" class="command-button" title="命令面板 Ctrl+Shift+P"><span data-icon="command"></span><span>命令</span><kbd>Ctrl K</kbd></button><button data-action="settings" class="icon-button" title="设置" aria-label="设置" data-icon="settings"></button><button data-action="help" class="icon-button" title="帮助与快捷键" aria-label="帮助与快捷键" data-icon="help"></button></div>
+  </header>
+  <main id="homePage" class="hub-page">
+    <div class="hub-container">
+      <div class="home-hero"><h1>项目</h1><span id="homeProjectCount" class="home-project-count"></span></div>
+      <section class="home-featured" aria-label="当前项目"><div class="home-featured-copy"><span class="home-current-label"><i></i>当前项目</span><h2 id="homeFeaturedName">继续你的创作</h2><span id="homeFeaturedFile"></span><code id="homeFeaturedPath"></code><button data-action="editorView" class="primary" id="continueProject">继续编辑 <span data-icon="chevron"></span></button></div><div class="home-document-preview"><div class="home-preview-placeholder" id="homePreviewPlaceholder"><span data-icon="file"></span><span>暂无预览</span></div><img id="homePreviewImage" alt="当前文档的首页预览" hidden></div></section>
+      <div class="project-actions">
+        <button data-action="newProject" class="project-action"><span class="action-symbol mint" data-icon="filePlus"></span><strong>新建文档</strong><span>从中文文档模板开始</span><span class="action-arrow">↗</span></button>
+        <button data-action="importProject" class="project-action"><span class="action-symbol blue" data-icon="upload"></span><strong>导入项目</strong><span>导入 .tex 或含图片的文件夹</span><span class="action-arrow">↗</span></button>
+        <button data-action="openProject" class="project-action"><span class="action-symbol lavender" data-icon="folder"></span><strong>打开本地文档</strong><span>选择已有的 .tex，直接编辑原文件</span><span class="action-arrow">↗</span></button>
+      </div>
+      <section class="recent-section"><div class="hub-section-title"><h2>最近项目</h2><div><button data-action="openProjectPath" class="text-button">输入路径</button><button data-action="refreshHub" class="tiny" title="刷新项目列表" aria-label="刷新项目列表" data-icon="refresh"></button></div></div><div id="recentProjects" class="recent-projects"><p class="hub-empty">正在读取项目…</p></div></section>
+      <section class="environment-card"><span class="environment-icon" data-icon="shield"></span><div><h3>编译环境 <span id="engineBadge" class="state-badge">检测中</span></h3><div id="environmentInfo" class="environment-info"></div></div><div class="environment-actions"><button data-action="health" class="secondary">检查环境</button><button data-action="packages" class="text-button">管理宏包 →</button></div></section>
+    </div>
+  </main>
+  <main id="packagesPage" class="hub-page">
+    <div class="hub-container package-container">
+      <div class="hub-section-title package-title"><div><h1>宏包管理</h1></div><button data-action="analyzePackages" class="secondary"><span data-icon="search"></span>检查项目依赖</button></div>
+      <div class="package-stats"><div><span>宏包总数</span><strong id="catalogCount">—</strong></div><div><span>已缓存</span><strong id="cachedPackageCount">—</strong></div><div><span>资源文件</span><strong id="cachedResourceCount">—</strong></div><div><span>占用空间</span><strong id="cacheSize">—</strong></div></div>
+      <div class="package-layout"><aside class="package-sidebar" aria-label="宏包浏览"><h2>浏览宏包</h2><div class="package-filters" role="tablist" aria-label="宏包筛选"><button data-package-filter="all" class="active" role="tab" aria-selected="true">全部</button><button data-package-filter="cached" role="tab" aria-selected="false">已缓存</button><button data-package-filter="available" role="tab" aria-selected="false">未缓存</button><button data-package-filter="removed" role="tab" aria-selected="false">已移除</button></div><div class="package-storage"><span data-icon="folder"></span><strong>本地缓存</strong><span id="packageCachePath"></span></div></aside><section class="package-content" aria-label="宏包资源列表">      <div class="package-searchbar"><div class="package-query"><span data-icon="search"></span><input id="packageQuery" placeholder="搜索名称或用途，例如 mathtools、中文、表格" aria-label="搜索宏包"><button data-action="clearPackageSearch" class="tiny" title="清空搜索" aria-label="清空宏包搜索" data-icon="close"></button></div><button data-action="refreshPackages" class="tiny" title="刷新宏包状态" aria-label="刷新宏包状态" data-icon="refresh"></button></div>
+      <section id="packageJob" class="package-job" hidden><div class="package-job-top"><div><span id="packageJobSpinner" class="spinner"></span><strong id="packageJobTitle">正在处理</strong><span id="packageJobCurrent"></span></div><button data-action="cancelPackage" id="cancelPackageButton" class="secondary">停止任务</button></div><progress id="packageProgress" max="1" value="0"></progress><details><summary>查看下载与验证日志</summary><pre id="packageLog"></pre></details></section><div class="package-results-bar"><h2 id="packageListTitle">全部宏包</h2><span id="packageResultCount"></span></div>      <div class="package-list-window"><div class="package-columns" aria-hidden="true"><span>宏包与说明</span><span>状态</span><span>操作</span></div><div id="packageList" class="package-list" role="region" aria-label="宏包列表" tabindex="0" aria-live="polite" aria-busy="false"><p class="hub-empty">正在读取宏包目录…</p></div><button id="packageScrollTop" class="package-scroll-top" title="返回列表顶部" aria-label="返回列表顶部" hidden>↑</button></div>
+<div class="package-pagination"><button id="packagePrev" class="secondary">上一页</button><span id="packagePageInfo">1 / 1</span><button id="packageNext" class="secondary">下一页</button></div></section></div>
+      <p class="package-footnote">“已缓存”表示主文件存在；“已验证”表示依赖已通过离线编译检查。目录使用当前编译器的兼容资源版本，未收录的自定义宏包可放入项目文件夹。</p>
+    </div>
+  </main>
+  <main id="aiPage" class="hub-page">
+    <div class="ai-container">
+      <div class="ai-heading"><h1>写作与版面</h1><div class="ai-heading-actions"><button id="workflowWritingUsage" type="button" class="secondary">AI 用量</button><button id="writingCompile" class="secondary">保存并编译</button><button data-action="aiSettings" class="secondary"><span data-icon="settings"></span>服务配置<span id="aiConnection" class="ai-dot"></span></button><button id="aiStartTop" class="primary" hidden>开始检查 ↗</button></div></div>
+      
+      <section id="writingWorkbench" aria-label="写作与版面工作区">
+        <ol class="writing-steps" aria-label="修改流程">
+          <li class="current" data-writing-step="0"><span>1</span>选择内容</li>
+          <li data-writing-step="1"><span>2</span>审阅建议</li>
+          <li data-writing-step="2"><span>3</span>预览效果</li>
+          <li data-writing-step="3"><span>4</span>确认应用</li>
+        </ol>
+        <div class="writing-grid">
+          <section class="writing-canvas" aria-label="内容与修改效果">
+            <div class="writing-canvas-head">
+              <div class="writing-segment" role="group" aria-label="内容类型"><button data-writing-mode="pdf" class="active" aria-pressed="true">▧ PDF 页面</button><button data-writing-mode="source" aria-pressed="false">{ } 源码</button></div>
+              <div class="writing-view-tabs" role="group" aria-label="预览内容"><button data-writing-view="content" class="active" aria-pressed="true">当前内容</button><button data-writing-view="comparison" disabled aria-pressed="false">效果对比</button><button data-writing-view="diff" disabled aria-pressed="false">源码差异</button></div>
+            </div>
+            <div id="writingPdfToolbar" class="writing-content-toolbar">
+              <button id="writingThumbnailsToggle" class="writing-icon" title="显示页面列表" aria-label="显示页面列表" aria-expanded="false">▤</button>
+              <button id="writingPrevious" class="writing-icon" aria-label="上一页">‹</button><label class="writing-page-input">第 <input id="writingPage" type="number" min="1" value="1" aria-label="PDF 页次"> / <span id="writingTotalPages">—</span> 页</label><button id="writingNext" class="writing-icon" aria-label="下一页">›</button>
+              <select id="writingSelectionMode" aria-label="页面选择模式"><option value="single">单页</option><option value="multiple">多页</option></select><button id="writingResetPageFocus" class="text-button" hidden>整页</button><button id="writingSelectCurrentPage" class="text-button">选此页</button><span id="writingPdfSelected" class="writing-chip">尚未选择</span><button id="writingLocalCheck" class="text-button" title="本地检查所选页面的边界与字号">本地检查</button>
+            </div>
+            <div id="writingPageSelectionToolbar" class="writing-content-toolbar writing-page-selection" hidden><label>页次 <input id="writingPageRange" aria-label="选择 PDF 页次范围" value="1" placeholder="1,3-5" title="最多 12 页；也可在页面列表中勾选"></label><button id="writingChoosePages" class="text-button">选定</button><button id="writingClearPages" class="text-button">清空</button></div>
+            <div id="writingSourceToolbar" class="writing-content-toolbar" hidden>
+              <select id="writingFile" aria-label="选择源码文件"></select><button id="writingReadSource" class="text-button">重新读取</button><button id="writingSelectFile" class="text-button">全选</button><div class="writing-line-range"><span>行</span><input id="writingLineStart" type="number" min="1" value="1" aria-label="源码起始行"><span>–</span><input id="writingLineEnd" type="number" min="1" value="1" aria-label="源码结束行"><button id="writingChooseLines" class="text-button">选择</button></div><span id="writingSourceSelection" class="writing-chip">完整文件</span>
+            </div>
+            <div id="writingContent" class="writing-content">
+              <aside id="writingThumbnails" class="writing-thumbnails" aria-label="PDF 页面列表" hidden></aside>
+              <div id="writingPdfScroll" class="writing-pdf-scroll"><div id="writingPdfEmpty" class="writing-empty"><span>▧</span><strong>编译后选择 PDF 页面</strong><button id="writingEmptyCompile" class="secondary">保存并编译</button></div><figure id="writingPdfSheet" class="writing-pdf-sheet" hidden aria-label="当前 PDF 页面预览"><img id="writingPdfImage" alt="当前 PDF 页面"><div id="writingPdfHighlight" class="writing-pdf-highlight" hidden></div><figcaption id="writingPdfCaption"></figcaption></figure></div>
+              <div id="writingSourceEditor" class="writing-source-editor" aria-label="选择待处理源码" hidden></div>
+            </div>
+            <div id="writingComparison" class="writing-comparison" hidden>
+              <div class="writing-compare-toolbar"><div class="writing-segment" role="group" aria-label="对比方式"><button data-writing-compare="split" class="active">并排</button><button data-writing-compare="overlay">滑动对比</button></div><select id="writingComparePage" aria-label="切换对比页次" hidden></select><span id="writingCompareMeta"></span><button id="writingFocusToggle" class="text-button">聚焦改动</button><label>缩放 <select id="writingZoom" aria-label="对比缩放"><option value="fit">适应宽度</option><option value="100">100%</option><option value="125">125%</option></select></label></div>
+              <div id="writingCompareScroll" class="writing-compare-scroll"><div id="writingCompareImages" class="writing-compare-images"><figure><figcaption>修改前</figcaption><div id="writingBeforeWindow" class="writing-image-window"><img id="writingBefore" alt="修改前的 PDF"><div id="writingBeforeMarker" class="writing-change-marker" hidden></div></div></figure><figure><figcaption>候选修改</figcaption><div id="writingAfterWindow" class="writing-image-window"><img id="writingAfter" alt="候选修改编译后的 PDF"><div id="writingAfterMarker" class="writing-change-marker" hidden></div></div></figure></div><div id="writingOverlay" class="writing-overlay" hidden><img id="writingOverlayAfter" alt="修改后底图"><div id="writingOverlayBeforeWrap"><img id="writingOverlayBefore" alt="修改前叠加图"></div><div class="writing-overlay-line"></div></div></div>
+              <label id="writingSliderLabel" class="writing-slider" hidden><span>修改前</span><input id="writingSlider" type="range" min="0" max="100" value="50" aria-label="滑动比较修改前后"><span>候选修改</span></label>
+            </div>
+            <div id="writingDiff" class="writing-diff" aria-label="源码修改差异" hidden></div>
+            <footer class="writing-canvas-footer"><span id="writingTargetLabel">选择 PDF 页面或源码范围</span><span id="writingContentState" role="status">等待载入</span></footer>
+          </section>
+          <aside class="writing-review" aria-label="建议与应用"><header class="writing-panel-heading"><span class="writing-panel-symbol">✦</span><h2 id="writingPhaseTitle">准备修改</h2><span id="writingPhaseNumber">1 / 4</span></header>
+            <section id="writingHistoryPanel" class="writing-history-panel" aria-label="最近任务" hidden><header><strong>最近任务</strong><button id="writingHistoryClose" class="tiny" aria-label="关闭最近任务">×</button></header><div id="writingHistoryList"></div></section>
+
+            <div class="writing-request">
+              <div class="writing-request-heading"><h2>任务设置</h2><div><button id="writingRequestToggle" class="text-button" hidden>调整要求</button><button id="writingHistoryToggle" class="text-button" aria-expanded="false">最近任务</button><button id="writingRestore" hidden>恢复任务</button></div></div>
+              <div class="writing-options"><label>任务<select id="writingTask"><option value="format">排版优化</option><option value="correct">检查纠错</option><option value="polish">学术润色</option><option value="translate">翻译</option><option value="check">本地检查</option><option value="dictionary">词典查询</option><option value="workflow">审稿工作流</option></select></label><label>服务<select id="writingProvider"><option value="deepseek">DeepSeek</option><option value="local">本地</option><option value="youdao">有道</option></select></label><label id="writingLanguageField" hidden>译为<select id="writingLanguage"><option value="en">英语</option><option value="zh-CHS">简体中文</option><option value="ja">日语</option><option value="de">德语</option><option value="fr">法语</option></select></label></div>
+              <textarea id="writingInstruction" rows="2" maxlength="1600" aria-label="修改要求" placeholder="例如：调整间距，修复重复词，保持公式与数据。"></textarea>
+              <div class="writing-request-actions" hidden inert><button id="writingSuggest" class="primary">✦ 获取修改建议</button><button id="writingStop" class="secondary" hidden>停止</button></div>
+            </div>
+            <div class="writing-result-heading"><h2>建议 <span id="writingSuggestionCount">0</span></h2><label id="writingSelectAllLabel" hidden><input id="writingSelectAll" type="checkbox" checked>全选</label></div>
+            <div id="writingProgress" class="writing-task-progress" hidden><progress id="writingProgressBar" max="1" value="0"></progress><span id="writingProgressText" role="status"></span></div><div id="writingResults" class="writing-results" aria-live="polite"><div class="writing-result-empty"><span>✦</span><strong>先选择内容，再获取建议</strong></div></div>
+            <div id="writingError" class="writing-error" role="alert" hidden><span id="writingErrorText"></span><button id="writingRecovery" class="text-button" hidden></button><details id="writingErrorDetails" hidden><summary>查看详情</summary><pre id="writingErrorLog"></pre></details></div>
+            <div id="writingStatus" class="writing-status" role="status">准备就绪</div>
+            <div class="writing-next-action"><div class="writing-action-meta"><span id="writingActionHint" role="status"></span><span id="writingCost" class="writing-chip"></span></div><button id="writingPrimaryAction" class="primary">获取建议</button><button id="writingCancelTask" class="secondary" hidden>停止</button><button id="writingRetryPages" class="secondary" hidden></button><button id="writingRegenerate" class="text-button" hidden>重新获取建议</button><span id="writingUsage" hidden></span></div><div class="writing-review-actions"><button id="writingPreview" class="secondary" disabled>预览所选修改</button><button id="writingApply" class="primary" disabled>确认应用</button><button id="writingContinue" class="primary" hidden>继续修改</button><button id="writingUndo" class="text-button" hidden>撤销本次应用</button></div>
+          </aside>
+        </div>
+      </section>
+      <div class="ai-layout" hidden inert>
+        <section class="ai-composer" aria-label="AI 任务配置">
+          <div class="ai-section-label"><span>01</span><strong>选择任务</strong><span class="ai-local-tag">支持离线检查</span></div>
+          <div id="aiTasks" class="ai-task-grid" role="group" aria-label="任务类型">
+            <button data-ai-task="check" class="selected" aria-pressed="true"><span class="ai-task-icon mint">✓</span><strong>检查诊断</strong><small>结构与文字问题</small></button>
+            <button data-ai-task="correct" aria-pressed="false"><span class="ai-task-icon blue">Aa</span><strong>智能纠错</strong><small>错字、语法与源码</small></button>
+            <button data-ai-task="format" aria-pressed="false"><span class="ai-task-icon violet">≡</span><strong>源码排版</strong><small>标题与图表结构</small></button>
+            <button data-ai-task="polish" aria-pressed="false"><span class="ai-task-icon peach">✎</span><strong>学术润色</strong><small>精简与规范表达</small></button>
+            <button data-ai-task="translate" aria-pressed="false"><span class="ai-task-icon blue">译</span><strong>正文翻译</strong><small>保留公式与引用</small></button>
+            <button data-ai-task="dictionary" aria-pressed="false"><span class="ai-task-icon mint">A</span><strong>有道词典</strong><small>术语释义查询</small></button>
+          </div>
+          <button id="aiWorkflow" class="ai-workflow" aria-pressed="false"><span class="ai-workflow-star">✦</span><div><strong>审稿工作流</strong><small>本地检查 → AI 纠错 → 源码排版</small></div><span>↗</span></button>
+          <div class="ai-section-label"><span>02</span><strong>准备内容</strong><button id="aiCapture" class="text-button">从编辑器读取 ↗</button></div>
+          <div class="ai-fields"><label>服务<select id="aiProvider"><option value="local">本地检查 · 无需联网</option><option value="deepseek">DeepSeek</option><option value="youdao">有道智云</option></select></label><label>处理范围<select id="aiScope"><option value="selection">编辑器选区</option><option value="file">当前文件</option><option value="text">粘贴文本</option></select></label></div>
+          <div id="aiSourceInfo" class="ai-source-info">尚未读取内容</div>
+          <textarea id="aiInput" rows="6" spellcheck="false" aria-label="待处理内容" placeholder="在编辑器中选择一段正文，点击「从编辑器读取」；也可以切换为粘贴文本。" readonly></textarea>
+          <div class="ai-input-footer"><span id="aiCharCount">0 字符</span><button data-action="editorView" class="text-button">返回编辑器 ↗</button></div>
+          <label id="aiLanguageField" class="ai-language" hidden>目标语言<select id="aiLanguage"><option value="en">英语</option><option value="zh-CHS">简体中文</option><option value="ja">日语</option><option value="de">德语</option><option value="fr">法语</option></select></label>
+          <label class="ai-notes-label" for="aiNotes">补充要求 <span>可选</span></label><textarea id="aiNotes" rows="2" maxlength="1600" placeholder="例如：保留专业术语，语气简洁客观。"></textarea>
+          <p id="aiSendHint" class="ai-send-hint">本地检查在你的电脑上运行。</p>
+          <div class="ai-run-actions"><button id="aiStart" class="primary"><span>✦</span>开始检查</button><button id="aiCancel" class="secondary" hidden>停止</button></div>
+        </section>
+        <section class="ai-review" aria-label="审阅结果">
+          <div class="ai-review-heading"><div><span class="ai-section-label"><span>03</span><strong>审阅建议</strong></span><span id="aiResultMeta" class="ai-meta">修改由你决定</span></div><button id="aiCopy" class="tiny" title="复制处理结果" aria-label="复制处理结果" disabled data-icon="copy"></button></div>
+          <ol id="aiSteps" class="ai-steps"><li class="current">准备内容</li><li>运行任务</li><li>对比采纳</li><li>编译预览</li></ol>
+          <div id="aiProgress" class="ai-progress" hidden><span class="spinner"></span><span id="aiStage">正在处理</span><span id="aiElapsed">0s</span></div>
+          <div id="aiError" class="ai-error" role="alert" hidden></div>
+          <div id="aiEmpty" class="ai-empty"><div class="ai-empty-art"><span>✦</span><i></i><i></i><i></i><b>✓</b></div><h2>每一处修改，都清楚可见。</h2><p>处理后查看原文与建议，逐项选择采纳。<br>公式、引用与数据保留在你的掌握中。</p><div><span>差异对比</span><span>逐项采纳</span><span>可撤销</span></div></div>
+          <div id="aiResults" hidden><p id="aiSummary" class="ai-summary"></p><div id="aiTermsUsed" class="review-terms-used" hidden></div><div id="aiStepResults" class="ai-step-results"></div><div id="aiIssues" class="ai-issues"></div><pre id="aiDictionary" class="ai-dictionary" hidden></pre><div id="aiChangeToolbar" class="ai-change-toolbar"><label><input id="aiSelectAll" type="checkbox" checked>选择全部建议</label><button id="aiDiff" class="text-button">展开差异对比 ↗</button></div><div id="aiEdits" class="ai-edits"></div></div>
+          <div id="aiReviewActions" class="ai-review-actions" hidden><span id="aiSelectedCount"></span><div><button id="aiApply" class="secondary">采纳所选</button><button id="aiApplyCompile" class="primary">采纳并编译 <span>↗</span></button></div></div>
+          <div class="ai-review-footnote">源码排版建议需编译后查看页面效果。检查结果仅覆盖所选范围。</div>
+        </section>
+      </div>
+      <section id="reviewWorkbench" hidden>
+        <p id="reviewError" class="review-error" role="alert" hidden></p>
+        <section id="review-layout" class="review-tool" hidden inert>
+          <div class="review-tool-header"><div><h2>从页面看排版</h2><p>先在本地检查几何边界，再选择页面进行 AI 视觉审阅。</p></div><div class="review-toolbar"><input id="layoutPages" value="all" aria-label="检查页码" placeholder="all 或 1,3-5"><button id="layoutScan" class="primary">检查当前 PDF</button></div></div>
+          <div id="layoutStats" class="review-stats"><div><strong>—</strong><span>等待检查</span></div></div>
+          <div class="review-layout-grid"><div class="review-card"><div class="review-card-heading"><h3>页面与线索</h3><span id="layoutVersion" class="review-muted"></span></div><div id="layoutPageList" class="layout-page-list"><p class="review-placeholder">检查后按页浏览，勾选最多 3 页进行 AI 审阅。</p></div><div id="layoutIssues" class="review-issues"></div><div class="vision-controls"><h3>✦ AI 视觉审阅</h3><p id="visionSelection">尚未选择页面</p><p>点击后仅将勾选的页面图片发送到 DeepSeek，不发送整个项目。</p><div><button id="visionStart" class="secondary">审阅所选页面</button><button id="visionStop" class="secondary" hidden>停止</button></div><p id="visionStatus" role="status"></p></div><div id="visionResults" class="review-issues"></div></div><div class="review-card layout-preview-card"><div class="review-card-heading"><h3 id="layoutPreviewTitle">页面预览</h3><button id="layoutOpenPdf" class="text-button">在 PDF 阅读器中打开 ↗</button></div><div id="layoutPreview" class="layout-page-preview"><p class="review-placeholder">选择一页查看预览</p></div><p id="layoutNote" class="review-footnote">本地规则提供检查线索，AI 的视觉建议仍需人工判断。</p></div></div>
+        </section>
+        <section id="review-pageedit" class="review-tool" hidden inert>
+          <div class="review-tool-header"><div><h2>先看修改效果，再决定应用</h2><p>一次只处理一个 PDF 页面。关联源码后生成修改，在临时副本中编译比较。</p></div><div class="review-toolbar"><button id="pageEditResume" class="secondary">恢复最近任务</button><button id="pageEditMap" class="secondary">保存并编译生成映射</button></div></div>
+          <div class="page-edit-setup review-card"><div class="page-edit-controls"><label>PDF 物理页次<input id="pageEditPage" type="number" min="1" value="1"></label><button id="pageEditPrepare" class="secondary">关联本页源码</button><label id="pageEditFileLabel" hidden>来源文件<select id="pageEditFile"></select></label><span id="pageEditContextInfo" class="review-muted">尚未关联源码</span></div><details id="pageEditSourceDetails"><summary>查看本页关联的源码范围</summary><textarea id="pageEditSource" rows="7" readonly spellcheck="false" aria-label="当前单页关联的源码"></textarea></details><label class="page-edit-note-label">希望如何修改<textarea id="pageEditNotes" rows="2" maxlength="1600" placeholder="例如：正文恢复正常字号，修复重复词；保持数据、公式与引用不变。"></textarea></label><div class="page-edit-run"><button id="pageEditGenerate" class="primary" disabled>生成源码修改 · 1 次 AI 请求</button><button id="pageEditStop" class="secondary" hidden>停止 AI</button><span id="pageEditStatus" role="status">关联源码和生成效果预览均不调用 AI。</span></div></div>
+          <div id="pageEditResult" class="review-card" hidden><div class="review-card-heading"><h3>可应用修改</h3><button id="pageEditSourceDiff" class="secondary">源码差异对比</button></div><p id="pageEditSummary"></p><div id="pageEditRejected" class="page-edit-rejected" hidden></div><div class="page-edit-select"><label><input id="pageEditAll" type="checkbox" checked>选择全部修改</label><span id="pageEditSelectionInfo"></span></div><div id="pageEditEdits"></div><div class="page-edit-actionbar"><button id="pageEditPreview" class="secondary">编译前后效果 · 不调用 AI</button><button id="pageEditApply" class="primary" disabled>应用修改并更新 PDF</button><button id="pageEditUndo" class="secondary" hidden>撤销本次应用</button></div></div>
+          <div id="pageEditComparison" class="review-card" hidden><div class="review-card-heading"><h3>真实 PDF 效果对比</h3><span id="pageEditPreviewMeta" class="review-muted"></span></div><div class="page-edit-comparison-grid"><figure><figcaption>修改前</figcaption><img id="pageEditBefore" alt="修改前的当前 PDF 页面"></figure><figure><figcaption>候选修改 · 尚未应用</figcaption><img id="pageEditAfter" alt="临时副本编译得到的修改后页面"></figure></div><p class="review-footnote">两张图片均由实际 PDF 渲染。只有点击应用才写回源码；重排可能影响页数，应用后可在阅读器中检查。</p></div>
+        </section>
+        <section id="review-references" class="review-tool" hidden>
+          <div class="review-tool-header"><div><h2>引用检查</h2><p>追踪主文档包含的 .tex 与 .bib，定位重复标签、缺失引用及文献条目。</p></div><button id="referencesScan" class="primary">检查当前项目</button></div>
+          <div id="referenceStats" class="review-stats"><div><strong>—</strong><span>等待检查</span></div></div><div class="review-card"><div class="reference-filter"><select id="referenceSeverity" aria-label="提示级别"><option value="all">全部级别</option><option value="error">错误</option><option value="warning">需确认</option><option value="info">信息</option></select><input id="referenceQuery" aria-label="筛选引用检查结果" placeholder="搜索文件、标签或文献键"><button id="referencesCopy" class="secondary" disabled>复制结果</button></div><div id="referenceIssues" class="review-issues"><p class="review-placeholder">检查使用当前编辑器内容，无需先保存文件。</p></div><details id="referenceFiles" class="review-file-list" hidden><summary>追踪的文件</summary><div></div></details><p id="referenceNote" class="review-footnote"></p></div>
+        </section>
+        <section id="review-glossary" class="review-tool" hidden>
+          <div class="review-tool-header"><div><h2>术语表</h2><p>术语表按项目保存；DeepSeek 处理时自动附上与原文匹配的术语。</p></div><div class="review-toolbar"><button id="glossaryImport" class="secondary">导入 TSV</button><button id="glossaryExport" class="secondary">复制 TSV</button><button id="glossarySave" class="primary">保存术语表</button></div></div><div class="review-card"><div class="glossary-toolbar"><input id="glossaryQuery" placeholder="搜索原词、译词或备注" aria-label="搜索术语"><span id="glossaryStatus" role="status">正在载入</span><button id="glossaryReload" class="text-button">重新载入</button><button id="glossaryUndo" class="secondary" disabled>撤销移除</button><button id="glossaryAdd" class="secondary">＋ 添加术语</button></div><div class="glossary-table-wrap"><table class="glossary-table"><thead><tr><th>原词</th><th>首选译词</th><th>备注</th><th><span class="sr-only">操作</span></th></tr></thead><tbody id="glossaryRows"></tbody></table></div><p class="review-footnote">最多 200 条；仅匹配的术语会作为 DeepSeek 的处理要求。最终译词仍需审阅，有道接口暂不自动应用此表。</p></div>
+        </section>
+        <section id="review-tests" class="review-tool" hidden>
+          <div class="review-tool-header"><div><h2>服务测试</h2><p>本地检查与线上接口测试分别记录；线上测试只发送内置独立示例。</p></div><button id="reviewHealthRefresh" class="secondary">刷新配置状态</button></div><div id="reviewHealth" class="review-test-cards"></div><div class="review-card"><div class="review-card-heading"><h3>本地自检</h3><button id="reviewSelftest" class="primary">运行本地自检</button></div><div id="selftestResults"><p class="review-placeholder">尚未运行</p></div></div><div class="review-card"><div class="review-card-heading"><h3>线上接口测试</h3><button id="probeStop" class="secondary" hidden>停止测试</button></div><div id="probeResults"><p class="review-placeholder">尚未测试</p></div></div>
+        </section>
+      </section>
+    </div>
+  </main>
+  <nav class="main-toolbar" aria-label="主工具栏">
+    <div class="toolbar-group"><button data-action="sidebar" class="icon-button" title="显示/隐藏侧栏" aria-label="显示/隐藏侧栏" data-icon="sidebar"></button><span class="toolbar-separator"></span><button data-action="save" title="保存当前文件 Ctrl+S"><span data-icon="save"></span>保存</button><button data-action="undo" class="icon-button" title="撤销 Ctrl+Z" aria-label="撤销" data-icon="undo"></button><button data-action="redo" class="icon-button" title="重做 Ctrl+Y" aria-label="重做" data-icon="redo"></button><span class="toolbar-separator"></span><button data-action="find" title="查找 Ctrl+F"><span data-icon="search"></span>查找</button><button data-action="replace" title="替换 Ctrl+H"><span data-icon="replace"></span>替换</button><span class="toolbar-separator"></span><details id="editorToolsMenu" class="editor-tools-menu"><summary>文档工具 <span>⌄</span></summary><div><button type="button" id="workflowHistory">版本历史</button><button type="button" id="workflowLocate">定位到 PDF</button><button type="button" id="workflowUsage">AI 用量</button><button data-editor-tool="references">引用检查</button><button data-editor-tool="glossary">术语表</button><button data-editor-tool="tests">服务测试</button></div></details></div>
+    <div class="toolbar-group compile-group"><label class="auto-compile"><input id="autoCompile" type="checkbox"><span>自动编译</span></label><div class="compile-split"><button id="compileButton" data-action="compile" class="primary" title="保存全部并编译 Ctrl+Enter"><span data-icon="play"></span><span id="compileLabel">编译预览</span><kbd>Ctrl ↵</kbd></button><button data-action="cancel" id="cancelButton" class="primary stop" title="停止编译" aria-label="停止编译" disabled data-icon="stop"></button></div></div>
+  </nav>
+  <main class="workspace" id="workspace">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-tabs" role="tablist"><button class="active" data-panel="files" role="tab" aria-selected="true" title="项目文件" data-icon="files"><span>文件</span></button><button data-panel="search" role="tab" aria-selected="false" title="在项目中查找上下文" data-icon="search"><span>搜索</span></button><button data-panel="outline" role="tab" aria-selected="false" title="当前文档章节" data-icon="list"><span>大纲</span></button></div>
+      <section class="sidebar-panel" id="panel-files"><div class="section-heading"><span>文件</span><div><button data-action="new" class="tiny" title="新建文件" aria-label="新建文件" data-icon="filePlus"></button><button data-action="upload" class="tiny" title="上传素材" aria-label="上传素材" data-icon="upload"></button><button data-action="refresh" class="tiny" title="刷新文件" aria-label="刷新文件" data-icon="refresh"></button></div></div><div class="file-tree" id="fileTree"></div></section>
+      <section class="sidebar-panel" id="panel-search" hidden><div class="section-heading"><span>搜索</span><button id="contextToggle" class="context-toggle active" aria-pressed="true" title="显示/隐藏匹配行的前后文">上下文</button></div><div class="search-box"><input id="projectQuery" placeholder="查找文字或代码…" aria-label="项目搜索关键词"><button data-action="clearSearch" class="tiny" title="清空搜索（Esc）" aria-label="清空搜索" data-icon="close"></button><button id="searchCase" class="tiny option" title="区分大小写" aria-label="区分大小写" aria-pressed="false">Aa</button><button id="searchRegex" class="tiny option" title="正则表达式" aria-label="正则表达式" aria-pressed="false">.*</button></div><div class="search-hint" id="searchCount" aria-live="polite">输入后自动搜索</div><div id="searchResults" class="search-results"></div></section>
+      <section class="sidebar-panel" id="panel-outline" hidden><div class="section-heading">文档结构<button data-action="foldAll" class="tiny" title="折叠所有章节" aria-label="折叠所有章节" data-icon="fold"></button></div><div id="outlineList" class="outline-list"></div></section>
+    </aside>
+    <section class="editor-pane" id="editorPane">
+      <div class="document-tabs" id="documentTabs" aria-label="已打开文件"></div>
+      <div class="editor-subbar"><div class="breadcrumb"><span data-icon="code"></span><span id="fileBreadcrumb">report.tex</span></div><div><button data-action="editorAi" class="ai-editor-button" title="编辑器 AI · Ctrl+Alt+A">✦ AI 助手</button><button data-action="bold" class="tiny text-tool" title="插入粗体" aria-label="插入粗体"><b>B</b></button><button data-action="italic" class="tiny text-tool" title="插入斜体" aria-label="插入斜体"><i>I</i></button><button data-action="snippet" class="tiny" title="插入 LaTeX 结构" aria-label="插入 LaTeX 结构" data-icon="braces"></button><span class="mini-separator"></span><button data-action="wrap" class="tiny" title="自动换行 Alt+Z" aria-label="自动换行" data-icon="wrap"></button><button data-action="history" class="tiny" title="本地历史版本" aria-label="本地历史版本" data-icon="history"></button><button data-action="fileMenu" class="tiny" title="文件操作" aria-label="文件操作" data-icon="more"></button></div></div>
+      <div id="editor" aria-label="源代码编辑区"></div><div id="assetPreview" class="asset-preview" hidden></div>
+    </section>
+    <div id="divider" class="divider" role="separator" aria-label="调整源码与预览宽度" aria-orientation="vertical" aria-valuemin="25" aria-valuemax="65" aria-valuenow="41" title="拖动调整宽度，双击恢复；方向键微调" tabindex="0"></div>
+    <section class="preview-pane" id="previewPane">
+      <div class="preview-heading"><div><span class="pdf-icon" data-icon="pdf"></span><strong>PDF 预览</strong><button id="editorAiReturnPdf" class="text-button" hidden>返回原 PDF</button><span id="previewFreshness" class="subtle">等待加载</span></div><div><button data-action="nativePreview" class="reader-switch" title="切换到浏览器自带的 PDF 阅读器">系统阅读器</button><button data-action="refreshPdf" class="tiny" title="重新加载 PDF" aria-label="重新加载 PDF" data-icon="refresh"></button><button data-action="download" class="tiny" title="下载 PDF" aria-label="下载 PDF" data-icon="download"></button><button data-action="focusPreview" class="tiny" title="展开/还原预览" aria-label="展开/还原预览" data-icon="expand"></button></div></div>
+      <div class="pdf-frame-wrap">
+        <iframe id="pdfFrame" title="PDF 可视化预览" src="about:blank"></iframe>
+        <div id="noPdf" class="empty-state" hidden><span data-icon="pdf"></span><h3>尚未生成 PDF</h3><p>编辑源码后，点击「编译预览」。</p><button data-action="compile" class="primary">编译文档</button></div>
+        <div id="previewMessage" class="preview-message" role="status" hidden><div class="preview-message-card"><span id="previewSpinner" class="spinner"></span><strong id="previewMessageTitle">正在加载 PDF</strong><p id="previewMessageText"></p><div id="previewRecovery" hidden><button data-action="refreshPdf" class="primary">重新加载</button><button data-action="nativePreview" class="secondary">系统阅读器</button><button data-action="download" class="secondary">下载 PDF</button></div></div></div>
+        <div id="compileOverlay" class="compile-overlay" hidden><span class="spinner"></span>正在编译，完成后自动更新预览</div>
+      </div>
+    </section>
+    <section class="log-panel" id="logPanel" hidden><div class="log-heading"><div><button id="editorLogTab" class="log-switch active">日志</button><button id="diagnosticTab" data-action="diagnostics" class="log-switch">问题 <span id="problemCount">0</span></button><button id="editorAiTab" class="log-switch">✦ AI</button><span id="compileMeta" class="subtle"></span></div><div><button id="editorAiRepair" class="secondary" hidden>✦ 修复报错</button><button data-action="copyLog" class="tiny" title="复制日志" aria-label="复制日志" data-icon="copy"></button><button id="editorDockClose" data-action="logs" class="tiny" title="收起面板" aria-label="关闭日志" data-icon="close"></button></div></div><pre id="logOutput"></pre><div id="diagnosticList" hidden></div>
+      <div id="editorAiPanel" class="editor-ai-panel" hidden>
+        <div class="editor-ai-compose">
+          <div class="editor-ai-mode"><select id="editorAiMode" aria-label="编辑器 AI 任务"><option value="repair">修复报错</option><option value="edit">修改代码</option><option value="explain">解释代码</option></select><button id="editorAiCapture" class="text-button">选取代码</button></div>
+          <button id="editorAiContext" class="editor-ai-context" title="定位到目标代码">未选择代码</button>
+          <textarea id="editorAiPrompt" rows="3" maxlength="2000" aria-label="编辑器 AI 要求" placeholder="补充说明（可选）"></textarea>
+          <div id="workflowEstimate" class="workflow-estimate" role="status"></div><div class="editor-ai-send"><label id="editorAiLimitLabel">最多 <select id="editorAiLimit" aria-label="修复轮数"><option value="1" selected>1 轮</option><option value="2">2 轮</option><option value="3">3 轮</option></select></label><button id="editorAiStart" class="primary">修复并验证</button><button id="editorAiStop" class="secondary" hidden>停止</button></div>
+          <div class="editor-ai-links"><button id="editorAiConfig" class="text-button">服务配置</button><button id="editorAiFull" class="text-button">完整助手 ↗</button></div>
+        </div>
+        <section class="editor-ai-review" aria-label="AI 建议与代码差异">
+          <ol id="workflowRepairSteps" class="workflow-repair-steps" aria-label="修复流程" hidden></ol><div class="editor-ai-review-head"><div><button id="editorAiSummaryTab" class="log-switch active">说明</button><button id="editorAiDiffTab" class="log-switch" disabled>代码差异</button><button id="editorAiEffectTab" class="log-switch" disabled>修改效果</button></div><select id="editorAiFiles" aria-label="查看修改文件" hidden></select><span id="editorAiUsage"></span><button id="editorAiExpand" class="tiny" title="展开面板" aria-label="展开面板" aria-expanded="false">↕</button></div>
+          <div id="editorAiResponse" class="editor-ai-response" aria-live="polite"><div class="editor-ai-empty"><strong>✦ 在代码旁完成修改</strong><span>选择代码，或从编译报错开始。</span></div></div>
+          <div id="editorAiDiff" class="editor-ai-diff" hidden></div>
+          <div id="editorAiEffect" class="editor-ai-effect" hidden><div class="editor-ai-effect-toolbar"><label>第 <select id="editorAiEffectPage" aria-label="修改效果页次"><option value="1">1</option></select> 页</label><span id="editorAiEffectState" role="status"></span><button id="editorAiOpenPdf" class="text-button">右侧打开 PDF ↗</button></div><div class="editor-ai-effect-pages"><figure><figcaption id="editorAiBeforeLabel">上次成功编译</figcaption><img id="editorAiBefore" alt="修改前的 PDF 页面" hidden><p id="editorAiBeforeEmpty">原稿尚无可用 PDF</p></figure><figure><figcaption id="editorAiAfterLabel">候选修改 · 未应用</figcaption><img id="editorAiAfter" alt="修改后的 PDF 页面"></figure></div></div>
+          <footer class="editor-ai-review-footer"><span id="editorAiStage" role="status">准备就绪</span><div><button id="editorAiPackages" class="text-button" hidden>检查宏包</button><button id="editorAiContinue" class="secondary" hidden>继续修复</button><button id="editorAiPreview" class="secondary" disabled>查看效果</button><button id="editorAiUndo" class="secondary" hidden>撤销应用</button><button id="editorAiApply" class="primary" disabled>应用修改并编译</button></div></footer>
+        </section>
+      </div>
+    </section>
+  </main>
+  <footer class="statusbar"><div><button id="editorAiStatus" title="编辑器 AI · Ctrl+Alt+A" aria-expanded="false">✦ AI<span id="editorAiBadge" hidden></span></button><span class="footer-separator"></span><span class="status-dot" id="saveDot"></span><span id="saveStatus" role="status">正在打开…</span><span class="footer-separator"></span><button data-action="logs"><span data-icon="terminal"></span><span id="compileStatus">编译日志</span></button></div><div><button data-action="goto" id="cursorStatus">行 1，列 1</button><span class="footer-separator"></span><span id="languageStatus">LaTeX</span><span class="footer-separator"></span><span>UTF-8</span></div></footer>
+  <div id="interactionTooltip" class="interaction-tooltip" role="tooltip" hidden></div>
+  <div id="toastRegion" aria-live="polite" class="toast-region"></div>
+  <aside id="packageDetails" class="package-details" aria-label="宏包详情" hidden><header><h2 id="packageDetailsTitle">宏包详情</h2><button type="button" id="packageDetailsClose" class="tiny" aria-label="关闭宏包详情">×</button></header><div id="packageDetailsBody"></div><footer id="packageDetailsActions"></footer></aside>
+  <dialog id="modal"><form method="dialog"><header><h2 id="modalTitle"></h2><button class="icon-button" value="close" aria-label="关闭" data-icon="close"></button></header><div id="modalBody"></div></form></dialog>
+  <input id="uploadInput" type="file" multiple hidden>
+  <input id="projectFileInput" type="file" accept=".tex,.bib,.sty,.cls,.png,.jpg,.jpeg,.pdf,.csv,.bbl,.py" multiple hidden>
+  <input id="projectFolderInput" type="file" webkitdirectory multiple hidden>
+  <aside id="editorToolPanel" class="editor-tool-panel" aria-label="文档工具" hidden>
+    <div class="editor-tool-panel-heading"><strong id="editorToolTitle">文档工具</strong><div class="editor-tool-tabs" aria-label="工具切换"><button data-editor-tool="references">引用</button><button data-editor-tool="glossary">术语</button><button data-editor-tool="tests">测试</button></div><button id="editorToolClose" class="tiny" aria-label="关闭文档工具">×</button></div>
+    <div id="editorToolBody" class="editor-tool-body"></div>
+  </aside>
+  <script src="/vendor/monaco/min/vs/nls/lang/zh-cn.js"></script><script src="/vendor/monaco/min/vs/loader.js"></script><script src="/app.js"></script><script src="/workspace-hub.js"></script><script src="/ai-studio.js"></script><script src="/review-studio.js"></script><script src="/page-edits.js"></script><script src="/writing-workbench.js"></script><script src="/editor-tools.js"></script><script src="/writing-friendly.js"></script><script src="/writing-focus.js"></script><script src="/editor-ai.js"></script>
+  <script src="/interface-polish.js"></script><script src="/workflow-tools.js"></script><script src="/hub-design.js"></script><script src="/writing-design.js"></script><script src="/updates.js"></script>
+</body></html>

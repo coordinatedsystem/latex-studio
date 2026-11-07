@@ -1,0 +1,38 @@
+/* Inter: Copyright The Inter Project Authors, SIL OFL 1.1. License in /fonts/. */
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/InterVariable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* Chinese, full-width punctuation and Arabic numerals use the installed Microsoft YaHei. */
+@font-face {
+  font-family: "Studio YaHei";
+  src: local("Microsoft YaHei"), local("MicrosoftYaHei"), local("Microsoft YaHei UI");
+  font-style: normal;
+  font-weight: 100 500;
+  unicode-range: U+0030-0039, U+2E80-303F, U+3100-312F, U+31A0-31BF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF, U+20000-2FA1F;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Studio YaHei";
+  src: local("Microsoft YaHei Bold"), local("MicrosoftYaHei-Bold"), local("Microsoft YaHei UI Bold");
+  font-style: normal;
+  font-weight: 501 900;
+  unicode-range: U+0030-0039, U+2E80-303F, U+3100-312F, U+31A0-31BF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE10-FE1F, U+FE30-FE4F, U+FF00-FFEF, U+20000-2FA1F;
+  font-display: swap;
+}
+
+/* Source Han Sans CN: Adobe, SIL OFL. License in /fonts/. */
+@font-face {
+  font-family:"Studio Source Han";
+  src:url("/fonts/SourceHanSansCN-Regular.woff2") format("woff2");
+  font-weight:100 550;font-style:normal;font-display:swap;
+  unicode-range:U+2E80-303F,U+3100-312F,U+31A0-31BF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FE10-FE1F,U+FE30-FE4F,U+FF00-FFEF,U+20000-2FA1F;
+}
+@font-face {
+  font-family:"Studio Digits";src:local("Microsoft YaHei"),local("MicrosoftYaHei");
+  font-weight:100 550;font-style:normal;unicode-range:U+0030-0039;font-display:swap;
+}

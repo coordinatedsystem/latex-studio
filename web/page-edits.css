@@ -1,0 +1,11 @@
+.page-edit-controls,.page-edit-run,.page-edit-actionbar { display:flex; align-items:center; flex-wrap:wrap; gap:12px; }
+.page-edit-controls { margin-bottom:16px; }.page-edit-controls label { display:flex; align-items:center; gap:9px; font-size:13px; font-weight:550; }.page-edit-controls input { width:76px; }.page-edit-controls select { max-width:280px; }
+#pageEditSourceDetails summary { font-size:13px; color:#3c4b41; cursor:pointer; margin:10px 0; }
+#pageEditSource,#pageEditNotes { display:block; width:100%; border:1px solid #bac8bf; border-radius:8px; padding:12px; background:#fcfdfc; color:#171b19; resize:vertical; line-height:1.8; font-size:13px; }
+#pageEditSource { font-family:"Studio YaHei",Consolas,"Microsoft YaHei",monospace; max-height:360px; }
+.page-edit-note-label { display:block; font-size:13px; font-weight:550; margin:19px 0 14px; }.page-edit-note-label textarea { margin-top:8px; font-family:var(--ui-font); }
+.page-edit-run>span { font-size:12px; color:#4c5851; line-height:1.8; }.page-edit-select { display:flex; align-items:center; justify-content:space-between; margin:18px 0 13px; font-size:13px; color:#35453b; }.page-edit-select label { display:flex; align-items:center; gap:8px; }
+.page-edit-actionbar { margin-top:18px; border-top:1px solid #d5dfd8; padding-top:17px; }
+.page-edit-comparison-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; }.page-edit-comparison-grid figure { margin:0; min-width:0; }.page-edit-comparison-grid figcaption { padding:12px; border:1px solid #c7d2cb; border-radius:8px 8px 0 0; background:#f6f9f7; color:#151d18; font-size:13px; font-weight:600; }.page-edit-comparison-grid img { width:100%; display:block; border:1px solid #c7d2cb; border-top:0; }
+#pageEditSummary { color:#18271e; font-size:14px; line-height:1.9; }.page-edit-rejected { border:1px solid #e4cfaf; background:#fff8ee; color:#815a30; padding:12px; font-size:12px; line-height:1.9; border-radius:8px; }
+@media(max-width:760px){.page-edit-comparison-grid { grid-template-columns:1fr; }.page-edit-controls { align-items:flex-start; }.page-edit-controls label { flex-wrap:wrap; }.page-edit-actionbar button { flex:1; }.page-edit-run .primary { width:100%; }}
