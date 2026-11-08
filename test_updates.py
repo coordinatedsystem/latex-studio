@@ -3,12 +3,14 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 from studio_updates import Updates,file_sha
+from studio_version import VERSION
 
 class UpdateTests(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup);base=Path(self.tmp.name)
         self.up=Updates(SimpleNamespace(data=base/'data',cache=base/'cache',home=base/'home'))
-        self.body=b'MZmock installer';self.release={'version':'1.0.2','file':'distribution/LaTeX-Studio-1.0.2-win64-Setup.exe','sha256':__import__('hashlib').sha256(self.body).hexdigest(),'size':len(self.body),'notes':'test'}
+        parts=list(map(int,VERSION.split('.')));parts[-1]+=1;next_version='.'.join(map(str,parts))
+        self.body=b'MZmock installer';self.release={'version':next_version,'file':f'distribution/LaTeX-Studio-{next_version}-win64-Setup.exe','sha256':__import__('hashlib').sha256(self.body).hexdigest(),'size':len(self.body),'notes':'test'}
     def test_defaults_are_opt_in_and_credentials_not_exposed(self):
         value=self.up.status();self.assertFalse(value['automatic']);self.assertFalse(value['configured'])
         self.assertEqual(self.up.token(),'')
