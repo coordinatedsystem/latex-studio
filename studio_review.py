@@ -223,7 +223,9 @@ def analyze_references(sources, main):
         for key,locs in bibs.items():
             if key not in used:
                 note(locs[0],'unused-bib','文献未被当前主文档引用：'+key,'info')
-    return {'files':files,'labels':len(labels),'references':len(refs),'citations':len(cites),'bibliography':len(bibs),
+    from studio_references import catalog
+    entries=catalog(sources,files,labels,refs,cites,bibs)
+    return {'catalog':entries,'files':files,'labels':len(labels),'references':len(refs),'citations':len(cites),'bibliography':len(bibs),
             'issues':sorted(issues,key=lambda x:(x['file'],x['line']))[:300],
             'note':'仅追踪主文档可静态解析的包含关系；条件编译、复杂宏和外部文献数据库以编译结果为准。'}
 

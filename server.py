@@ -26,7 +26,7 @@ sys.dont_write_bytecode = True
 if sys.version_info < (3, 10):
     raise RuntimeError('LaTeX Studio requires Python 3.10 or later. Use the desktop launcher to select a compatible runtime.')
 
-from studio_storage import storage_for, project_id, detect_main
+from studio_storage import storage_for, project_id, detect_main, read_json
 from studio_packages import packages_for
 from studio_engine import engine_environment
 from studio_ai import assistant_for
@@ -215,7 +215,7 @@ def compile_job(main, offline, job):
             raise RuntimeError('缺少便携式 Tectonic 编译器')
         env = engine_environment(storage().runtime, storage().data,storage().tex_cache)
         source_hashes={p.relative_to(ROOT).as_posix():sha(p) for p in project_files(ROOT)}
-        args = [str(engine), '--keep-logs', '--synctex', '--untrusted', '--outdir', str(work)]
+        args = [str(engine), '--keep-logs', '--keep-intermediates', '--synctex', '--untrusted', '--outdir', str(work)]
         if offline:
             args.append('--only-cached')
         args.append(main)
@@ -584,7 +584,7 @@ class Handler(BaseHTTPRequestHandler):
                     return self.send(glossary_save(storage().data, project_id(ROOT), data))
             if route == '/api/review/selftest':
                 return self.send(selftest())
-            if route == '/api/review/references':
+            if route in {'/api/review/references','/api/review/impact','/api/review/consistency'}:
                 with LOCK:
                     sources = {}
                     total = 0
@@ -592,7 +592,7 @@ class Handler(BaseHTTPRequestHandler):
                     if not isinstance(overlays,dict):
                         raise ValueError('编辑器内容格式无效')
                     for item in tree():
-                        if Path(item['path']).suffix.lower() in {'.tex','.bib'}:
+                        if Path(item['path']).suffix.lower() in ({'.tex','.bib'} if route=='/api/review/references' else {'.tex','.bib','.py','.csv','.json'}):
                             if item['size'] > 2_000_000 or len(sources)>=300:
                                 raise ValueError('文本文件超过检查上限，请拆分项目')
                             content = overlays.get(item['path'])
@@ -604,7 +604,21 @@ class Handler(BaseHTTPRequestHandler):
                             if total>8_000_000:
                                 raise ValueError('项目文本超过 800 万字符，无法一次检查')
                             sources[item['path']] = content
-                    return self.send({**analyze_references(sources, STATE['main']), 'projectId':project_id(ROOT)})
+                    if route=='/api/review/references':result=analyze_references(sources,STATE['main'])
+                    elif route=='/api/review/consistency':
+                        from studio_document_tools import check_consistency
+                        result=check_consistency(sources,data.get('bindings'),data.get('dataFiles'),STATE['main'])
+                    else:
+                        from studio_document_tools import impact
+                        meta=read_json(storage().data/'previews'/(project_id(ROOT)+'.synctex.json'),{})
+                        fresh=current_preview().is_file() and meta.get('pdfVersion')==str(current_preview().stat().st_mtime_ns)
+                        if fresh:
+                            fresh=all(project_path(name).is_file() and sha(project_path(name))==value for name,value in meta.get('sources',{}).items())
+                        if fresh:
+                            fresh=all(content.replace('\r\n','\n')==project_path(name).read_text('utf-8-sig',errors='replace') for name,content in sources.items())
+                        result=impact(sources,STATE['main'],data.get('path',STATE['main']),data.get('startLine',1),data.get('endLine',1),meta if fresh else {},[f['path'] for f in tree()])
+                        result['mappingFresh']=bool(fresh)
+                    return self.send({**result,'projectId':project_id(ROOT)})
             if route == '/api/review/layout':
                 with LOCK:
                     preview = current_preview()

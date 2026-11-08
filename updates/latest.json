@@ -1,7 +1,7 @@
 {
-  "version": "1.1.1",
-  "file": "distribution/LaTeX-Studio-1.1.1-win64-Setup.exe",
-  "size": 74191618,
-  "sha256": "6997c8d8055db2bb2bc844a8810fc2526a77b44adc42569544f99632acbc55cb",
-  "notes": "修复页码栏宽度拖动、按住拖动连选与横向溢出，支持记忆宽度和边缘自动滚动。"
+  "version": "1.2.0",
+  "file": "distribution/LaTeX-Studio-1.2.0-win64-Setup.exe",
+  "size": 74218782,
+  "sha256": "b6216d8d182e01d8b93157b99e66f70b5e31625ad6b8dbf5b248c7e3d408f123",
+  "notes": "1.2.0：引用条目展开与精确双向定位、改动影响地图、数据一致性检查、编辑器 AI 面板拖动、安装路径选择。"
 }

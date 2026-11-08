@@ -61,7 +61,9 @@ def save_source_map(root,main,pdf,synctex,data,source_hashes=None):
                 y=int(match[3])*unit/65536
                 if 45<y<sizes[current-1]-40:pages[current][inputs[int(match[1])]][int(match[2])]+=1
     sources=source_hashes or {str(p.relative_to(root).as_posix()):sha(p) for p in project_files(root)}
-    mapping={'main':main,'pdfVersion':str(pdf.stat().st_mtime_ns),'totalPages':len(sizes),'sources':sources,
+    from studio_navigation import read_aux_anchors
+    anchors=read_aux_anchors(synctex.parent)
+    mapping={'anchors':anchors,'main':main,'pdfVersion':str(pdf.stat().st_mtime_ns),'totalPages':len(sizes),'sources':sources,
              'pages':{str(p):{name:dict(counts) for name,counts in files.items()} for p,files in pages.items()}}
     write_json(target.with_suffix('.json'),mapping)
 

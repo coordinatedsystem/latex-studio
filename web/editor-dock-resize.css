@@ -1,0 +1,15 @@
+.workspace.with-log.dock-sized,.workspace.with-log.editor-ai-open.dock-sized,.workspace.with-log.editor-ai-open.editor-ai-expanded.dock-sized{grid-template-rows:minmax(0,1fr) var(--studio-dock-height)}
+.editor-dock-resize{display:flex;align-items:center;justify-content:center;flex-shrink:0;touch-action:none;user-select:none;background:#f5f7fa;outline-offset:-2px;z-index:3;cursor:col-resize}
+.editor-dock-resize>span{display:block;width:3px;height:32px;border-radius:3px;background:#a9b4c3;pointer-events:none}
+.editor-dock-resize:hover,.editor-dock-resize:focus-visible,.editor-dock-resize.dragging{background:#e4edff;outline-color:#0f62fe}
+.editor-dock-resize:hover>span,.editor-dock-resize:focus-visible>span,.editor-dock-resize.dragging>span{background:#0f62fe}
+#editorDockHeightResize{height:9px;width:100%;cursor:row-resize;border-bottom:1px solid #cbd3de}
+#editorDockHeightResize>span{width:46px;height:3px}
+#editorAiPanel.editor-ai-panel{grid-template-columns:var(--studio-ai-compose-width,260px) 9px minmax(0,1fr)}
+.editor-ai-compose{border-right:0;min-width:0}
+#editorAiColumnResize{border-left:1px solid #cbd3de;border-right:1px solid #cbd3de}
+.editor-ai-effect-pages{grid-template-columns:minmax(0,var(--studio-effect-left,1fr)) 9px minmax(0,var(--studio-effect-right,1fr));gap:0}
+.editor-ai-effect-pages>figure:first-child{padding-right:8px}.editor-ai-effect-pages>figure:last-child{padding-left:8px}
+#editorAiCompareResize{align-self:stretch;min-height:90px;border-left:1px solid #cbd3de;border-right:1px solid #cbd3de;position:sticky;top:0}
+.editor-dock-dragging,.editor-dock-dragging *{user-select:none!important}.editor-dock-row-dragging,.editor-dock-row-dragging *{cursor:row-resize!important}.editor-dock-column-dragging,.editor-dock-column-dragging *{cursor:col-resize!important}
+@media(prefers-reduced-motion:no-preference){.editor-dock-resize,.editor-dock-resize>span{transition:background .12s ease}}

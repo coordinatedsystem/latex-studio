@@ -4,7 +4,7 @@ import gzip, math, re
 from studio_storage import project_id, read_json
 from studio_page_edits import project_files,sha
 
-def locate(root,data,pdf,query):
+def sync_context(root,data,pdf):
     root=Path(root).resolve();pdf=Path(pdf)
     base=Path(data)/'previews'/(project_id(root)+'.synctex.gz')
     meta=read_json(base.with_suffix('.json'),{})
@@ -33,15 +33,9 @@ def locate(root,data,pdf,query):
                 x=(int(m[3])*factor+ox/65536*72/72.27)/sizes[page-1][0]
                 y=(int(m[4])*factor+oy/65536*72/72.27)/sizes[page-1][1]
                 if 0<=x<=1 and 0<=y<=1:points.append({'path':inputs[int(m[1])],'line':int(m[2]),'page':page,'x':x,'y':y})
-    if query.get('direction')=='forward':
-        path=str(query.get('path',''));line=int(query.get('line',1))
-        choices=[p for p in points if p['path']==path]
-        if not choices:raise ValueError('此文件没有可用的 PDF 定位信息')
-        point=min(choices,key=lambda p:(abs(p['line']-line),p['page'],p['y']))
-    else:
-        page=int(query.get('page',0));x=float(query.get('x',0));y=float(query.get('y',0))
-        if not math.isfinite(x+y) or not 0<=x<=1 or not 0<=y<=1:raise ValueError('页面坐标无效')
-        choices=[p for p in points if p['page']==page]
-        if not choices:raise ValueError('这一页没有可定位的源码')
-        point=min(choices,key=lambda p:(p['y']-y)**2*4+(p['x']-x)**2)
-    return {**point,'approximate':True,'projectId':project_id(root)}
+    return root,meta,sizes,points
+
+def locate(root,data,pdf,query):
+    from studio_navigation import locate_precise
+    root,meta,sizes,points=sync_context(root,data,pdf)
+    return locate_precise(root,pdf,meta,sizes,points,query)
