@@ -507,6 +507,8 @@ class Handler(BaseHTTPRequestHandler):
                         on_progress=lambda result:manager.attach_batch(ident,page_root,result)
                         data={**data,'text':'审阅所选 PDF 页面','provider':'deepseek','parts':parts,
                               'allParts':[{k:p[k] for k in ('part','page','path')} for p in session['parts']],
+                              'documentContext':session.get('documentContext',{}),'wholeDocument':session.get('wholeDocument',False),
+                              'globalReview':(session.get('result') or {}).get('globalReview') if data.get('retryPages') is not None else None,
                               'seedPageStates':(session.get('result') or {}).get('pageStates',[]) if data.get('retryPages') is not None else []}
                         bound_context=ident
                     elif data.get('task') == 'page_edit':
@@ -555,7 +557,7 @@ class Handler(BaseHTTPRequestHandler):
             if route == '/api/ai/pages-prepare':
                 with LOCK:
                     require_idle()
-                    return self.send(pages_for(storage()).prepare_pages(ROOT,STATE['main'],current_preview(),data.get('pages')))
+                    return self.send(pages_for(storage()).prepare_pages(ROOT,STATE['main'],current_preview(),data.get('pages'),bool(data.get('wholeDocument'))))
             if route == '/api/ai/source-prepare':
                 with LOCK:
                     require_idle()

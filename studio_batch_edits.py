@@ -5,7 +5,7 @@ import shutil
 import threading
 import uuid
 
-MAX_PAGES=12
+MAX_PAGES=80
 
 def original_encoding(text,original):
     if b'\r\n' in original:text=text.replace('\n','\r\n')
@@ -29,16 +29,25 @@ def atomic_write_set(changes):
         for _,temp in staged:temp.unlink(missing_ok=True)
 
 class BatchEditsMixin:
-    def prepare_pages(self,root,main,pdf,pages):
+    def prepare_pages(self,root,main,pdf,pages,whole_document=False):
         if not isinstance(pages,list) or not pages or len(pages)>MAX_PAGES or any(isinstance(p,bool) or not isinstance(p,int) for p in pages):
-            raise ValueError('请选择 1～12 个有效 PDF 页面')
+            raise ValueError('请选择 1～80 个有效 PDF 页面')
         pages=sorted(set(pages));parts=[];internal=[]
+        from studio_document_context import reading_context
+        document_context,adjacent=reading_context(root,main,pdf,pages,whole_document)
         self._batch_preparing=True
         try:
             for page in pages:
-                context=self.prepare(root,main,pdf,page)
-                with self.lock:
-                    part=dict(self._session(context['id'],root));parts.append(part);internal.append((part['id'],Path(part['folder'])))
+                try:
+                    context=self.prepare(root,main,pdf,page)
+                    with self.lock:
+                        part=dict(self._session(context['id'],root));parts.append(part);internal.append((part['id'],Path(part['folder'])))
+                except ValueError as error:
+                    if '这一页无法可靠定位' not in str(error):raise
+                    from studio_storage import read_json,project_id
+                    metadata=read_json(self.storage.data/'previews'/(project_id(root)+'.synctex.json'),{})
+                    target=Path(root)/main;full=target.read_text('utf-8-sig')
+                    parts.append(dict(page=page,path=main,startLine=1,endLine=1,start=0,end=0,source='',full=full,originalBytes=target.read_bytes(),sourceHashes=metadata['sources'],candidates=[main],readOnly=True))
         except Exception:
             for ident,folder in internal:
                 self.sessions.pop(ident,None)
@@ -56,7 +65,9 @@ class BatchEditsMixin:
                 files[part['path']]={'full':part['full'],'originalBytes':part['originalBytes']}
             if len(combined)>300000:raise ValueError('所选页面的源码过长，请分批处理')
             slim=[{k:p[k] for k in ('part','page','path','start','end','startLine','endLine','source','displayStart')} for p in parts]
-            s.update(source=combined,parts=slim,files=files,pages=pages,appliedHashes={})
+            for item,part in zip(slim,parts):item['readOnly']=bool(part.get('readOnly'))
+            if not whole_document:document_context['selectedSource']=combined[:18000]
+            s.update(source=combined,parts=slim,files=files,pages=pages,appliedHashes={},documentContext=document_context,adjacent=adjacent,wholeDocument=bool(whole_document))
             for ident,folder in internal:
                 self.sessions.pop(ident,None)
                 if folder.resolve().is_relative_to(Path(s['folder']).parent.resolve()) and not folder.is_symlink():shutil.rmtree(folder,ignore_errors=True)
@@ -77,7 +88,7 @@ class BatchEditsMixin:
                 if retry_pages is not None and p['page'] not in retry_pages:continue
                 image=page_image(original,self.storage.data,s['projectId'],p['page'],original.stat().st_mtime_ns)
                 images.append({'page':p['page'],'image':'data:image/png;base64,'+base64.b64encode(image.read_bytes()).decode()})
-                parts.append({k:p[k] for k in ('part','page','path','source','displayStart')})
+                parts.append({**{k:p[k] for k in ('part','page','path','source','displayStart')},'readOnly':p.get('readOnly',False),'adjacent':{str(n):s.get('adjacent',{}).get(str(n),'') for n in (p['page']-1,p['page']+1)}})
             return parts,images
 
     def attach_batch(self,ident,root,result):
@@ -89,7 +100,9 @@ class BatchEditsMixin:
                 try:
                     index=edit['part']
                     if isinstance(index,bool) or not isinstance(index,int) or not 0<=index<len(s['parts']):raise ValueError('无效的页面来源')
-                    part=s['parts'][index];relative=edit['start']-part['displayStart']
+                    part=s['parts'][index]
+                    if part.get('readOnly'):raise ValueError('本页仅可审阅，不能自动修改')
+                    relative=edit['start']-part['displayStart']
                     line=part['source'][:relative].count('\n')+1
                     checked=validate_edits(part['source'],[{'before':edit['before'],'after':edit['after'],'reason':edit['reason'],'line':line}])[0][0]
                     if checked['start']!=relative:raise ValueError('修改超出已选页面的源码范围')

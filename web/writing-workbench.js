@@ -105,8 +105,8 @@ async function writingChoosePage(page){
  if(writing.busy)return;const n=Math.max(1,Math.min(Number(page)||1,writing.doc?.totalPages||1));
  if(writing.view==='comparison'){if(writing.preview?.pages?.some(p=>p.page===n)){writingRenderComparison(n);return;}writingSetView('content');}writingShowPage(n);
 }
-function writingParsePages(value,total){const pages=new Set();for(const token of value.replace(/，/g,',').split(',').filter(t=>t.trim())){const match=/^\s*(\d+)(?:\s*-\s*(\d+))?\s*$/.exec(token);if(!match)throw new Error('请输入页次，例如 1,3-5');const a=Number(match[1]),b=Number(match[2]||a);if(a<1||b<a||b>total||b-a>=12)throw new Error('页次超出范围或一次选择超过 12 页');for(let p=a;p<=b;p++)pages.add(p);if(pages.size>12)throw new Error('一次最多选择 12 页');}if(!pages.size)throw new Error('请至少选择一页');return [...pages].sort((a,b)=>a-b);}
-function writingTogglePage(page){if(writing.busy)return;if(writing.selectionMode==='single'){const wasSelected=writing.pages.has(page);writingReset();writing.pages=wasSelected?new Set():new Set([page]);writingShowPage(page);return;}if(!writing.pages.has(page)&&writing.pages.size>=12)throw new Error('一次最多选择 12 页');writingReset();writing.pages.has(page)?writing.pages.delete(page):writing.pages.add(page);writingShowPage(page);}
+function writingParsePages(value,total){const pages=new Set();for(const token of value.replace(/，/g,',').split(',').filter(t=>t.trim())){const match=/^\s*(\d+)(?:\s*-\s*(\d+))?\s*$/.exec(token);if(!match)throw new Error('请输入页次，例如 1,3-5');const a=Number(match[1]),b=Number(match[2]||a);if(a<1||b<a||b>total||b-a>=80)throw new Error('页次超出范围或一次选择超过 80 页');for(let p=a;p<=b;p++)pages.add(p);if(pages.size>80)throw new Error('一次最多选择 80 页');}if(!pages.size)throw new Error('请至少选择一页');return [...pages].sort((a,b)=>a-b);}
+function writingTogglePage(page){if(writing.busy)return;if(writing.selectionMode==='single'){const wasSelected=writing.pages.has(page);writingReset();writing.pages=wasSelected?new Set():new Set([page]);writingShowPage(page);return;}if(!writing.pages.has(page)&&writing.pages.size>=80)throw new Error('一次最多选择 80 页');writingReset();writing.pages.has(page)?writing.pages.delete(page):writing.pages.add(page);writingShowPage(page);}
 async function writingSetMode(mode){
  if(writing.busy)return;
  if(writing.mode!==mode){writingReset();writing.mode=mode;}
@@ -154,7 +154,7 @@ async function writingStart(){
   if($('#writingTask').value==='check'&&writing.mode==='pdf'){await writingLocalScan();return;}
   const mode=writing.mode,project=state.projectId,task=$('#writingTask').value;
   writingStatus('正在关联所选内容…');let context;
-  if(mode==='pdf'){const pages=[...writing.pages].sort((a,b)=>a-b);context=pages.length>1?await api('ai/pages-prepare',{pages}):await api('ai/page-prepare',{page:pages[0]});}
+  if(mode==='pdf'){const pages=[...writing.pages].sort((a,b)=>a-b);context=pages.length>1||writingContinuous.fullDocument?await api('ai/pages-prepare',{pages,wholeDocument:writingContinuous.fullDocument}):await api('ai/page-prepare',{page:pages[0]});}
   else{
    const live=models.get(writing.file)?.model;
    if(!writing.range||live&&writing.full!==live.getValue().replace(/\r\n/g,'\n'))throw new Error('源码已变化，请重新读取并编译。');
@@ -164,8 +164,8 @@ async function writingStart(){
   reviewGuard(project);writingDisposeDiff();writing.context=context;writing.result=null;writing.preview=null;writing.selected.clear();writing.applied=false;writing.stale=false;
   $('#writingResults').innerHTML='<div class="writing-result-empty"><span class="spinner"></span><strong>正在生成建议</strong></div>';writingStep(1);writingSetView('content');
   const instruction=$('#writingInstruction').value;
-  const purpose={format:'优化页面排版、段落间距和层次。',correct:'检查并修复文字与源码错误。',polish:'改善学术表达，精简冗余。',translate:'将所选正文翻译为'+$('#writingLanguage option:checked').textContent+'，保留公式与引用。'}[task]||'';
-  const payload=mode==='pdf'?{task:context.mode==='pages'?'pages_edit':'page_edit',provider:'deepseek',pageContext:context.id,instruction:(purpose+'\n'+instruction).slice(0,1600)}:{task,provider:$('#writingProvider').value,sourceContext:context.id,instruction,target:$('#writingLanguage').value};
+  const purpose={audit:'综合检查结构、前后衔接、术语一致性、表达、引用与页面排版，修正明确问题，保留事实与数值。',format:'优化页面排版、段落间距和层次。',correct:'检查并修复文字与源码错误。',polish:'改善学术表达，精简冗余。',translate:'将所选正文翻译为'+$('#writingLanguage option:checked').textContent+'，保留公式与引用。'}[task]||'';
+  const payload=mode==='pdf'?{task:context.mode==='pages'?'pages_edit':'page_edit',provider:'deepseek',pageContext:context.id,instruction:(purpose+'\n'+instruction).slice(0,1600)}:{task:task==='audit'?'correct':task,provider:$('#writingProvider').value,sourceContext:context.id,instruction:task==='audit'?(purpose+'\n'+instruction).slice(0,1600):instruction,target:$('#writingLanguage').value};
   writing.context.request={task:payload.task,provider:payload.provider,instruction:payload.instruction,target:payload.target};
   writing.job=await api('ai/start',payload);if(typeof writingRemember==='function')writingRemember();
   if(writing.stopRequested&&writing.job.running)await api('ai/cancel',{id:writing.job.id});

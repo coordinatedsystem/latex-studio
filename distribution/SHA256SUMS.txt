@@ -1,1 +1,1 @@
-a83d05d1487c0979bff2ec45436caeadb9e1b7af67b8e909e3c5e3ababc74001  LaTeX-Studio-1.0.1-win64-Setup.exe
+1493378e28af31f920438038e45c304c5a78efd9e2554ef8d3290938c38e1205  LaTeX-Studio-1.1.0-win64-Setup.exe

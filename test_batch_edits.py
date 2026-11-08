@@ -15,7 +15,7 @@ from studio_page_edits import PageEdits,save_source_map,sha
 
 class BatchTests(unittest.TestCase):
     def setUp(self):
-        self.temp=tempfile.TemporaryDirectory();base=Path(self.temp.name);self.root=base/'project';self.root.mkdir();self.data=base/'data';self.data.mkdir()
+        self.temp=tempfile.TemporaryDirectory();base=Path(self.temp.name).resolve();self.root=base/'project';self.root.mkdir();self.data=base/'data';self.data.mkdir()
         (self.root/'main.tex').write_text('\\documentclass{article}\n\\begin{document}\\input{a}\\newpage\\input{b}\\end{document}\n',encoding='utf-8')
         self.originals={'a.tex':b'\xef\xbb\xbf% First\r\n\\small\r\nAn eror.\r\n','b.tex':b'% Second\n\\small\nAn eror.\n'}
         for name,content in self.originals.items():(self.root/name).write_bytes(content)
@@ -35,7 +35,7 @@ class BatchTests(unittest.TestCase):
 
     def preview(self):
         from PIL import Image
-        base=Path(self.temp.name);before=base/'before.png';after=base/'after.png';Image.new('RGB',(10,10),'white').save(before);Image.new('RGB',(10,10),'black').save(after)
+        base=Path(self.temp.name).resolve();before=base/'before.png';after=base/'after.png';Image.new('RGB',(10,10),'white').save(before);Image.new('RGB',(10,10),'black').save(after)
         def compile_fake(command,**kwargs):
             output=Path(command[command.index('--outdir')+1]);shutil.copyfile(self.pdf,output/'main.pdf');return SimpleNamespace(returncode=0,stdout='',stderr='')
         with patch('studio_page_edits.subprocess.run',side_effect=compile_fake),patch('studio_page_edits.engine_environment',return_value={}),patch('studio_page_edits.page_image',side_effect=lambda p,*args:before if Path(p).name=='before.pdf' else after):

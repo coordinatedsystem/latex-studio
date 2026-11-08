@@ -1,0 +1,50 @@
+/* White document surfaces, small blue controls, semantic red/green change marks. */
+#aiPage .ai-container{max-width:2200px}
+#writingWorkbench .writing-grid{grid-template-columns:minmax(320px,1fr) 12px minmax(290px,var(--review-width,32%));gap:0;height:calc(100dvh - 205px)}
+.continuous-resizer{display:flex;align-items:center;justify-content:center;cursor:col-resize;touch-action:none;border-radius:6px;outline-offset:-2px;transition:background .15s}
+.continuous-resizer span{height:40px;width:3px;border-radius:3px;background:#c1cbd7;transition:height .15s,background .15s}
+.continuous-resizer:hover,.continuous-resizer:focus-visible{background:#edf3ff}.continuous-resizer:hover span{height:65px;background:#0f62fe}
+.writing-resizing,.writing-resizing *{cursor:col-resize!important;user-select:none!important}
+#writingWorkbench .writing-pdf-scroll{display:block;position:relative;padding:20px 25px;background:#f5f6f8;scrollbar-gutter:stable;overscroll-behavior:contain}
+#writingPdfSheet{display:none!important}.continuous-stack{max-width:930px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+.continuous-page{border:1px solid #cfd6df;border-radius:7px;background:#fff;box-shadow:0 2px 7px #12213a09;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.continuous-page.selected{border-color:#0f62fe;box-shadow:0 0 0 1px #0f62fe20}.continuous-page.current>header{box-shadow:inset 3px 0 #0f62fe}
+.continuous-page>header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #e1e5ea;background:#fff;font-size:14px}
+.continuous-page>header label{display:flex;gap:9px;align-items:center;cursor:pointer;min-height:26px}.continuous-page input{width:17px;height:17px;accent-color:#0f62fe}
+.continuous-page>header button{border:0;border-radius:5px;background:#f0f4fa;color:#111;padding:3px 9px;font-size:17px}
+.continuous-paper{position:relative;aspect-ratio:1 / 1.41421356;background:white;overflow:hidden;min-width:0}
+.continuous-paper img{display:block;width:100%;height:auto;min-height:100%;object-fit:contain;vertical-align:top;background:#fff}
+.continuous-paper img.loading{background:linear-gradient(110deg,#fff 25%,#f2f4f7 45%,#fff 65%);background-size:200% 100%;animation:writing-skeleton 1.8s linear infinite}
+.continuous-retry{display:none}.continuous-paper.load-error .continuous-retry{display:block;position:absolute;left:50%;top:30%;transform:translateX(-50%);border:1px solid #c5d0e1;border-radius:6px;padding:10px;background:#fff;color:#111}
+#writingWorkbench .writing-thumbnails{width:65px;flex-basis:65px;min-width:65px;padding:9px 8px;display:flex;flex-direction:column;gap:7px;overflow:auto}
+#writingWorkbench .writing-thumbnails button{min-height:37px;width:43px;flex-shrink:0;display:grid;place-items:center;border:1px solid #ccd5e2;border-radius:7px;background:#fff;color:#111;font-size:14px}
+#writingWorkbench .writing-thumbnails button.current{box-shadow:inset 3px 0 #0f62fe}#writingWorkbench .writing-thumbnails button.selected{border-color:#0f62fe!important;background:#eaf2ff!important}
+#writingWorkbench .writing-content-toolbar{gap:7px;flex-wrap:wrap}#writingWorkbench .writing-page-selection input{max-width:200px}
+#writingWorkbench .writing-content-toolbar button:focus-visible,#writingWorkbench button:focus-visible,.continuous-resizer:focus-visible{outline:2px solid #0f62fe;outline-offset:2px}
+#writingWorkbench button{transition:background .15s,border-color .15s,box-shadow .15s,transform .12s}#writingWorkbench button:not(:disabled):active{transform:translateY(1px)}
+#writingWorkbench button:disabled{cursor:default}#writingWorkbench .writing-options select,#writingWorkbench #writingInstruction{transition:border-color .15s,box-shadow .15s}
+#writingWorkbench #writingInstruction:focus{border-color:#0f62fe;box-shadow:0 0 0 3px #0f62fe12}
+#writingWholeReview.active{border-color:#0f62fe;background:#edf3ff;color:#111}
+#writingCompareImages{display:none!important}#writingCompareScroll{position:relative;display:block!important;overflow:auto;padding:17px;overscroll-behavior:contain;scrollbar-gutter:stable}
+#writingCompareStack{--compare-ratio:50%;display:flex;flex-direction:column;gap:24px;min-width:0}
+#writingCompareStack.zoomed{min-width:var(--comparison-min,1660px)}
+.continuous-pair{min-width:0;border:1px solid #cbd4df;border-radius:8px;overflow:hidden;background:#fff;transition:box-shadow .2s}
+.continuous-pair>header{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid #d5dce5;font-size:14px;color:#111}.continuous-pair>header strong{font-weight:550}
+.continuous-pair-pages{display:grid;grid-template-columns:minmax(0,var(--compare-ratio)) minmax(0,1fr);align-items:start;gap:0}
+.continuous-pair figure{margin:0;min-width:0}.continuous-pair figure:first-child{border-right:2px solid #c3cdd9}
+.continuous-pair figcaption{padding:8px 10px;font-size:14px;color:#111;display:flex;justify-content:space-between;gap:8px;border-bottom:2px solid #c82c39;flex-wrap:wrap}
+.continuous-pair figcaption span{font-size:12px}.continuous-pair .continuous-after figcaption{border-color:#16823a}
+.continuous-mark{position:absolute;box-sizing:border-box;border:2px solid #c82c39;background:#dc263409;pointer-events:none;min-height:5px;z-index:2}
+.continuous-after .continuous-mark{border-color:#16823a;background:#16823a09}
+.continuous-ratio{display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap}.continuous-ratio input{width:90px;accent-color:#0f62fe}
+#writingWorkbench .writing-compare-toolbar{flex-wrap:wrap;gap:8px;background:#fff;flex-shrink:0}.continuous-pair.focus-flash{box-shadow:0 0 0 3px #0f62fe45}
+#writingWorkbench .writing-canvas,#writingWorkbench .writing-review{position:relative}
+#writingWorkbench.is-processing .writing-review{border-color:#6597ec;box-shadow:0 0 0 1px #0f62fe15}
+#writingWorkbench.is-processing .writing-panel-symbol{background:linear-gradient(110deg,#dbeaff,#e7f6e9,#ece4ff,#dbeaff);background-size:250% 100%;animation:writing-skeleton 3s linear infinite}
+#writingWorkbench.is-processing #writingPrimaryAction:before{content:'';display:inline-block;vertical-align:-2px;width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;margin-right:8px;animation:writing-spin .8s linear infinite}
+#writingWorkbench .writing-results{scrollbar-gutter:stable}#writingWorkbench .writing-summary{white-space:pre-line}
+.continuous-confirm{color:#111;font-size:15px}.continuous-confirm>strong{font-size:20px;font-weight:550}.continuous-confirm p{line-height:1.8}.continuous-confirm button{width:100%}
+@keyframes writing-skeleton{to{background-position:-200% 0}}@keyframes writing-spin{to{transform:rotate(360deg)}}
+@media(max-width:950px){#aiPage .ai-container{padding:15px 14px}#writingWorkbench .writing-grid{grid-template-columns:minmax(280px,1fr) 10px minmax(275px,var(--review-width,32%))}.continuous-pair figcaption span{display:none}#writingWorkbench .writing-pdf-scroll{padding:15px}#writingWorkbench .writing-canvas-head{flex-wrap:wrap}}
+@media(max-width:740px){#writingWorkbench .writing-grid{display:flex;flex-direction:column;height:auto;max-height:none;gap:12px}#writingWorkbench .writing-canvas{height:70dvh;min-height:450px}#writingPaneResize{display:none}#writingWorkbench .writing-review{max-height:80dvh;min-height:450px}#aiPage .ai-heading{flex-wrap:wrap;gap:10px}.continuous-ratio{display:none}}
+@media(prefers-reduced-motion:reduce){#writingWorkbench *{animation:none!important;scroll-behavior:auto!important;transition:none!important}}

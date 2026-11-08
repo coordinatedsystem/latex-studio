@@ -116,6 +116,7 @@ class PageEdits(BatchEditsMixin):
             if isinstance(view.get('comparePage'),int):value['comparePage']=view['comparePage']
             settings=view.get('settings')
             if isinstance(settings,dict):value['settings']={k:str(settings[k])[:1600 if k=='instruction' else 40] for k in ('task','provider','language','instruction') if k in settings}
+            if isinstance(settings,dict):value['settings']['wholeDocument']=bool(settings.get('wholeDocument'))
             s['view']={**s.get('view',{}),**value};self.remember(s);return {'ok':True}
 
     def describe_task(self,ident,root,pdf,live=None):
@@ -251,7 +252,7 @@ class PageEdits(BatchEditsMixin):
         with self.lock:
             s=self._session(ident,root)
             return {**{k:s[k] for k in ('id','projectId','page','path','startLine','endLine','start','end','source','pdfVersion','candidates','mode')},
-                    'pages':s.get('pages',[s['page']]),'result':s.get('result'),'preview':dict(s['preview']),'applied':bool(s['appliedHash']),'undone':s.get('undone',False)}
+                    'wholeDocument':s.get('wholeDocument',False),'readOnlyPages':[p['page'] for p in s.get('parts',[]) if p.get('readOnly')],'pages':s.get('pages',[s['page']]),'result':s.get('result'),'preview':dict(s['preview']),'applied':bool(s['appliedHash']),'undone':s.get('undone',False)}
 
     def preview(self,ident,root,pdf,selected):
         with self.lock:

@@ -1,7 +1,7 @@
 {
-  "version": "1.0.1",
-  "file": "distribution/LaTeX-Studio-1.0.1-win64-Setup.exe",
-  "size": 74181522,
-  "sha256": "a83d05d1487c0979bff2ec45436caeadb9e1b7af67b8e909e3c5e3ababc74001",
-  "notes": "修复首次大提交导致版本检查失败的问题；增加检查进度反馈。"
+  "version": "1.1.0",
+  "file": "distribution/LaTeX-Studio-1.1.0-win64-Setup.exe",
+  "size": 74190006,
+  "sha256": "1493378e28af31f920438038e45c304c5a78efd9e2554ef8d3290938c38e1205",
+  "notes": "连续多页阅读与对照、Shift 连选和全文审核、红绿改动标记、可调分栏及更流畅的交互。"
 }

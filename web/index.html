@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="/editor-ai.css">
   <link rel="stylesheet" href="/interface-polish.css">
   <link rel="stylesheet" href="/neutral-theme.css"><link rel="stylesheet" href="/workflow-tools.css"><link rel="stylesheet" href="/hub-design.css"><link rel="stylesheet" href="/writing-design.css"><link rel="stylesheet" href="/updates.css">
+  <link rel="stylesheet" href="/writing-continuous.css">
 </head>
 <body data-view="home">
   <header class="app-header">
@@ -89,7 +90,7 @@
 
             <div class="writing-request">
               <div class="writing-request-heading"><h2>任务设置</h2><div><button id="writingRequestToggle" class="text-button" hidden>调整要求</button><button id="writingHistoryToggle" class="text-button" aria-expanded="false">最近任务</button><button id="writingRestore" hidden>恢复任务</button></div></div>
-              <div class="writing-options"><label>任务<select id="writingTask"><option value="format">排版优化</option><option value="correct">检查纠错</option><option value="polish">学术润色</option><option value="translate">翻译</option><option value="check">本地检查</option><option value="dictionary">词典查询</option><option value="workflow">审稿工作流</option></select></label><label>服务<select id="writingProvider"><option value="deepseek">DeepSeek</option><option value="local">本地</option><option value="youdao">有道</option></select></label><label id="writingLanguageField" hidden>译为<select id="writingLanguage"><option value="en">英语</option><option value="zh-CHS">简体中文</option><option value="ja">日语</option><option value="de">德语</option><option value="fr">法语</option></select></label></div>
+              <div class="writing-options"><label>任务<select id="writingTask"><option value="format">排版优化</option><option value="audit">综合审核</option><option value="correct">检查纠错</option><option value="polish">学术润色</option><option value="translate">翻译</option><option value="check">本地检查</option><option value="dictionary">词典查询</option><option value="workflow">审稿工作流</option></select></label><label>服务<select id="writingProvider"><option value="deepseek">DeepSeek</option><option value="local">本地</option><option value="youdao">有道</option></select></label><label id="writingLanguageField" hidden>译为<select id="writingLanguage"><option value="en">英语</option><option value="zh-CHS">简体中文</option><option value="ja">日语</option><option value="de">德语</option><option value="fr">法语</option></select></label></div>
               <textarea id="writingInstruction" rows="2" maxlength="1600" aria-label="修改要求" placeholder="例如：调整间距，修复重复词，保持公式与数据。"></textarea>
               <div class="writing-request-actions" hidden inert><button id="writingSuggest" class="primary">✦ 获取修改建议</button><button id="writingStop" class="secondary" hidden>停止</button></div>
             </div>
@@ -219,4 +220,5 @@
   </aside>
   <script src="/vendor/monaco/min/vs/nls/lang/zh-cn.js"></script><script src="/vendor/monaco/min/vs/loader.js"></script><script src="/app.js"></script><script src="/workspace-hub.js"></script><script src="/ai-studio.js"></script><script src="/review-studio.js"></script><script src="/page-edits.js"></script><script src="/writing-workbench.js"></script><script src="/editor-tools.js"></script><script src="/writing-friendly.js"></script><script src="/writing-focus.js"></script><script src="/editor-ai.js"></script>
   <script src="/interface-polish.js"></script><script src="/workflow-tools.js"></script><script src="/hub-design.js"></script><script src="/writing-design.js"></script><script src="/updates.js"></script>
+  <script src="/writing-continuous.js"></script>
 </body></html>
