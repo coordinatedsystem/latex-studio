@@ -66,6 +66,8 @@ WizardInstalling=正在安装
 InstallingLabel=正在安装 [name]，请稍候。
 [Tasks]
 Name: "desktopicon"; Description: "创建桌面快捷方式"; Flags: checkedonce
+[InstallDelete]
+Type: files; Name: "{app}\app\studio_usage.py"
 [Files]
 Source: "{#Payload}\app\*"; DestDir: "{app}\app"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#Payload}\python\*"; DestDir: "{app}\python"; Flags: ignoreversion recursesubdirs createallsubdirs

@@ -62,7 +62,6 @@ function editorAiRender(){
  $('#editorAiUndo').hidden=!j?.applied;$('#editorAiUndo').disabled=!j?.canUndo||dirty||busy;
  $('#editorAiContinue').hidden=!j?.canContinue;$('#editorAiContinue').disabled=dirty||!!state?.running||busy;
  $('#editorAiPackages').hidden=!j?.manual;$('#editorAiStage').textContent=j?(dirty&&changed?'有未保存改动 · 请先保存':j.stale?'源码已变化 · 请重新分析':j.undone?'已撤销':j.applied?'已应用':j.stage||j.error||'准备就绪'):'准备就绪';
- $('#editorAiUsage').textContent=j?'本批请求 '+j.requestCount+'/'+j.limit+(j.previousRequests?' · 累计 '+(j.previousRequests+j.requestCount)+' 次':'')+(j.tokens?' · '+j.tokens+' tokens':''):'';
  $('#editorAiBadge').hidden=!j;$('#editorAiBadge').textContent=busy?'进行中':j?.undone?'已撤销':j?.applied?'已应用':j?.verified&&changed?'待确认':j?.error?'未完成':'完成';
  const paths=j?.changedPaths||[],current=$('#editorAiFiles').value;$('#editorAiFiles').hidden=paths.length<2;
  if(JSON.stringify(paths)!==$('#editorAiFiles').dataset.paths){$('#editorAiFiles').innerHTML=paths.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');if(paths.includes(current))$('#editorAiFiles').value=current;$('#editorAiFiles').dataset.paths=JSON.stringify(paths);}

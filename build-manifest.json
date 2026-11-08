@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "files": [
     {
       "path": "Launch.vbs",
@@ -8,13 +8,13 @@
     },
     {
       "path": "app/bootstrap_install.py",
-      "size": 884,
-      "sha256": "e7b7f23bdcd951c4700e2e843f521808405e4ace796bdc39dc5bfa39166c7dd1"
+      "size": 989,
+      "sha256": "d05683fd9de2a6cd9c5cc9b89c4ddf4ddb1349dc3637fab3552de0de3a05e7cb"
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 2834,
-      "sha256": "9171d94984c7c4f695be129a064abfe3abc798394e1772eab772e5be11e83fd0"
+      "size": 3587,
+      "sha256": "e8b8612bc7826bc8b3aaedec65734dbc4b1903f8ffaa9fb2e728d6e072607a40"
     },
     {
       "path": "app/launch.ps1",
@@ -28,18 +28,18 @@
     },
     {
       "path": "app/README.md",
-      "size": 6257,
-      "sha256": "478dd649ffc063f4114b8459bb0f3eaa1e2f62948345edfa600ed590a2c947c6"
+      "size": 6274,
+      "sha256": "90bff90400c5d0ceb0084a3b4b362827281c6b69bc9f00e718bcd66d80731809"
     },
     {
       "path": "app/server.py",
-      "size": 47887,
-      "sha256": "c0cd33f42b2ec86df39b4774f8632b1afa636da94cfefbac6f2d133e08f01eb5"
+      "size": 46919,
+      "sha256": "f9f75ce2fe5664f9385305644dd31d0fef0db4e1e905242ade5bbd5bb64ef750"
     },
     {
       "path": "app/studio_ai.py",
-      "size": 41161,
-      "sha256": "0048029512f6620671819e27dbe76de36da3946e1441c314ed0bd642fa0896c5"
+      "size": 40501,
+      "sha256": "449f33017e7761374a9a9231d8d1f9c45d790e02636e2cf225cfc4f7d7c3f8a9"
     },
     {
       "path": "app/studio_batch_edits.py",
@@ -63,8 +63,8 @@
     },
     {
       "path": "app/studio_editor_ai.py",
-      "size": 26455,
-      "sha256": "c8d0c612e04181c2bd4f0572e9e76a2838b4c4cfdae0354765d51762e972e379"
+      "size": 26462,
+      "sha256": "89582d08e3699d8d200b49abc69cf38496a9cbe4280626859427437f720b99ff"
     },
     {
       "path": "app/studio_engine.py",
@@ -127,11 +127,6 @@
       "sha256": "6baf63e133b43eae27acbedc4faf605100e7de274c3304dfa21728ff7b0b9f21"
     },
     {
-      "path": "app/studio_usage.py",
-      "size": 2286,
-      "sha256": "7e82c2b2fb33aa6b45991c3e20445c2bbe0c9ed85449cdf7905795242600569e"
-    },
-    {
       "path": "app/studio_version.py",
       "size": 257,
       "sha256": "82b6e43a1c5fd9b0ad5b5275620dadc8c7f787a09fe4e2c3e59168953edf2773"
@@ -144,7 +139,7 @@
     {
       "path": "app/version.json",
       "size": 128,
-      "sha256": "0a6b73927cf0600f77eb8dfcbfb0b27f71fc01acea0712f3d4f391ec202ea01b"
+      "sha256": "f5734921f4bf472e3b4a3e3e8333864f173260548fd6bd460cc5fb6404514915"
     },
     {
       "path": "app/assets/studio.ico",
@@ -3018,8 +3013,8 @@
     },
     {
       "path": "app/web/ai-studio.js",
-      "size": 19022,
-      "sha256": "1aa52a13601d64e369d336c0fb721a56773dd61506f9b3df50e655f1fae02a0a"
+      "size": 18778,
+      "sha256": "a5ef0c383f2d450e8ed7d26f8c9c3a5e7ecbaed137f0325018e6e3d4a730ceb8"
     },
     {
       "path": "app/web/app.js",
@@ -3033,8 +3028,8 @@
     },
     {
       "path": "app/web/document-analysis.js",
-      "size": 11154,
-      "sha256": "57a512d1963688b7e91ba6ea6fd592041dd72aa905bab6ff2002e15dadc8fe75"
+      "size": 11118,
+      "sha256": "92041cff0d85445420aa9d1dd2d23707dd767537674388d1f5c78346dfbf940c"
     },
     {
       "path": "app/web/editor-ai.css",
@@ -3043,8 +3038,8 @@
     },
     {
       "path": "app/web/editor-ai.js",
-      "size": 17974,
-      "sha256": "637b755944b8cbb0ee8efe2e1a1491bd9103c683b09e41b4f7c01dc44e2ec956"
+      "size": 17646,
+      "sha256": "eed29292e7b0fde0db43e1439815f922de247923858156cd6c1fc40d577d3a1a"
     },
     {
       "path": "app/web/editor-dock-resize.css",
@@ -3078,8 +3073,8 @@
     },
     {
       "path": "app/web/index.html",
-      "size": 49733,
-      "sha256": "0d8c16ecbc17d346644f511d75d8b092c0713569b6754b5d86d9892e93e5b5db"
+      "size": 49307,
+      "sha256": "3e6fdaeb694799e53495652241b3af40583dda57db0d07ef6b73f5692e3d2cf2"
     },
     {
       "path": "app/web/interface-polish.css",
@@ -3118,8 +3113,8 @@
     },
     {
       "path": "app/web/reference-navigation.js",
-      "size": 16973,
-      "sha256": "c7d7ba1900a4a46eca5ea16d796c2e1062c06a701d0d2738d01c823d8ced3cf8"
+      "size": 16955,
+      "sha256": "685f0e35a4a6077bae18e74cc3d7690c9886037471ad9e94467506766438b564"
     },
     {
       "path": "app/web/reference-tools.css",
@@ -3133,8 +3128,8 @@
     },
     {
       "path": "app/web/review-studio.js",
-      "size": 21117,
-      "sha256": "398c3daabd74742c12bc251f3173b42761ace9cb440a35d18ccc7f5b46f183d7"
+      "size": 20915,
+      "sha256": "d269ca3d20c80f0c95ecff5e4fe819d0bac61bb76ff5d5c86efef07eada59f71"
     },
     {
       "path": "app/web/style.css",
@@ -3157,19 +3152,29 @@
       "sha256": "b21632419cc582378e02aec2ad749f3ce6e3bd9f036c1161ae483a7ad6c0179f"
     },
     {
+      "path": "app/web/usability.css",
+      "size": 3553,
+      "sha256": "5835f2caa5c7322129069a9a46ca38dbdd8f37abfcd8d4f8db22b757870df982"
+    },
+    {
+      "path": "app/web/usability.js",
+      "size": 10419,
+      "sha256": "819c2685db9540741c88e671e658f7067b1c9f1f3795f78c3476562eab92f117"
+    },
+    {
       "path": "app/web/viewer-bridge.js",
       "size": 505,
       "sha256": "0919af83dfc0df3ab407f91439ea11cd3331c880b7928c4feefa0c2d444ceb8c"
     },
     {
       "path": "app/web/workflow-tools.css",
-      "size": 1662,
-      "sha256": "da5ca7c9ccc14d4aee4791d7eff9adbb563b0e3fd2245ac084d0f67106e080c0"
+      "size": 1186,
+      "sha256": "3ac2386d9aadf8276f24d130bb50d559a987b21c10d3453cb4e77830ff81ad01"
     },
     {
       "path": "app/web/workflow-tools.js",
-      "size": 9735,
-      "sha256": "7dcdc15818588462df50e90dfdad4c30e3e3faaea6e2836749b7e7d8b89f9e41"
+      "size": 6805,
+      "sha256": "f34eceb87ddd669c799f7c597f83e4cb71995ba6c1193b376a5b1b0733621522"
     },
     {
       "path": "app/web/workspace-hub.js",
@@ -3183,8 +3188,8 @@
     },
     {
       "path": "app/web/writing-continuous.js",
-      "size": 28400,
-      "sha256": "0a9ec8d117ba38531edb1d9de3618c6a0d951cf276cb4d16529f83db3cf93cd1"
+      "size": 27913,
+      "sha256": "ff48c4792c41c8f2ccd4716381bb037a666184a15b26401d38a45e72fe638142"
     },
     {
       "path": "app/web/writing-design.css",
@@ -3208,8 +3213,8 @@
     },
     {
       "path": "app/web/writing-friendly.js",
-      "size": 25749,
-      "sha256": "39e53a335d12b22bca86f817b7677ce30a7c4f78cc15623b7a2d2a014dae55b4"
+      "size": 25366,
+      "sha256": "86646320c26e28572964acdfd80fe1ee86aa50b4acf0e528523457acb0847597"
     },
     {
       "path": "app/web/writing-workbench.css",

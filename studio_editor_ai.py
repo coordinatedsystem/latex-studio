@@ -113,10 +113,17 @@ class EditorAI:
         with self.lock:
             if not ident:
                 base=self.storage.data/'editor-ai'/project_id(root)
-                files=sorted(base.glob('*/session.json'),key=lambda p:p.stat().st_mtime_ns,reverse=True)
+                cleared=read_json(base/'cleared.json',{}).get('before',0)
+                files=sorted((p for p in base.glob('*/session.json') if p.stat().st_mtime>cleared),key=lambda p:p.stat().st_mtime_ns,reverse=True)
                 if not files:return {'id':None,'running':False}
                 ident=files[0].parent.name
             return self.public(self.session(root,ident))
+
+    def clear(self,root):
+        with self.lock:
+            if self.busy():raise ValueError('请先停止或等待当前任务，再清空对话')
+            write_json(self.storage.data/'editor-ai'/project_id(root)/'cleared.json',{'before':time.time()})
+            return {'ok':True}
 
     def fresh(self,s):
         root=Path(s['root']);actual={p.relative_to(root).as_posix():sha(p) for p in project_files(root)}
@@ -210,7 +217,7 @@ class EditorAI:
         def dispatch():
             self.checkpoint();self.update(s,requestCount=s['requestCount']+1)
             return studio_ai.request_json('https://api.deepseek.com/chat/completions',payload,{'Authorization':'Bearer '+config['key']})
-        response=studio_ai.usage_for(self.storage.data).request(dispatch)
+        response=dispatch()
         self.checkpoint()
         try:
             choice=response['choices'][0]

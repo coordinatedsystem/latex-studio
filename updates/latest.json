@@ -1,7 +1,7 @@
 {
-  "version": "1.2.0",
-  "file": "distribution/LaTeX-Studio-1.2.0-win64-Setup.exe",
-  "size": 74218782,
-  "sha256": "b6216d8d182e01d8b93157b99e66f70b5e31625ad6b8dbf5b248c7e3d408f123",
-  "notes": "1.2.0：引用条目展开与精确双向定位、改动影响地图、数据一致性检查、编辑器 AI 面板拖动、安装路径选择。"
+  "version": "1.3.0",
+  "file": "distribution/LaTeX-Studio-1.3.0-win64-Setup.exe",
+  "size": 74222343,
+  "sha256": "8eac1fc7c76692e4d512fc1ed7d46e3ed0a0c71b6e409b208918352f1a335e41",
+  "notes": "1.3.0：临时定位高亮、可移动文档工具、功能说明、编辑器 AI 清空与布局优化，移除用量和本地限额。"
 }

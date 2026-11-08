@@ -12,6 +12,8 @@ def configure(home):
     value.setdefault('defaultProject',str(home/'projects/我的文档'))
     write_json(app/'installation.json',value)
     for name in ['data','projects','cache']: (home/name).mkdir(exist_ok=True)
+    legacy=home/'data/ai-usage.json'
+    if legacy.is_file() and not legacy.is_symlink():legacy.unlink()
     print('Installation configured')
 
 if __name__=='__main__':

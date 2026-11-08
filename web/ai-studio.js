@@ -89,7 +89,7 @@ function aiExpected(indices){const value=aiCompose(indices);return aiContext.ful
 function aiRenderResults(){
  $('#aiResults').hidden=false;$('#aiEmpty').hidden=true;$('#aiCopy').disabled=false;$('#aiSummary').textContent=aiResult.summary+((aiResult.rejected||[]).length?' 已拦截 '+aiResult.rejected.length+' 项无法安全应用的修改：'+aiResult.rejected.map(r=>r.reason).join('；'):'');
  if($('#aiTermsUsed')){$('#aiTermsUsed').hidden=!aiResult.terminology?.length;$('#aiTermsUsed').textContent=aiResult.terminology?.length?'已附术语：'+aiResult.terminology.map(t=>t.source+' → '+t.target).join('；'):'';}
- $('#aiResultMeta').textContent=aiNames[aiJob.task]+' · '+aiJob.duration+'s'+(aiResult.usage?.total_tokens?' · '+aiResult.usage.total_tokens.toLocaleString()+' tokens':'');
+ $('#aiResultMeta').textContent=aiNames[aiJob.task]+' · '+aiJob.duration+'s';
  $('#aiStepResults').innerHTML=(aiResult.steps||[]).map((s,i)=>`<p><span>${i+1}</span>${esc(s)}</p>`).join('');
  const issues=aiResult.issues||[];
  $('#aiIssues').innerHTML=issues.length?`<details open><summary>${issues.length} 条检查提示</summary>${issues.map((issue,i)=>`<button type="button" data-ai-issue="${i}" class="ai-issue ${esc(issue.severity||'warning')}"><span>${issue.severity==='error'?'!':'·'}</span><div><strong>第 ${Number(issue.line)+aiContext.line-1} 行</strong><p>${esc(issue.message)}</p></div><span>↗</span></button>`).join('')}</details>`:'';

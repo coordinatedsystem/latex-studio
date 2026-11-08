@@ -24,6 +24,16 @@ class EditorAITests(unittest.TestCase):
         folder=self.ai.folder(s['root'],s['id'],True);folder.mkdir(parents=True,exist_ok=True);(folder/'candidate.pdf').write_bytes(b'%PDF-1.5 mock')
         return True,'passed'
     def start(self,mode='repair',**extra):return self.ai.start(self.root,'main.tex',dict(mode=mode,path='main.tex',**extra))
+    def test_clear_hides_conversation_after_restart_without_changing_source_or_deleting_job(self):
+        with patch('studio_ai.request_json',return_value=self.response('textbff','textbf')):
+            job=self.start('explain');self.wait()
+        self.ai.clear(self.root)
+        restored=EditorAI(self.storage);self.assertIsNone(restored.status(self.root)['id'])
+        self.assertEqual(restored.status(self.root,job['id'])['id'],job['id'])
+        self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+    def test_clear_refuses_running_work(self):
+        self.ai.sessions['busy']={'running':True}
+        with self.assertRaisesRegex(ValueError,'停止'):self.ai.clear(self.root)
     def test_two_rounds_verified_review_apply_and_exact_undo(self):
         with patch.object(self.ai,'compile_copy',side_effect=self.compiler),patch('studio_ai.request_json',side_effect=[self.response('textbff','textbf'),self.response('empph','emph')]) as call:
             self.start();j=self.wait()

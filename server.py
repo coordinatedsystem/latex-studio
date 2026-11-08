@@ -30,7 +30,6 @@ from studio_storage import storage_for, project_id, detect_main, read_json
 from studio_packages import packages_for
 from studio_engine import engine_environment
 from studio_ai import assistant_for
-from studio_usage import usage_for
 from studio_sync import locate
 from studio_editor_ai import editor_ai_for
 from studio_page_edits import pages_for, project_files, save_source_map, sha
@@ -399,8 +398,6 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send({'path': name, 'content': data.decode('utf-8-sig'), 'revision': digest(data)})
             if path == '/api/updates':
                 return self.send(updates_for(storage()).status())
-            if path == '/api/ai/usage':
-                return self.send(usage_for(storage().data).status())
             if path == '/api/sync-point':
                 with LOCK:return self.send(locate(ROOT,storage().data,current_preview(),{k:v[0] for k,v in query.items()}))
             if path == '/api/history':
@@ -470,8 +467,6 @@ class Handler(BaseHTTPRequestHandler):
                     require_idle()
                     result=updates_for(storage()).install();self.send(result)
                     threading.Thread(target=self.server.shutdown,daemon=True).start();return
-            if route == '/api/ai/usage':
-                return self.send(usage_for(storage().data).configure(data.get('limit')))
             if route == '/api/history-checkpoint':
                 with LOCK:
                     p=project_path(data.get('path',''))
@@ -483,6 +478,8 @@ class Handler(BaseHTTPRequestHandler):
                     require_idle()
                     main=data.get('main') or STATE['main'];project_path(main)
                     return self.send(editor_ai_for(storage()).start(ROOT,main,data,STATE['lines'] if STATE['success'] is False else []))
+            if route == '/api/editor-ai/clear':
+                with LOCK:return self.send(editor_ai_for(storage()).clear(ROOT))
             if route == '/api/editor-ai/cancel':
                 with LOCK:return self.send(editor_ai_for(storage()).cancel(ROOT,data.get('id')))
             if route in {'/api/editor-ai/apply','/api/editor-ai/undo'}:

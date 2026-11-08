@@ -23,7 +23,7 @@ function writingUXControls(){
  const label={generate:needs?'保存并获取建议':'获取建议',retry:'重试未完成页',preview:'预览所选修改',apply:'确认应用',rebase:'重新关联并预览',continue:'继续修改'}[kind];
  $('#writingPrimaryAction').textContent=writing.preparing?writing.prepareStage||'准备中…':writing.job?.running?'获取建议中…':writing.preview?.running?'编译预览中…':label;
  $('#writingPrimaryAction').disabled=locked||(kind==='generate'&&!hasScope)||(['preview','rebase','apply'].includes(kind)&&!writing.selected.size);
- $('#writingCost').textContent=writing.job?.running&&writing.job.provider!=='local'?'本次已发出 '+(writing.job.requestCount||0)+' 次请求':count?(writing.mode==='pdf'?(kind==='retry'?count:writing.pages.size)+' 页 · ':'')+count+' 次请求':'本地操作 · 不调用 AI';
+ $('#writingCost').textContent=writing.mode==='pdf'?writing.pages.size+' 页':'源码选区';
  let hint='';if(!hasScope&&kind==='generate')hint=writing.mode==='pdf'?'请至少选择一页':'请先选择源码范围';else if(['preview','rebase','apply'].includes(kind)&&!writing.selected.size)hint='请至少勾选一条建议';else if(writing.stale)hint='原建议已保留，重新关联后才能应用';else if(kind==='preview')hint='先查看真实 PDF 效果';else if(kind==='apply')hint='预览已通过，确认后写回源码';else if(kind==='continue')hint='已应用 '+(writing.appliedCount||writing.selected.size)+' 处修改';
  $('#writingActionHint').textContent=hint;$('#writingActionHint').hidden=!hint||writing.busy;
  $('#writingCancelTask').hidden=!(writing.preparing||writing.job?.running);$('#writingCancelTask').disabled=!!writing.stopRequested;
@@ -31,11 +31,10 @@ function writingUXControls(){
  $('#writingUndo').disabled=locked||writing.canUndo===false;$('#writingUndo').title=writing.canUndo===false?'源码后来已修改，可从文件历史恢复':'';
  const pending=[...new Set([...(writing.result?.failedPages||[]),...(writing.result?.pendingPages||[])])];
  $('#writingRetryPages').hidden=writing.busy||!pending.length||writing.context?.mode!=='pages'||writing.result?.rebased||writing.applied;
- $('#writingRetryPages').textContent='重试 '+pending.length+' 页 · '+pending.length+' 次请求';
+ $('#writingRetryPages').textContent='重试 '+pending.length+' 页';
  $$('[data-writing-retry-page]').forEach(b=>b.disabled=locked||writing.stale||writing.applied);
  const progress=writing.job?.progress;$('#writingProgress').hidden=!writing.job?.running||!progress;
  if(progress){$('#writingProgressBar').max=progress.total||1;$('#writingProgressBar').value=progress.processed||0;$('#writingProgressText').textContent='已处理 '+progress.processed+'/'+progress.total+' 页'+(progress.currentPage?' · 当前第 '+progress.currentPage+' 页':'')+(progress.failed?' · '+progress.failed+' 页待重试':'');}
- const tokens=writing.result?.usage?.total_tokens||0;$('#writingUsage').hidden=!tokens;$('#writingUsage').textContent='累计 '+tokens.toLocaleString()+' tokens';
  $('#writingSelectCurrentPage').disabled=locked||writing.pages.has(writing.page);$('#writingSelectCurrentPage').textContent=writing.pages.has(writing.page)?'此页已选':'选此页';
  if(writing.view==='comparison'&&writing.preview?.success){$('#writingContentState').textContent=writing.stale?'历史预览 · 请重新关联':'当前候选预览';if(writing.stale&&!$('#writingCompareMeta').textContent.startsWith('历史预览'))$('#writingCompareMeta').textContent='历史预览 · '+$('#writingCompareMeta').textContent;}
 }

@@ -27,4 +27,4 @@ jobs:
             Write-Host "::error title=Python test details::$message"
             exit $result
           }
-      - run: node --test test_workflow_ui.js test_editor_dock.js
+      - run: node --test test_workflow_ui.js test_editor_ai_ui.js test_editor_dock.js test_usability.js

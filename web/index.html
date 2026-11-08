@@ -19,6 +19,7 @@
 <link rel="stylesheet" href="/reference-tools.css">
 <link rel="stylesheet" href="/document-analysis.css">
 <link rel="stylesheet" href="/editor-dock-resize.css">
+<link rel="stylesheet" href="/usability.css">
 </head>
 <body data-view="home">
   <header class="app-header">
@@ -51,7 +52,7 @@
   </main>
   <main id="aiPage" class="hub-page">
     <div class="ai-container">
-      <div class="ai-heading"><h1>写作与版面</h1><div class="ai-heading-actions"><button id="workflowWritingUsage" type="button" class="secondary">AI 用量</button><button id="writingCompile" class="secondary">保存并编译</button><button data-action="aiSettings" class="secondary"><span data-icon="settings"></span>服务配置<span id="aiConnection" class="ai-dot"></span></button><button id="aiStartTop" class="primary" hidden>开始检查 ↗</button></div></div>
+      <div class="ai-heading"><h1>写作与版面</h1><div class="ai-heading-actions"><button id="writingCompile" class="secondary">保存并编译</button><button data-action="aiSettings" class="secondary"><span data-icon="settings"></span>服务配置<span id="aiConnection" class="ai-dot"></span></button><button id="aiStartTop" class="primary" hidden>开始检查 ↗</button></div></div>
       
       <section id="writingWorkbench" aria-label="写作与版面工作区">
         <ol class="writing-steps" aria-label="修改流程">
@@ -101,7 +102,7 @@
             <div id="writingProgress" class="writing-task-progress" hidden><progress id="writingProgressBar" max="1" value="0"></progress><span id="writingProgressText" role="status"></span></div><div id="writingResults" class="writing-results" aria-live="polite"><div class="writing-result-empty"><span>✦</span><strong>先选择内容，再获取建议</strong></div></div>
             <div id="writingError" class="writing-error" role="alert" hidden><span id="writingErrorText"></span><button id="writingRecovery" class="text-button" hidden></button><details id="writingErrorDetails" hidden><summary>查看详情</summary><pre id="writingErrorLog"></pre></details></div>
             <div id="writingStatus" class="writing-status" role="status">准备就绪</div>
-            <div class="writing-next-action"><div class="writing-action-meta"><span id="writingActionHint" role="status"></span><span id="writingCost" class="writing-chip"></span></div><button id="writingPrimaryAction" class="primary">获取建议</button><button id="writingCancelTask" class="secondary" hidden>停止</button><button id="writingRetryPages" class="secondary" hidden></button><button id="writingRegenerate" class="text-button" hidden>重新获取建议</button><span id="writingUsage" hidden></span></div><div class="writing-review-actions"><button id="writingPreview" class="secondary" disabled>预览所选修改</button><button id="writingApply" class="primary" disabled>确认应用</button><button id="writingContinue" class="primary" hidden>继续修改</button><button id="writingUndo" class="text-button" hidden>撤销本次应用</button></div>
+            <div class="writing-next-action"><div class="writing-action-meta"><span id="writingActionHint" role="status"></span><span id="writingCost" class="writing-chip"></span></div><button id="writingPrimaryAction" class="primary">获取建议</button><button id="writingCancelTask" class="secondary" hidden>停止</button><button id="writingRetryPages" class="secondary" hidden></button><button id="writingRegenerate" class="text-button" hidden>重新获取建议</button></div><div class="writing-review-actions"><button id="writingPreview" class="secondary" disabled>预览所选修改</button><button id="writingApply" class="primary" disabled>确认应用</button><button id="writingContinue" class="primary" hidden>继续修改</button><button id="writingUndo" class="text-button" hidden>撤销本次应用</button></div>
           </aside>
         </div>
       </section>
@@ -165,7 +166,7 @@
     </div>
   </main>
   <nav class="main-toolbar" aria-label="主工具栏">
-    <div class="toolbar-group"><button data-action="sidebar" class="icon-button" title="显示/隐藏侧栏" aria-label="显示/隐藏侧栏" data-icon="sidebar"></button><span class="toolbar-separator"></span><button data-action="save" title="保存当前文件 Ctrl+S"><span data-icon="save"></span>保存</button><button data-action="undo" class="icon-button" title="撤销 Ctrl+Z" aria-label="撤销" data-icon="undo"></button><button data-action="redo" class="icon-button" title="重做 Ctrl+Y" aria-label="重做" data-icon="redo"></button><span class="toolbar-separator"></span><button data-action="find" title="查找 Ctrl+F"><span data-icon="search"></span>查找</button><button data-action="replace" title="替换 Ctrl+H"><span data-icon="replace"></span>替换</button><span class="toolbar-separator"></span><details id="editorToolsMenu" class="editor-tools-menu"><summary>文档工具 <span>⌄</span></summary><div><button type="button" id="workflowHistory">版本历史</button><button type="button" id="workflowLocate">定位到 PDF</button><button type="button" id="workflowUsage">AI 用量</button><button data-editor-tool="references">引用检查</button><button data-editor-tool="glossary">术语表</button><button data-editor-tool="tests">服务测试</button></div></details></div>
+    <div class="toolbar-group"><button data-action="sidebar" class="icon-button" title="显示/隐藏侧栏" aria-label="显示/隐藏侧栏" data-icon="sidebar"></button><span class="toolbar-separator"></span><button data-action="save" title="保存当前文件 Ctrl+S"><span data-icon="save"></span>保存</button><button data-action="undo" class="icon-button" title="撤销 Ctrl+Z" aria-label="撤销" data-icon="undo"></button><button data-action="redo" class="icon-button" title="重做 Ctrl+Y" aria-label="重做" data-icon="redo"></button><span class="toolbar-separator"></span><button data-action="find" title="查找 Ctrl+F"><span data-icon="search"></span>查找</button><button data-action="replace" title="替换 Ctrl+H"><span data-icon="replace"></span>替换</button><span class="toolbar-separator"></span><details id="editorToolsMenu" class="editor-tools-menu"><summary>文档工具 <span>⌄</span></summary><div><button type="button" id="workflowHistory">版本历史</button><button type="button" id="workflowLocate">定位到 PDF</button><button data-editor-tool="references">引用检查</button><button data-editor-tool="glossary">术语表</button><button data-editor-tool="tests">服务测试</button></div></details></div>
     <div class="toolbar-group compile-group"><label class="auto-compile"><input id="autoCompile" type="checkbox"><span>自动编译</span></label><div class="compile-split"><button id="compileButton" data-action="compile" class="primary" title="保存全部并编译 Ctrl+Enter"><span data-icon="play"></span><span id="compileLabel">编译预览</span><kbd>Ctrl ↵</kbd></button><button data-action="cancel" id="cancelButton" class="primary stop" title="停止编译" aria-label="停止编译" disabled data-icon="stop"></button></div></div>
   </nav>
   <main class="workspace" id="workspace">
@@ -196,11 +197,11 @@
           <div class="editor-ai-mode"><select id="editorAiMode" aria-label="编辑器 AI 任务"><option value="repair">修复报错</option><option value="edit">修改代码</option><option value="explain">解释代码</option></select><button id="editorAiCapture" class="text-button">选取代码</button></div>
           <button id="editorAiContext" class="editor-ai-context" title="定位到目标代码">未选择代码</button>
           <textarea id="editorAiPrompt" rows="3" maxlength="2000" aria-label="编辑器 AI 要求" placeholder="补充说明（可选）"></textarea>
-          <div id="workflowEstimate" class="workflow-estimate" role="status"></div><div class="editor-ai-send"><label id="editorAiLimitLabel">最多 <select id="editorAiLimit" aria-label="修复轮数"><option value="1" selected>1 轮</option><option value="2">2 轮</option><option value="3">3 轮</option></select></label><button id="editorAiStart" class="primary">修复并验证</button><button id="editorAiStop" class="secondary" hidden>停止</button></div>
+          <div class="editor-ai-send"><label id="editorAiLimitLabel">自动修复 <select id="editorAiLimit" aria-label="修复轮数"><option value="1" selected>1 轮</option><option value="2">2 轮</option><option value="3">3 轮</option></select></label><button id="editorAiStart" class="primary">修复并验证</button><button id="editorAiStop" class="secondary" hidden>停止</button></div>
           <div class="editor-ai-links"><button id="editorAiConfig" class="text-button">服务配置</button><button id="editorAiFull" class="text-button">完整助手 ↗</button></div>
         </div>
         <section class="editor-ai-review" aria-label="AI 建议与代码差异">
-          <ol id="workflowRepairSteps" class="workflow-repair-steps" aria-label="修复流程" hidden></ol><div class="editor-ai-review-head"><div><button id="editorAiSummaryTab" class="log-switch active">说明</button><button id="editorAiDiffTab" class="log-switch" disabled>代码差异</button><button id="editorAiEffectTab" class="log-switch" disabled>修改效果</button></div><select id="editorAiFiles" aria-label="查看修改文件" hidden></select><span id="editorAiUsage"></span><button id="editorAiExpand" class="tiny" title="展开面板" aria-label="展开面板" aria-expanded="false">↕</button></div>
+          <ol id="workflowRepairSteps" class="workflow-repair-steps" aria-label="修复流程" hidden></ol><div class="editor-ai-review-head"><div><button id="editorAiSummaryTab" class="log-switch active">说明</button><button id="editorAiDiffTab" class="log-switch" disabled>代码差异</button><button id="editorAiEffectTab" class="log-switch" disabled>修改效果</button></div><select id="editorAiFiles" aria-label="查看修改文件" hidden></select><button id="editorAiExpand" class="tiny" title="展开面板" aria-label="展开面板" aria-expanded="false">↕</button></div>
           <div id="editorAiResponse" class="editor-ai-response" aria-live="polite"><div class="editor-ai-empty"><strong>✦ 在代码旁完成修改</strong><span>选择代码，或从编译报错开始。</span></div></div>
           <div id="editorAiDiff" class="editor-ai-diff" hidden></div>
           <div id="editorAiEffect" class="editor-ai-effect" hidden><div class="editor-ai-effect-toolbar"><label>第 <select id="editorAiEffectPage" aria-label="修改效果页次"><option value="1">1</option></select> 页</label><span id="editorAiEffectState" role="status"></span><button id="editorAiOpenPdf" class="text-button">右侧打开 PDF ↗</button></div><div class="editor-ai-effect-pages"><figure><figcaption id="editorAiBeforeLabel">上次成功编译</figcaption><img id="editorAiBefore" alt="修改前的 PDF 页面" hidden><p id="editorAiBeforeEmpty">原稿尚无可用 PDF</p></figure><figure><figcaption id="editorAiAfterLabel">候选修改 · 未应用</figcaption><img id="editorAiAfter" alt="修改后的 PDF 页面"></figure></div></div>
@@ -227,4 +228,5 @@
 <script src="/reference-navigation.js"></script>
 <script src="/document-analysis.js"></script>
 <script src="/editor-dock-resize.js"></script>
+<script src="/usability.js"></script>
 </body></html>
