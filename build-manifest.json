@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.1.1",
   "files": [
     {
       "path": "Launch.vbs",
@@ -13,8 +13,8 @@
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 1442,
-      "sha256": "f9a4e18427ed73d8b7fa437d3cfc22f282613c131cb239983043ad6b323038d5"
+      "size": 1830,
+      "sha256": "5870acc9a121d2f30dcc73c54ca783eb503e46d5ae20bf81c46d063183a6da62"
     },
     {
       "path": "app/launch.ps1",
@@ -29,7 +29,7 @@
     {
       "path": "app/README.md",
       "size": 5280,
-      "sha256": "84965435143408db85c6f120c0e2a0894afad4bdd288454f70df1fec6c640c43"
+      "sha256": "93a5513f53ec88407502a37d66a7dab40e72945f926b6cfeff42cc5745655da1"
     },
     {
       "path": "app/server.py",
@@ -129,7 +129,7 @@
     {
       "path": "app/version.json",
       "size": 128,
-      "sha256": "d1709ba362cad90335578119f744cafcd07cc91d08f1c6fc868e3f25b55b3d6e"
+      "sha256": "dbc231bc1dca13326b79665e88688e01e3426ab27291001b669ca76e8d3d4300"
     },
     {
       "path": "app/assets/studio.ico",
@@ -3133,13 +3133,13 @@
     },
     {
       "path": "app/web/writing-continuous.css",
-      "size": 7575,
-      "sha256": "897c933c088a69e8fe8fc183b2ee278a3d824b62305a2d68d02af819efb53678"
+      "size": 8065,
+      "sha256": "e0ffb35252322473b61f070fe703f68458565b8a83810d2b5d50d1b3f5c7baed"
     },
     {
       "path": "app/web/writing-continuous.js",
-      "size": 23508,
-      "sha256": "8083e4f02ff26820eb5c76ec7682a02ba5244ca8e078f8e59de4a34f4f180730"
+      "size": 28400,
+      "sha256": "0a9ec8d117ba38531edb1d9de3618c6a0d951cf276cb4d16529f83db3cf93cd1"
     },
     {
       "path": "app/web/writing-design.css",

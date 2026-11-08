@@ -16,8 +16,10 @@
 .continuous-paper img{display:block;width:100%;height:auto;min-height:100%;object-fit:contain;vertical-align:top;background:#fff}
 .continuous-paper img.loading{background:linear-gradient(110deg,#fff 25%,#f2f4f7 45%,#fff 65%);background-size:200% 100%;animation:writing-skeleton 1.8s linear infinite}
 .continuous-retry{display:none}.continuous-paper.load-error .continuous-retry{display:block;position:absolute;left:50%;top:30%;transform:translateX(-50%);border:1px solid #c5d0e1;border-radius:6px;padding:10px;background:#fff;color:#111}
-#writingWorkbench .writing-thumbnails{width:65px;flex-basis:65px;min-width:65px;padding:9px 8px;display:flex;flex-direction:column;gap:7px;overflow:auto}
-#writingWorkbench .writing-thumbnails button{min-height:37px;width:43px;flex-shrink:0;display:grid;place-items:center;border:1px solid #ccd5e2;border-radius:7px;background:#fff;color:#111;font-size:14px}
+#writingWorkbench .writing-thumbnails{width:var(--page-rail-width,86px);flex:0 0 var(--page-rail-width,86px);min-width:76px;padding:9px 8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(40px,1fr));align-content:start;gap:8px;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;touch-action:pan-y;user-select:none}
+#writingWorkbench .writing-thumbnails button{min-height:40px;width:100%;min-width:0;display:grid;place-items:center;border:1px solid #ccd5e2;border-radius:7px;background:#fff;color:#111;font-size:14px;touch-action:none}
+#writingPageRailResize{flex:0 0 10px;border-radius:0;border-right:1px solid #d1d9e4;background:#f8faff}#writingPageRailResize span{height:48px;background:#9aabc1}
+#writingWorkbench .writing-thumbnails.selecting-pages,#writingWorkbench .writing-thumbnails.selecting-pages button{cursor:crosshair}
 #writingWorkbench .writing-thumbnails button.current{box-shadow:inset 3px 0 #0f62fe}#writingWorkbench .writing-thumbnails button.selected{border-color:#0f62fe!important;background:#eaf2ff!important}
 #writingWorkbench .writing-content-toolbar{gap:7px;flex-wrap:wrap}#writingWorkbench .writing-page-selection input{max-width:200px}
 #writingWorkbench .writing-content-toolbar button:focus-visible,#writingWorkbench button:focus-visible,.continuous-resizer:focus-visible{outline:2px solid #0f62fe;outline-offset:2px}

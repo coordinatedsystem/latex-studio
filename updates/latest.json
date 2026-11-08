@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0",
-  "file": "distribution/LaTeX-Studio-1.1.0-win64-Setup.exe",
-  "size": 74190006,
-  "sha256": "1493378e28af31f920438038e45c304c5a78efd9e2554ef8d3290938c38e1205",
-  "notes": "连续多页阅读与对照、Shift 连选和全文审核、红绿改动标记、可调分栏及更流畅的交互。"
+  "version": "1.1.1",
+  "file": "distribution/LaTeX-Studio-1.1.1-win64-Setup.exe",
+  "size": 74191618,
+  "sha256": "6997c8d8055db2bb2bc844a8810fc2526a77b44adc42569544f99632acbc55cb",
+  "notes": "修复页码栏宽度拖动、按住拖动连选与横向溢出，支持记忆宽度和边缘自动滚动。"
 }
