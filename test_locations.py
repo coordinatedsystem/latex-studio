@@ -8,7 +8,7 @@ from studio_engine import engine_environment
 
 class LocationTests(unittest.TestCase):
  def setUp(self):
-  self.temp=tempfile.TemporaryDirectory();self.base=Path(self.temp.name);self.app=self.base/'app';self.app.mkdir();self.store=StudioStorage(self.app)
+  self.temp=tempfile.TemporaryDirectory();self.base=Path(self.temp.name).resolve();self.app=self.base/'app';self.app.mkdir();self.store=StudioStorage(self.app)
   self.old=self.store.projects/'Example';self.old.mkdir(parents=True);(self.old/'main.tex').write_bytes(b'original source\r\n');self.store.default_root=self.old;self.store.record_project(self.old,'main.tex')
   self.store.tex_cache.mkdir(parents=True);(self.store.tex_cache/'resource').write_bytes(b'cached-resource')
   self.projects=self.base/'new-projects';self.cache=self.base/'new-cache'
