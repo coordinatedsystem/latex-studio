@@ -116,8 +116,9 @@ def check_consistency(sources,bindings=None,data_files=None,main=None):
                 pattern=(r'(?<![A-Za-z_])' if term.isascii() else '')+re.escape(term)+(r'(?![A-Za-z_])' if term.isascii() else '')
                 for match in re.finditer(pattern,visible,re.I):
                     tail=visible[match.end():match.end()+36];number=NUMBER.search(tail)
-                    if not number or number.start()>18 or re.search(r'[，,；;。&]',tail[:number.start()]):continue
-                    before=tail[:number.start()]
+                    if not number or number.start()>18:continue
+                    before=re.sub(r'^\s*,\s*which\s+(is|was|are)\s*$',r'\1 ',tail[:number.start()],flags=re.I)
+                    if re.search(r'[，,；;。&]',before):continue
                     if re.search(r'\d',before) or any(word.casefold() not in {'is','was','are','equals','equal','to','of','set','at','about','approximately'} for word in re.findall(r'[A-Za-z]+',before)):continue
                     parsed=_numeric(number[0],key)
                     if not parsed:continue

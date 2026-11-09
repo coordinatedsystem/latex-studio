@@ -178,16 +178,9 @@ def tree():
     return items
 
 
-def snapshot(path):
-    if not path.exists():
-        return
-    relative = path.relative_to(ROOT)
-    folder = storage().history_folder(ROOT, relative)
-    folder.mkdir(parents=True, exist_ok=True)
-    stamp = time.strftime('%Y%m%d-%H%M%S') + '-' + str(time.time_ns() % 1000000000)
-    shutil.copy2(path, folder / stamp)
-    for old in sorted(folder.iterdir(), reverse=True)[30:]:
-        old.unlink()
+def snapshot(path,reason='保存前'):
+    from studio_history import capture
+    return capture(storage(),ROOT,path,reason)
 
 
 def detect_diagnostics(lines, main):
@@ -325,10 +318,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send({'error': '当前项目已在其他窗口切换，请重新打开所需项目'}, 409)
             if path == '/api/state':
                 with LOCK:
-                    return self.send({**STATE, 'root': str(ROOT), 'projectName': ROOT.name, 'projectId': project_id(ROOT), 'serverBuild': SERVER_BUILD, 'version':VERSION, 'app': str(APP),
+                    return self.send({**STATE, 'pdfVersion':str(STATE.get('pdfVersion',0)), 'root': str(ROOT), 'projectName': ROOT.name, 'projectId': project_id(ROOT), 'serverBuild': SERVER_BUILD, 'version':VERSION, 'app': str(APP),
                                       'hasPdf': current_preview().exists(), 'files': tree(),
                                       'runtime': str(storage().runtime), 'packageBusy': package_busy(), 'aiBusy': assistant_for(storage().data).busy() or editor_ai_for(storage()).busy(), 'editorAiBusy':editor_ai_for(storage()).busy(),
                                       'pythonVersion': sys.version.split()[0], 'pythonExecutable': sys.executable, 'pid': os.getpid(),'pagePreviewBusy':pages_for(storage()).busy()})
+            if path == '/api/editor-ai/history':
+                with LOCK:return self.send(editor_ai_for(storage()).history(ROOT))
             if path == '/api/editor-ai/job':
                 with LOCK:return self.send(editor_ai_for(storage()).status(ROOT,query.get('id',[None])[0]))
             if path == '/api/editor-ai/diff':
@@ -403,8 +398,9 @@ class Handler(BaseHTTPRequestHandler):
             if path == '/api/history':
                 p = project_path(query.get('path', [''])[0])
                 folder = storage().history_folder(ROOT, p.relative_to(ROOT))
-                entries = sorted((f.name for f in folder.iterdir()), reverse=True) if folder.exists() else []
-                return self.send(entries)
+                from studio_history import versions
+                entries=versions(storage(),ROOT,p)
+                return self.send(entries if query.get('details') else [e['id'] for e in entries])
             if path == '/api/history-content':
                 p = project_path(query.get('path', [''])[0])
                 version = query.get('version', [''])[0]
@@ -472,7 +468,8 @@ class Handler(BaseHTTPRequestHandler):
                     p=project_path(data.get('path',''))
                     if p.suffix.lower() not in TEXT:raise ValueError('此文件不能创建文本版本')
                     if data.get('revision')!=digest(p.read_bytes()):raise ValueError('文件已变化，请重新保存后创建版本')
-                    snapshot(p);return self.send({'ok':True})
+                    ident=snapshot(p,'手动保存')
+                    return self.send({'ok':True,'id':ident})
             if route == '/api/editor-ai/start':
                 with LOCK:
                     require_idle()
@@ -569,6 +566,7 @@ class Handler(BaseHTTPRequestHandler):
                     changes,session=pages_for(storage()).apply_files(data.get('id'),ROOT,current_preview(),data.get('previewId'),undo,data.get('selected'))
                     for target,_ in changes:snapshot(target)
                     atomic_write_set(changes)
+                    for target,_ in changes:snapshot(target,'AI 撤销' if undo else 'AI 应用')
                     session['appliedHash']=None if undo else digest(changes[0][1])
                     session['appliedHashes']={} if undo else {target.relative_to(ROOT).as_posix():digest(content) for target,content in changes}
                     if undo:
@@ -695,6 +693,7 @@ class Handler(BaseHTTPRequestHandler):
                     output.write(json.dumps(event, ensure_ascii=False) + '\n')
                 return self.send({'ok': True})
             if route in {'/api/save', '/api/create', '/api/upload'}:
+                history_warning=None
                 p = project_path(data['path'], write=True)
                 with LOCK:
                     if route == '/api/save':
@@ -715,7 +714,10 @@ class Handler(BaseHTTPRequestHandler):
                     temp = p.with_name(p.name + '.studio-tmp')
                     temp.write_bytes(content)
                     os.replace(temp, p)
-                return self.send({'revision': digest(content)})
+                    if route=='/api/save':
+                        try:snapshot(p,'编辑保存')
+                        except OSError:history_warning='文件已保存，但历史记录未成功；请重试“保存当前版本”'
+                return self.send({'revision': digest(content),'historyWarning':history_warning})
             if route == '/api/rename':
                 with LOCK:
                     old, new = project_path(data['path'], True), project_path(data['newPath'], True)

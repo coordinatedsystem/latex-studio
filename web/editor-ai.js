@@ -10,6 +10,7 @@ function editorAiCapture(){
  const model=models.get(active)?.model,range=editor?.getSelection();
  editorAiTarget={path:model?active:prefs.main,line:model?(range?.startLineNumber||1):1,selection:editorAiSelection(model,range),version:model?.getVersionId()};
  $('#editorAiContext').textContent=editorAiTarget.path+(editorAiTarget.selection?' · 行 '+range.startLineNumber+'–'+range.endLineNumber:' · 当前行 '+editorAiTarget.line);
+ $('#editorAiContext').title=$('#editorAiContext').textContent;
 }
 function editorAiDock(tab){
  const ai=tab==='ai',issues=tab==='issues';$('#logPanel').hidden=false;$('#workspace').classList.add('with-log');$('#workspace').classList.toggle('editor-ai-open',ai);

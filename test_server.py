@@ -62,15 +62,42 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual((server.ROOT / 'report.tex').read_text(encoding='utf-8'), '新内容\n')
         _, versions = self.call('/api/history?path=report.tex')
-        self.assertEqual(len(versions), 1)
-        _, history = self.call('/api/history-content?path=report.tex&version=' + versions[0])
+        self.assertEqual(len(versions), 2)
+        _, latest = self.call('/api/history-content?path=report.tex&version='+versions[0])
+        self.assertEqual(latest['content'],'新内容\n')
+        _, history = self.call('/api/history-content?path=report.tex&version=' + versions[1])
         self.assertIn('目标文字', history['content'])
         status, _ = self.call('/api/save', {'path': 'report.tex', 'content': '覆盖', 'revision': opened['revision']})
         self.assertEqual(status, 409)
         self.assertEqual((server.ROOT / 'report.tex').read_text(encoding='utf-8'), '新内容\n')
         self.call('/api/save', {'path': 'report.tex', 'content': '新内容\n', 'revision': saved['revision']})
         _, versions = self.call('/api/history?path=report.tex')
-        self.assertEqual(len(versions), 1, 'Unchanged saves should not consume history slots')
+        self.assertEqual(len(versions), 2, 'Unchanged saves should not consume history slots')
+
+    def test_manual_history_is_immediately_visible_and_deduplicated(self):
+        _,opened=self.call('/api/file?path=report.tex')
+        status,one=self.call('/api/history-checkpoint',{'path':'report.tex','revision':opened['revision']})
+        self.assertEqual(status,200)
+        _,two=self.call('/api/history-checkpoint',{'path':'report.tex','revision':opened['revision']})
+        self.assertEqual(one['id'],two['id'])
+        _,items=self.call('/api/history?path=report.tex&details=1')
+        self.assertEqual(len(items),1);self.assertEqual(items[0]['reason'],'手动保存')
+
+    def test_post_save_history_failure_still_returns_the_saved_revision_with_warning(self):
+        from unittest.mock import patch
+        _,opened=self.call('/api/file?path=report.tex')
+        with patch('server.snapshot',side_effect=['existing',OSError('history unavailable')]):
+            status,result=self.call('/api/save',{'path':'report.tex','content':'saved','revision':opened['revision']})
+        self.assertEqual(status,200);self.assertIn('历史',result['historyWarning'])
+        self.assertEqual((server.ROOT/'report.tex').read_text(),'saved')
+        self.assertEqual(result['revision'],server.digest(b'saved'))
+
+    def test_pdf_version_is_not_rounded_by_browser_json_numbers(self):
+        old=server.STATE.get('pdfVersion');server.STATE['pdfVersion']=1794204617365591300
+        try:
+            status,value=self.call('/api/state');self.assertEqual(status,200)
+            self.assertEqual(value['pdfVersion'],'1794204617365591300')
+        finally:server.STATE['pdfVersion']=old
 
     def test_ai_routes_are_authenticated_scoped_and_do_not_write_source(self):
         original = (server.ROOT / 'report.tex').read_bytes()

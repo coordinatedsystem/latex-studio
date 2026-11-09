@@ -1,3 +1,4 @@
+from test_fixture_pdf import write_fixture_pdf
 import gzip
 import json
 from pathlib import Path
@@ -19,7 +20,7 @@ class BatchTests(unittest.TestCase):
         (self.root/'main.tex').write_text('\\documentclass{article}\n\\begin{document}\\input{a}\\newpage\\input{b}\\end{document}\n',encoding='utf-8')
         self.originals={'a.tex':b'\xef\xbb\xbf% First\r\n\\small\r\nAn eror.\r\n','b.tex':b'% Second\n\\small\nAn eror.\n'}
         for name,content in self.originals.items():(self.root/name).write_bytes(content)
-        self.pdf=base/'baseline.pdf';shutil.copyfile(Path(__file__).parent/'tests/fixtures/report.pdf',self.pdf)
+        self.pdf=base/'baseline.pdf';write_fixture_pdf(self.pdf)
         sync=base/'main.synctex.gz';sync.write_bytes(gzip.compress((f'Input:1:{self.root / "a.tex"}\nInput:2:{self.root / "b.tex"}\nUnit:1\n{{1\ng1,3:4475232,6789236\n}}1\n{{2\ng2,3:4475232,6789236\n}}2\n').encode()))
         save_source_map(self.root,'main.tex',self.pdf,sync,self.data)
         self.manager=PageEdits(SimpleNamespace(data=self.data,runtime=base/'runtime'));self.context=self.manager.prepare_pages(self.root,'main.tex',self.pdf,[1,2])

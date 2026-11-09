@@ -305,6 +305,8 @@ class PageEdits(BatchEditsMixin):
                 comparisons.append({'page':number,'shownPage':shown,'changed':changed,'bounds':normalized});images[str(number)]={'before':str(before),'after':str(after)}
             with self.lock:
                 s['candidate']=candidate;s['candidatePdf']=str(pdf);s['imagePages']=images;s['images']=images[str(s['page'])]
+                from studio_ai_quality import pdf_report
+                s['preview']['quality']=pdf_report(Path(s['folder'])/'before.pdf',pdf)
                 s['preview'].update(running=False,success=True,stage='编译通过，等待确认',changed=any(p['changed'] for p in comparisons),totalPages=total,shownPage=comparisons[0]['shownPage'],pages=comparisons)
                 self.remember(s)
             cached=sorted((p for p in Path(s['folder']).iterdir() if p.is_dir() and re.fullmatch(r'[a-f0-9]{32}',p.name)),key=lambda p:p.stat().st_mtime_ns,reverse=True)

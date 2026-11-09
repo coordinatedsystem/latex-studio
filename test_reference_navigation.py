@@ -66,6 +66,8 @@ class ConsistencyTests(unittest.TestCase):
         self.assertEqual(statuses['accuracy'],'match');self.assertEqual(statuses['time'],'match');self.assertEqual(statuses['learning_rate'],'mismatch')
         english=check_consistency({'main.tex':r'Accuracy is 94.7\%. Learning rate is 0.01. Runtime is 1s.','results.json':sources['results.json']})
         self.assertEqual({i['claim']['key']:i['status'] for i in english['items']},statuses)
+        qualified=check_consistency({'main.tex':r'Accuracy, which is 94.7\%.','data.json':'{"accuracy":0.946}'})
+        self.assertEqual(qualified['items'][0]['status'],'mismatch')
 
     def test_key_value_tables_and_ambiguous_data_are_not_guessed(self):
         sources={'main.tex':r'\begin{tabular}{lr}参数 & 数值\\学习率 & 0.01\\\end{tabular}', 'a.json':'{"learning_rate":0.01}', 'b.json':'{"learning_rate":0.02}'}

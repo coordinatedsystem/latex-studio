@@ -1,3 +1,4 @@
+from test_fixture_pdf import write_fixture_pdf
 import gzip
 import json
 from pathlib import Path
@@ -61,7 +62,7 @@ class PageContextTests(unittest.TestCase):
         self.root=base/'project';self.root.mkdir();self.data=base/'data';self.data.mkdir()
         self.source=b'\xef\xbb\xbf\\documentclass{article}\r\n\\begin{document}\r\n\\small\r\nAn eror.\r\n\\end{document}\r\n'
         (self.root/'main.tex').write_bytes(self.source)
-        self.pdf=base/'original.pdf';shutil.copyfile(Path(__file__).parent/'tests/fixtures/report.pdf',self.pdf)
+        self.pdf=base/'original.pdf';write_fixture_pdf(self.pdf)
         sync=base/'main.synctex.gz';sync.write_bytes(gzip.compress(('SyncTeX Version:1\nInput:1:'+str(self.root/'main.tex')+'\nUnit:1\nContent:\n{1\ng1,4:4475232,6789236\n}1\n').encode()))
         save_source_map(self.root,'main.tex',self.pdf,sync,self.data)
         self.storage=SimpleNamespace(data=self.data,runtime=base/'runtime');self.manager=PageEdits(self.storage)
@@ -88,7 +89,7 @@ class PageContextTests(unittest.TestCase):
 
     def test_preview_does_not_modify_original_and_apply_requires_same_selection(self):
         from PIL import Image
-        base=Path(self.temp.name);before=base/'before.png';after=base/'after.png'
+        base=Path(self.temp.name).resolve();before=base/'before.png';after=base/'after.png'
         Image.new('RGB',(12,12),'white').save(before);Image.new('RGB',(12,12),'black').save(after)
         source=self.context['source'];edits=validate_edits(source,[{'before':'eror','after':'error'}])[0]
         self.manager.attach(self.context['id'],self.root,edits)

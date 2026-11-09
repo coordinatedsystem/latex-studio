@@ -1,7 +1,7 @@
 {
-  "version": "1.3.0",
-  "file": "distribution/LaTeX-Studio-1.3.0-win64-Setup.exe",
-  "size": 74222343,
-  "sha256": "8eac1fc7c76692e4d512fc1ed7d46e3ed0a0c71b6e409b208918352f1a335e41",
-  "notes": "1.3.0：临时定位高亮、可移动文档工具、功能说明、编辑器 AI 清空与布局优化，移除用量和本地限额。"
+  "version": "1.4.0",
+  "file": "distribution/LaTeX-Studio-1.4.0-win64-Setup.exe",
+  "size": 74229894,
+  "sha256": "1d96b3a11b8e40bbc52eec64c293adf632aac0494075010907efaa161bd4ad83",
+  "notes": "1.4.0：修改前后版本与最近 AI 任务、锁定公式引用、完整段落翻译、质量复核提示、首页 PDF 缩略图修复。"
 }

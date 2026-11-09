@@ -19,7 +19,7 @@ jobs:
       - name: Python tests
         shell: pwsh
         run: |
-          $output = & python -B -m unittest test_updates test_workflow test_editor_ai test_server test_review test_document_context test_reference_navigation 2>&1
+          $output = & python -B -m unittest discover -q 2>&1
           $result = $LASTEXITCODE
           $output | ForEach-Object { Write-Host $_ }
           if ($result -ne 0) {
@@ -27,4 +27,8 @@ jobs:
             Write-Host "::error title=Python test details::$message"
             exit $result
           }
-      - run: node --test test_workflow_ui.js test_editor_ai_ui.js test_editor_dock.js test_usability.js
+      - shell: pwsh
+        run: |
+          $tests = @(Get-ChildItem -File -Filter 'test_*.js' | Select-Object -ExpandProperty Name)
+          & node --test $tests
+          exit $LASTEXITCODE

@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
+  "version": "1.4.0",
   "files": [
     {
       "path": "Launch.vbs",
@@ -13,8 +13,8 @@
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 3587,
-      "sha256": "e8b8612bc7826bc8b3aaedec65734dbc4b1903f8ffaa9fb2e728d6e072607a40"
+      "size": 4822,
+      "sha256": "0a5942dc082688450df2bd993ead67f4593fa0f135f913dc9ff92b1220bd7e44"
     },
     {
       "path": "app/launch.ps1",
@@ -28,18 +28,23 @@
     },
     {
       "path": "app/README.md",
-      "size": 6274,
-      "sha256": "90bff90400c5d0ceb0084a3b4b362827281c6b69bc9f00e718bcd66d80731809"
+      "size": 6689,
+      "sha256": "b7b99afec330c06f92ff3981e617e21a1cc080f8e950165e15644f2dec68ce07"
     },
     {
       "path": "app/server.py",
-      "size": 46919,
-      "sha256": "f9f75ce2fe5664f9385305644dd31d0fef0db4e1e905242ade5bbd5bb64ef750"
+      "size": 47321,
+      "sha256": "f538966f641757e70a703d209caf7716fe9cd9ec001c7efd912be9a55d5702b6"
     },
     {
       "path": "app/studio_ai.py",
-      "size": 40501,
-      "sha256": "449f33017e7761374a9a9231d8d1f9c45d790e02636e2cf225cfc4f7d7c3f8a9"
+      "size": 41714,
+      "sha256": "bd81f29d297b8c47a711cb12e02e83f466a59acbca8fe60802608937bcf6def2"
+    },
+    {
+      "path": "app/studio_ai_quality.py",
+      "size": 7361,
+      "sha256": "af612bd9399d310992399c2d4c8bf7ab60cc0272c174b62e686f84db6862d606"
     },
     {
       "path": "app/studio_batch_edits.py",
@@ -58,18 +63,23 @@
     },
     {
       "path": "app/studio_document_tools.py",
-      "size": 16092,
-      "sha256": "352afac7a7769412e71cddec077f184a8d3bfdf272c833082e032a1bf9456b13"
+      "size": 16169,
+      "sha256": "d74df03819a0c269f66437ecab963de6a37ad447f8ec0765c9dfb161eb5d7250"
     },
     {
       "path": "app/studio_editor_ai.py",
-      "size": 26462,
-      "sha256": "89582d08e3699d8d200b49abc69cf38496a9cbe4280626859427437f720b99ff"
+      "size": 28667,
+      "sha256": "76bdc20c1cc1d296176c6304160ebe343b933066c6b2297ff6a63e28bc03f02c"
     },
     {
       "path": "app/studio_engine.py",
       "size": 1184,
       "sha256": "35b0cdc4bf8bed38a596b7e9c6cfe15cbea725a19c3be05b473bd6e12c1c8cea"
+    },
+    {
+      "path": "app/studio_history.py",
+      "size": 2487,
+      "sha256": "238bd896409767d80dfd3785a2fd80992d734309ab409ed703ee8927cf2f1a3e"
     },
     {
       "path": "app/studio_locations.py",
@@ -88,8 +98,8 @@
     },
     {
       "path": "app/studio_page_edits.py",
-      "size": 24000,
-      "sha256": "d75af4d6614eaa05d455a2844b64ec722b9d148f11b8f7e2a164480694804b53"
+      "size": 23784,
+      "sha256": "3606313aecbdefe6f2dc823bb5a594dce66f8496c9546174e9dd5f6d2033f2e9"
     },
     {
       "path": "app/studio_references.py",
@@ -139,7 +149,7 @@
     {
       "path": "app/version.json",
       "size": 128,
-      "sha256": "f5734921f4bf472e3b4a3e3e8333864f173260548fd6bd460cc5fb6404514915"
+      "sha256": "a0428a0dffc7d65425e5eb92780c2f07e00c2eedd9e9899b914c6f99c89af3bd"
     },
     {
       "path": "app/assets/studio.ico",
@@ -3018,8 +3028,8 @@
     },
     {
       "path": "app/web/app.js",
-      "size": 57830,
-      "sha256": "f48ab4df49c031ba9e3231f43590be65445502a4ffde22b69035c7c83a9c2edd"
+      "size": 57948,
+      "sha256": "e751ae343f2b7388b2730a1edb3a36e7bbc11564b0306c50e5d12c34b4c38051"
     },
     {
       "path": "app/web/document-analysis.css",
@@ -3038,8 +3048,8 @@
     },
     {
       "path": "app/web/editor-ai.js",
-      "size": 17646,
-      "sha256": "eed29292e7b0fde0db43e1439815f922de247923858156cd6c1fc40d577d3a1a"
+      "size": 17710,
+      "sha256": "a13611cda0862d2e2daed9128e2d5ca07096356533dd538cfb1be253979aa210"
     },
     {
       "path": "app/web/editor-dock-resize.css",
@@ -3062,6 +3072,16 @@
       "sha256": "ea84f8851b7c1cb3cd8892c1baaa2c29bf3815826ba02eb221f1b4ba88652fd9"
     },
     {
+      "path": "app/web/history-quality.css",
+      "size": 1948,
+      "sha256": "1b2748cd3e1fa5bee494bb7801d78d63b0a3e5b436b663262236ac7f4286b4f4"
+    },
+    {
+      "path": "app/web/history-quality.js",
+      "size": 8148,
+      "sha256": "d77ddd57a6e1364d1c750d5084bc1b8ff8d0173cbd3ee558a483f3e1b2880767"
+    },
+    {
       "path": "app/web/hub-design.css",
       "size": 11605,
       "sha256": "125bda37a03a1f401a598e16cb6a836548cf94a2a2f29aa0599a1778f06bb3d6"
@@ -3073,8 +3093,8 @@
     },
     {
       "path": "app/web/index.html",
-      "size": 49307,
-      "sha256": "3e6fdaeb694799e53495652241b3af40583dda57db0d07ef6b73f5692e3d2cf2"
+      "size": 49403,
+      "sha256": "026cc9537a237d16b6c64c628506426c32e99702b6233ea38c765fe34396ab65"
     },
     {
       "path": "app/web/interface-polish.css",

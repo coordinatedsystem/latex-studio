@@ -93,7 +93,7 @@ async function closeFile(path){
 async function saveFile(path=active){
  const info=models.get(path);if(!info||info.asset||!info.dirty)return;if(info.saving){await info.saving;if(info.dirty)return saveFile(path);return;}
  const value=info.model.getValue(),version=info.model.getAlternativeVersionId();
- info.saving=(async()=>{try{const result=await api('save',{path,content:value,revision:info.revision});info.revision=result.revision;info.dirty=version!==info.model.getAlternativeVersionId();if(path===active)setSaveStatus(info.dirty?'尚未保存':'已保存 · '+new Date().toLocaleTimeString('zh-CN',{hour12:false}));renderTabs();}catch(e){setSaveStatus('保存失败 · 请处理文件冲突',true);throw e}finally{info.saving=null}})();return info.saving;
+ info.saving=(async()=>{try{const result=await api('save',{path,content:value,revision:info.revision});info.revision=result.revision;info.dirty=version!==info.model.getAlternativeVersionId();if(path===active)setSaveStatus(info.dirty?'尚未保存':'已保存 · '+new Date().toLocaleTimeString('zh-CN',{hour12:false}));renderTabs();if(result.historyWarning){toast(result.historyWarning,true);setSaveStatus('文件已保存 · 历史未保存',true);}}catch(e){setSaveStatus('保存失败 · 请处理文件冲突',true);throw e}finally{info.saving=null}})();return info.saving;
 }
 async function saveAll(){for(const [path] of models)await saveFile(path)}
 function goLine(line,column=1){if(!models.get(active)?.model)return;editor.setPosition({lineNumber:line,column:column||1});editor.revealLineInCenter(line);editor.focus();if(innerWidth<=850)$('#workspace').classList.remove('sidebar-visible');updateOutlineCursor(line);syncControls();}
