@@ -12,7 +12,7 @@ from studio_packages import PackageManager
 class ProjectTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='studio-library-test-')
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
         self.app = self.root / 'latex-studio'
         self.app.mkdir()
         self.store = StudioStorage(self.app)
@@ -63,7 +63,7 @@ class ProjectTests(unittest.TestCase):
 class PackageTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='studio-package-test-')
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
         self.app = self.root / 'latex-studio'
         self.app.mkdir()
         self.store = StudioStorage(self.app)
