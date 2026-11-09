@@ -22,7 +22,7 @@ def rebase(manager,ident,root,main,pdf,selected):
         full=target.read_text(encoding='utf-8-sig').replace('\r\n','\n')
         try:
             # Unique exact matching is intentional: never guess after an external edit.
-            checked=validate_edits(full,[{'before':e['before'],'after':e['after'],'reason':e['reason']}])[0][0]
+            checked=validate_edits(full,[{'before':e['before'],'after':e['after'],'reason':e['reason']}],allow_content_changes=bool((old.get('result') or {}).get('allowContentChanges')))[0][0]
             if any(checked['start']<prior['end'] and checked['end']>prior['start'] for _,prior in by_file.get(name,{}).get('edits',[])):
                 raise ValueError('重新关联后与其他修改重叠')
             by_file.setdefault(name,{'full':full,'raw':target.read_bytes(),'edits':[]})['edits'].append((index,checked))

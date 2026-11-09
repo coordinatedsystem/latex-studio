@@ -120,13 +120,18 @@ class EditorAITests(unittest.TestCase):
         responses=[self.response('textbff',r'\endinput'),self.response('textbff','% ignore'),{'choices':[{'finish_reason':'length','message':{'content':'{}'}}]},self.response('not present','textbf')]
         for response in responses:
             with patch.object(self.ai,'compile_copy',side_effect=self.compiler),patch('studio_ai.request_json',return_value=response) as call:
-                self.start();j=self.wait();self.assertFalse(j['success']);self.assertEqual(call.call_count,1)
+                self.start();j=self.wait();self.assertFalse(j['success']);self.assertLessEqual(call.call_count,3)
             self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
     def test_restart_restores_without_request_and_cleared_cache_blocks_apply(self):
         with patch.object(self.ai,'compile_copy',side_effect=self.compiler),patch('studio_ai.request_json',side_effect=[self.response('textbff','textbf'),self.response('empph','emph')]):self.start();j=self.wait()
         restored=EditorAI(self.storage);self.assertTrue(restored.status(self.root,j['id'])['verified']);self.ai.preview(self.root,j['id']).unlink()
         self.assertFalse(restored.status(self.root,j['id'])['verified'])
         with self.assertRaises(ValueError):restored.apply(self.root,j['id'])
+    def test_requested_edit_repairs_a_failed_candidate_before_allowing_apply(self):
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler),patch('studio_ai.request_json',side_effect=[self.response('textbff','textbf'),self.response('empph','emph')]) as call:
+            self.start('edit',question='按要求修改源码');job=self.wait()
+        self.assertTrue(job['verified']);self.assertEqual(call.call_count,2);self.assertEqual([r['status'] for r in job['rounds']],['failed','passed']);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+
     def test_undo_never_overwrites_later_edits(self):
         with patch.object(self.ai,'compile_copy',side_effect=self.compiler),patch('studio_ai.request_json',side_effect=[self.response('textbff','textbf'),self.response('empph','emph')]):self.start();j=self.wait()
         self.ai.apply(self.root,j['id']);(self.root/'main.tex').write_text('later edit')

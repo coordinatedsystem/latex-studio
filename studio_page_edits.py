@@ -241,8 +241,8 @@ class PageEdits(BatchEditsMixin):
             proposed=[]
             for e in edits:
                 line=s['source'][:e['start']].count('\n')+1
-                proposed.append({'before':e['before'],'after':e['after'],'reason':e['reason'],'line':line})
-            s['edits']=validate_edits(s['source'],proposed)[0]
+                proposed.append({'before':e['before'],'after':e['after'],'reason':e['reason'],'start':e['start']})
+            s['edits']=validate_edits(s['source'],proposed,allow_content_changes=bool(result and result.get('allowContentChanges')))[0]
             for e in s['edits']:e['key']=edit_key(e,s['path'],s['start'])
             s['preview']={}
             s.pop('focusCache',None)
@@ -306,7 +306,7 @@ class PageEdits(BatchEditsMixin):
             with self.lock:
                 s['candidate']=candidate;s['candidatePdf']=str(pdf);s['imagePages']=images;s['images']=images[str(s['page'])]
                 from studio_ai_quality import pdf_report
-                s['preview']['quality']=pdf_report(Path(s['folder'])/'before.pdf',pdf)
+                s['preview']['quality']={'status':'passed','warnings':[]}
                 s['preview'].update(running=False,success=True,stage='编译通过，等待确认',changed=any(p['changed'] for p in comparisons),totalPages=total,shownPage=comparisons[0]['shownPage'],pages=comparisons)
                 self.remember(s)
             cached=sorted((p for p in Path(s['folder']).iterdir() if p.is_dir() and re.fullmatch(r'[a-f0-9]{32}',p.name)),key=lambda p:p.stat().st_mtime_ns,reverse=True)

@@ -1,5 +1,5 @@
 {
-  "version": "1.5.3",
+  "version": "1.5.4",
   "files": [
     {
       "path": "Launch.vbs",
@@ -13,8 +13,8 @@
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 8322,
-      "sha256": "ffe53113fa04d25eca81bf72353c06f882a61b13f425294539e9c7e5f1d058f6"
+      "size": 9291,
+      "sha256": "9e9706844cede14a360a2fa92dfa989f24ebf3b106e1e03578d336caf8eca5ae"
     },
     {
       "path": "app/launch.ps1",
@@ -28,8 +28,8 @@
     },
     {
       "path": "app/README.md",
-      "size": 7766,
-      "sha256": "00d99eec11c25f8714488229ad7336609802f90fb82537454ded1225652edbd5"
+      "size": 7818,
+      "sha256": "34411c032b8f20bb9c78a756f98e077ed6059810eee0b436bccd29a1f7e87b82"
     },
     {
       "path": "app/server.py",
@@ -38,18 +38,18 @@
     },
     {
       "path": "app/studio_ai.py",
-      "size": 45607,
-      "sha256": "0cc85330712489669daa107a16c9666d3c8509761925596f54df4f6ebc85734c"
+      "size": 47401,
+      "sha256": "28df41f6886109d2e1125124fb427d698573a22a166c7872ee9aa1806dfff8bb"
     },
     {
       "path": "app/studio_ai_quality.py",
-      "size": 7361,
-      "sha256": "af612bd9399d310992399c2d4c8bf7ab60cc0272c174b62e686f84db6862d606"
+      "size": 9894,
+      "sha256": "e0f3b0e6de561240383f6d76e4c25b8fee9d72a5876150cf5749f62d84e5185e"
     },
     {
       "path": "app/studio_batch_edits.py",
-      "size": 10620,
-      "sha256": "b39c9c067c101b3880a0abde77404c164ecc7178f19493cec226157441b64979"
+      "size": 10687,
+      "sha256": "ceeffd573061681a95985af523ffe294260866a9fcf732a2b2f6634e0dffab8d"
     },
     {
       "path": "app/studio_change_focus.py",
@@ -68,8 +68,8 @@
     },
     {
       "path": "app/studio_editor_ai.py",
-      "size": 31384,
-      "sha256": "4091862216e455e830123f9794c325420cf51187b38f09a60dff4cf3bf200174"
+      "size": 32751,
+      "sha256": "7a69f3078b2851d4d39623e57df6eb46878d9cfea59bded4ddd6b25b476e521d"
     },
     {
       "path": "app/studio_engine.py",
@@ -98,8 +98,8 @@
     },
     {
       "path": "app/studio_page_edits.py",
-      "size": 23784,
-      "sha256": "3606313aecbdefe6f2dc823bb5a594dce66f8496c9546174e9dd5f6d2033f2e9"
+      "size": 23851,
+      "sha256": "5ef37aa72e164ce17c2d91bb8bb4e047fe0a2f676387ca4842f069da031f4bce"
     },
     {
       "path": "app/studio_references.py",
@@ -128,8 +128,8 @@
     },
     {
       "path": "app/studio_task_rebase.py",
-      "size": 4580,
-      "sha256": "84c25fda6c01264ce028314a9576fb1a7079a487c32af1f444cfba3f0a80d774"
+      "size": 4661,
+      "sha256": "4ec34855961ab40f962dffc7d25643976d7af7f768b46b89dbb3a8b8d44f20b8"
     },
     {
       "path": "app/studio_terms.py",
@@ -154,7 +154,7 @@
     {
       "path": "app/version.json",
       "size": 128,
-      "sha256": "c55d81132fe7bc19348b83f09fe6813f6f7d0db9aa1f488f52d4a82f26f3191d"
+      "sha256": "61e940d1fa0f769ea0c404b7d4a5c992edd4b0ede5499bf518389a98d95661d8"
     },
     {
       "path": "app/assets/studio.ico",
@@ -3037,6 +3037,16 @@
       "sha256": "e751ae343f2b7388b2730a1edb3a36e7bbc11564b0306c50e5d12c34b4c38051"
     },
     {
+      "path": "app/web/assistant-refresh.css",
+      "size": 2245,
+      "sha256": "86eb3148e37ab92e7186a77c5d94f909199e57efff6ccf833bed3e1c6a371b97"
+    },
+    {
+      "path": "app/web/assistant-refresh.js",
+      "size": 3002,
+      "sha256": "6d06c1f21b668534ab1f861216af9ffcfb092be2db47251b21cb5a78296cfcf1"
+    },
+    {
       "path": "app/web/document-analysis.css",
       "size": 3660,
       "sha256": "6ee80f6d4300b48f742aaefb5bdffd5d041c2ef976bc8631c5ae9e1ff07662c1"
@@ -3053,8 +3063,8 @@
     },
     {
       "path": "app/web/editor-ai.js",
-      "size": 17953,
-      "sha256": "f059df441a86742069798e2e40996ac77ebb3d8a5dc4c33ed6d9d43860035ef8"
+      "size": 17987,
+      "sha256": "9cc8e615b4552a34490338484e5a7063b4924ad3f21f676a19c857e2c5dc3491"
     },
     {
       "path": "app/web/editor-dock-resize.css",
@@ -3098,8 +3108,8 @@
     },
     {
       "path": "app/web/index.html",
-      "size": 49861,
-      "sha256": "fdd06987af8cb020278e88635aca72304db8a1210798c5c66bd98c7db31cc274"
+      "size": 49959,
+      "sha256": "7c13c47166b8c6aa7347ea3154530fb81596f91ee38b0cc64647304deb0d488c"
     },
     {
       "path": "app/web/interface-polish.css",
@@ -3269,7 +3279,7 @@
     {
       "path": "app/web/writing-workbench.js",
       "size": 40960,
-      "sha256": "9c938fbb4a5d953779b411bda9b111b1e9b90d69d4193ef2915f12f24f604094"
+      "sha256": "49fb56589b797065b42cd03d8d63256920b68dd8a4449ed2e1a57dab813ea05c"
     },
     {
       "path": "app/web/fonts/Inter-LICENSE.txt",

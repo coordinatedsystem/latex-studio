@@ -27,7 +27,7 @@ function editorAiMinimize(){
 function editorAiOpen(mode){
  hubView('editor');editorAiCapture();if(mode)$('#editorAiMode').value=mode;editorAiMode();editorAiDock('ai');editorAiRefresh(true).catch(e=>toast(e.message,true));$('#editorAiPrompt').focus();
 }
-function editorAiMode(){const mode=$('#editorAiMode').value;$('#editorAiLimitLabel').hidden=mode!=='repair';$('#editorAiStart').textContent=({repair:'修复并验证',edit:'生成并验证',explain:'解释代码'})[mode];$('#editorAiPrompt').placeholder=mode==='edit'?'输入修改要求，例如调整段落间距':'补充说明（可选）';}
+function editorAiMode(){const mode=$('#editorAiMode').value;$('#editorAiLimitLabel').hidden=mode==='explain';$('#editorAiStart').textContent=({repair:'修复并验证',edit:'生成并验证',explain:'解释代码'})[mode];$('#editorAiPrompt').placeholder=mode==='edit'?'描述你要的改动，例如删除参考文献、精简章节或重写段落':'补充说明（可选）';}
 function editorAiDirty(){return [...models.values()].some(m=>m.dirty||m.saving);}
 function editorAiDiscardDiff(){editorAiDiffEditor?.setModel(null);editorAiDiffModels.forEach(m=>m.dispose());editorAiDiffModels=[];editorAiDiffKey='';}
 async function editorAiShowDiff(){

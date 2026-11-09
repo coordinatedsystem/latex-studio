@@ -104,7 +104,7 @@ class BatchEditsMixin:
                     if part.get('readOnly'):raise ValueError('本页仅可审阅，不能自动修改')
                     relative=edit['start']-part['displayStart']
                     line=part['source'][:relative].count('\n')+1
-                    checked=validate_edits(part['source'],[{'before':edit['before'],'after':edit['after'],'reason':edit['reason'],'line':line}])[0][0]
+                    checked=validate_edits(part['source'],[{'before':edit['before'],'after':edit['after'],'reason':edit['reason'],'start':relative}],allow_content_changes=bool(result.get('allowContentChanges')))[0][0]
                     if checked['start']!=relative:raise ValueError('修改超出已选页面的源码范围')
                     start=part['start']+checked['start'];end=part['start']+checked['end'];key=(part['path'],start,end,checked['after'])
                     if key in seen:continue
