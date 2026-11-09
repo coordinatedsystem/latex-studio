@@ -3,6 +3,7 @@ const source=fs.readFileSync(__dirname+'/web/editor-ai.js','utf8');
 function setup(){
  const nodes=new Map(),calls=[],classes=new Set();const $=id=>{if(!nodes.has(id))nodes.set(id,{value:id==='#editorAiMode'?'repair':id==='#editorAiLimit'?'3':'',dataset:{},hidden:true,disabled:false,innerHTML:'',textContent:'',focus(){},setAttribute(){},removeAttribute(){},classList:{add(...names){names.forEach(n=>classes.add(n));},remove(...names){names.forEach(n=>classes.delete(n));},contains:n=>classes.has(n),toggle(n,on){if(on)classes.add(n);else classes.delete(n);}}});return nodes.get(id);};
  const c=vm.createContext({$,console,commands:[],Array,Map,Date,JSON,document:{addEventListener(){}},state:{projectId:'one',pdfVersion:7,running:false,aiBusy:false},prefs:{main:'main.tex'},models:new Map(),active:null,editor:null,monacoApi:null,diagnosticsOnly:false,hubView(){},hubNotifyState(){},toggleLogs(){},requestAnimationFrame:fn=>fn(),toast(){},api:async(p,data)=>{calls.push({p,data});return {id:null,running:false};},saveAll:async()=>{},esc:s=>String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;')});
+ vm.runInContext(fs.readFileSync(__dirname+'/web/ui-patch-registry.js','utf8'),c);
  vm.runInContext(source,c);return {c,calls,$};
 }
 test('opening and minimizing restores jobs without starting a paid request',async()=>{const {c,calls}=setup();vm.runInContext("editorAiOpen();editorAiMinimize();editorAiOpen();",c);await new Promise(r=>setImmediate(r));assert.ok(calls.length);assert.ok(calls.every(x=>x.p==='editor-ai/job'));});

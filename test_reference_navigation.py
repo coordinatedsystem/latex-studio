@@ -78,6 +78,7 @@ class ConsistencyTests(unittest.TestCase):
     def test_python_is_parsed_without_executing_it(self):
         with tempfile.TemporaryDirectory() as d:
             marker=Path(d)/'must-not-exist';source='learning_rate=0.02\nopen('+repr(str(marker))+',"w").write("bad")\n'
-            report=check_consistency({'main.tex':'learning_rate = 0.01','results.py':source});self.assertFalse(marker.exists());self.assertEqual(report['items'][0]['status'],'mismatch')
+            report=check_consistency({'main.tex':'learning_rate = 0.01','results.py':source});self.assertFalse(marker.exists());self.assertEqual(report['items'][0]['status'],'ambiguous')
+            item=report['items'][0];confirmed=check_consistency({'main.tex':'learning_rate = 0.01','results.py':source},{item['claim']['id']:item['sources'][0]['id']});self.assertEqual(confirmed['items'][0]['status'],'mismatch')
 
 if __name__=='__main__':unittest.main()

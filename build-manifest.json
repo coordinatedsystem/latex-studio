@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0",
+  "version": "1.5.1",
   "files": [
     {
       "path": "Launch.vbs",
@@ -13,8 +13,8 @@
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 4822,
-      "sha256": "0a5942dc082688450df2bd993ead67f4593fa0f135f913dc9ff92b1220bd7e44"
+      "size": 6823,
+      "sha256": "50ec1e27a82828611745a60a968e42a230dd1d23e5ae0fb8f329e2baa5e1b819"
     },
     {
       "path": "app/launch.ps1",
@@ -28,18 +28,18 @@
     },
     {
       "path": "app/README.md",
-      "size": 6689,
-      "sha256": "b7b99afec330c06f92ff3981e617e21a1cc080f8e950165e15644f2dec68ce07"
+      "size": 7667,
+      "sha256": "8698502f5b1082af6017138967a73865f500fbb86a30ab91a35a8e41121b1920"
     },
     {
       "path": "app/server.py",
-      "size": 47321,
-      "sha256": "f538966f641757e70a703d209caf7716fe9cd9ec001c7efd912be9a55d5702b6"
+      "size": 50652,
+      "sha256": "6e04f21abd1282f2079cc75829ac0d4c0d32bc34556340c2335673be54c134ec"
     },
     {
       "path": "app/studio_ai.py",
-      "size": 41714,
-      "sha256": "bd81f29d297b8c47a711cb12e02e83f466a59acbca8fe60802608937bcf6def2"
+      "size": 44329,
+      "sha256": "fc70fa3ff6b4856e2f8703a277f51e8ed87e7e2e84440d4e4fef052f6cbb5f11"
     },
     {
       "path": "app/studio_ai_quality.py",
@@ -63,8 +63,8 @@
     },
     {
       "path": "app/studio_document_tools.py",
-      "size": 16169,
-      "sha256": "d74df03819a0c269f66437ecab963de6a37ad447f8ec0765c9dfb161eb5d7250"
+      "size": 17145,
+      "sha256": "27028836726b4ec327fcaef457c9e0b01c97aa1618c734b9ed7d81ec03f5a771"
     },
     {
       "path": "app/studio_editor_ai.py",
@@ -132,6 +132,11 @@
       "sha256": "84c25fda6c01264ce028314a9576fb1a7079a487c32af1f444cfba3f0a80d774"
     },
     {
+      "path": "app/studio_terms.py",
+      "size": 10408,
+      "sha256": "aaab7c99c005260b5006bd0ae3940f1fa3744b6c0d443831488867a122ddc396"
+    },
+    {
       "path": "app/studio_updates.py",
       "size": 7832,
       "sha256": "6baf63e133b43eae27acbedc4faf605100e7de274c3304dfa21728ff7b0b9f21"
@@ -148,8 +153,8 @@
     },
     {
       "path": "app/version.json",
-      "size": 128,
-      "sha256": "a0428a0dffc7d65425e5eb92780c2f07e00c2eedd9e9899b914c6f99c89af3bd"
+      "size": 122,
+      "sha256": "659fdbb1844dd989207a2058bf8bbd94adef63f0bed7b58899f8822d351b02aa"
     },
     {
       "path": "app/assets/studio.ico",
@@ -3038,8 +3043,8 @@
     },
     {
       "path": "app/web/document-analysis.js",
-      "size": 11118,
-      "sha256": "92041cff0d85445420aa9d1dd2d23707dd767537674388d1f5c78346dfbf940c"
+      "size": 12804,
+      "sha256": "6091de619d85faa0edea639a5ae116144e1b36407cd68974f777f7bf789fee3b"
     },
     {
       "path": "app/web/editor-ai.css",
@@ -3048,8 +3053,8 @@
     },
     {
       "path": "app/web/editor-ai.js",
-      "size": 17710,
-      "sha256": "a13611cda0862d2e2daed9128e2d5ca07096356533dd538cfb1be253979aa210"
+      "size": 17778,
+      "sha256": "477bb52dc1adfbade0d6ef8915b4406504c2ed796d65aaca9033962e5b47078c"
     },
     {
       "path": "app/web/editor-dock-resize.css",
@@ -3088,13 +3093,13 @@
     },
     {
       "path": "app/web/hub-design.js",
-      "size": 4535,
-      "sha256": "6d6205164364edf92cc4ad9b4bf97e3d9ffbaafcb9445d4c7665641f8a8c74b8"
+      "size": 4628,
+      "sha256": "0bc67d297124f5114c35e6a50ab8136ade571aaf62e80d7f4ca29afc21be02df"
     },
     {
       "path": "app/web/index.html",
-      "size": 49403,
-      "sha256": "026cc9537a237d16b6c64c628506426c32e99702b6233ea38c765fe34396ab65"
+      "size": 49661,
+      "sha256": "fcb9db782e51580f16b705eeaaa3b56d1039b220d215488964b137fbc2570e1a"
     },
     {
       "path": "app/web/interface-polish.css",
@@ -3157,6 +3162,21 @@
       "sha256": "cf321a20952684af8b90b78117cafa21fe9651a11fea2d204c74de0fc851eaca"
     },
     {
+      "path": "app/web/terms-desk.css",
+      "size": 4811,
+      "sha256": "e1692dadb50147c832155d830ef1de8a16964986ac8bb2b46cc027803d55718b"
+    },
+    {
+      "path": "app/web/terms-desk.js",
+      "size": 12022,
+      "sha256": "b3d590aae5c9251cb775d59004249e21f08fc2434afb1aee1f5b9b009e078436"
+    },
+    {
+      "path": "app/web/ui-patch-registry.js",
+      "size": 2547,
+      "sha256": "116b79c5d41c7ba465cd78bb40fd203cd5793de62914e117e32cef23de73129d"
+    },
+    {
       "path": "app/web/ui-polish.css",
       "size": 6809,
       "sha256": "6fb7d30fc0db6fe811c1fdc262e82667654bce69c7fcecf799ba4b8d2b01e78f"
@@ -3168,8 +3188,8 @@
     },
     {
       "path": "app/web/updates.js",
-      "size": 4547,
-      "sha256": "b21632419cc582378e02aec2ad749f3ce6e3bd9f036c1161ae483a7ad6c0179f"
+      "size": 4602,
+      "sha256": "f0591142c65efcbb96b8ab8474e0d42f05435532678204fbe0450fbdc7aa0014"
     },
     {
       "path": "app/web/usability.css",
@@ -3178,8 +3198,8 @@
     },
     {
       "path": "app/web/usability.js",
-      "size": 10419,
-      "sha256": "819c2685db9540741c88e671e658f7067b1c9f1f3795f78c3476562eab92f117"
+      "size": 10773,
+      "sha256": "0dfe8efffa75c579e1b72ff75d450f64996883a5ae4db22f4f983420d69666fd"
     },
     {
       "path": "app/web/viewer-bridge.js",
@@ -3193,8 +3213,8 @@
     },
     {
       "path": "app/web/workflow-tools.js",
-      "size": 6805,
-      "sha256": "f34eceb87ddd669c799f7c597f83e4cb71995ba6c1193b376a5b1b0733621522"
+      "size": 6867,
+      "sha256": "bc5c6ef5c0b5287d4bfa2100453d74a990714f6083db96631a16f739add85be5"
     },
     {
       "path": "app/web/workspace-hub.js",
@@ -3208,8 +3228,8 @@
     },
     {
       "path": "app/web/writing-continuous.js",
-      "size": 27913,
-      "sha256": "ff48c4792c41c8f2ccd4716381bb037a666184a15b26401d38a45e72fe638142"
+      "size": 28006,
+      "sha256": "18c9675aeaa3e91900d6593a57a3fd369900e61fd92d6ad4ed12481b5d146fde"
     },
     {
       "path": "app/web/writing-design.css",
@@ -3218,8 +3238,8 @@
     },
     {
       "path": "app/web/writing-design.js",
-      "size": 1944,
-      "sha256": "4f66e1b3e5818f124e2a10e230d07c52bd8f0c793b7f3efdb6480a912cabe645"
+      "size": 1268,
+      "sha256": "1d47e3fa690c9ec21cdb47930f07e43309418d03a473d5f94ac651c0dcb347c5"
     },
     {
       "path": "app/web/writing-focus.js",
@@ -3347,6 +3367,11 @@
       "sha256": "1d9f36f4e9674bef594a47cac7d5781e9f7e0c7c8edf9f72769f4dc6f10d1b5f"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/backref.sty",
+      "size": 12929,
+      "sha256": "3d31e722c9ad85dabe7a53785239fc2ce7865e29c098243f59a3261053c15308"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/bigintcalc.sty",
       "size": 40635,
       "sha256": "050f2ad3a3671a1f4f9bcf97784836301bc751507e7ada546632379406aea103"
@@ -3387,9 +3412,19 @@
       "sha256": "a566cd48687b2cd897e02501118b2413c14ae86d318f9abbbba97feb84189f0f"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/CJK.sty",
+      "size": 33241,
+      "sha256": "25ea84e881c2fba7f86adfc747b5064ddcd9821c6cade7b5112187566468915a"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/CJKfntef.sty",
       "size": 12851,
       "sha256": "d06dc529270d63296ae382551930b086aba07d654c089d882ec1b6db5689c658"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/CJKulem.sty",
+      "size": 3691,
+      "sha256": "d188b304905f1ce21a7977acd94f28e89b093c3ecc32e2fe9af1615152795493"
     },
     {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/ckx.map",
@@ -3932,9 +3967,29 @@
       "sha256": "a3529ccdadc8248b4c5d7c34ceea53bdc1509b54f18a192ad51b924bd297d8df"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/color.sty",
+      "size": 7197,
+      "sha256": "2b4ecc9d1ba83a5179742f31dcdf8513518febd33d6077e41ba6de4263c9e6bd"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/ctexart.cls",
+      "size": 54817,
+      "sha256": "80e434fb161f5f6d56126606845962b296a2375d9e403b428183d730d16f5d98"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/ctexbackend.cfg",
+      "size": 1903,
+      "sha256": "dfadc67e91e6ad619fdf8a304f07af9d4bd92d6f5807ed09801e4aa1b8b8d794"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/ctexhook.sty",
       "size": 6480,
       "sha256": "1c1b7e806ae828b1aa6fac1a2fa949cd40c769fdcf3c52c131ae4957cba5277b"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/ctexpatch.sty",
+      "size": 8437,
+      "sha256": "aad27ba596a537e44b1a9c7ae4d12485dc436c8e720de7ad5147e7e863bf8bab"
     },
     {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/dehyphn-x-2022-03-16.pat",
@@ -3992,6 +4047,16 @@
       "sha256": "a217353d233e54e8c0944d87ea2924ec1f20d849a35b749698df03884856e5e3"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/etex.src",
+      "size": 31690,
+      "sha256": "00b9b0017fc2347a8c55215bd415fc00e9daf63d02dc91476b1a6a28781c5af0"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/etex.sty",
+      "size": 19013,
+      "sha256": "eba429a3179645fca6fa2051ab2fdb6eec664e3a0f987af6afaabe512b526d7e"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/etexcmds.sty",
       "size": 7734,
       "sha256": "a7db2834e02bd11be0e62a3be15e3dc293ba1be9196f19b29b9d98bfdbeb7514"
@@ -4000,6 +4065,16 @@
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/etoolbox.sty",
       "size": 46845,
       "sha256": "b10381f0017ae75bd03dc9175b35ad56b93fdd24f2a47dd4aa9c6987ef35ccdb"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/everysel-2011-10-28.sty",
+      "size": 4713,
+      "sha256": "342742b9dbf2f541726c0f9c7791b3633190be5c02c80ee85e018d74982b1a1d"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/everysel.sty",
+      "size": 2884,
+      "sha256": "a827cd85aa3b6de76157aea5edec9dffde7e93be8f26e5c961ef89a21f4085cd"
     },
     {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/expl3-code.tex",
@@ -4027,6 +4102,16 @@
       "sha256": "506755645f7b6fa415a12a5efa6007f2f24e958429eba89b0aff9e2ce47c1924"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/fix-cm.sty",
+      "size": 14741,
+      "sha256": "bc40dfd4efc0c827a3845afbf1c09d26170d44ae79e4dbd5d3c884f2d1670f5e"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/fleqn.clo",
+      "size": 4807,
+      "sha256": "1b3b003c20cb08d46f2b8d32d817ef71ab0b8a2abf74a95b3431b1fdc16555aa"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/float.sty",
       "size": 6749,
       "sha256": "be4a09ab7ded44b4ce97ba20a3a3efbb061d186327d5db61f8de6a3cab5019aa"
@@ -4045,6 +4130,11 @@
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/fontmath.ltx",
       "size": 24949,
       "sha256": "f16b8c352292d9bb9ae82fa6764651e7f61d21e7bb5fdb039c18dca704700855"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/fontspec-luatex.sty",
+      "size": 150585,
+      "sha256": "275eed9a2309c63b86f0de4d49a1fa1e6bfc665359cd2a16bad1dd21a5eb45ca"
     },
     {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/fontspec-xetex.sty",
@@ -4887,6 +4977,11 @@
       "sha256": "c42f0c2628dc5fbd95b535cf8cd3cc964347653c099d38c0d416f896d84e8240"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/kvoptions-patch.sty",
+      "size": 14829,
+      "sha256": "ce9f97a0f80a42caabc824975df1d65067cbb024f877bea3b190fe3999ca8f8d"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/kvoptions.sty",
       "size": 22521,
       "sha256": "28be410832fdddeb9c853ceb14d49845de1c62316acfe4406f8b5b60f2e13e62"
@@ -4932,6 +5027,11 @@
       "sha256": "7906e4c5d770db4002740cba4d8194281b06d6fe7edd9d9949b60a291b753646"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/leqno.clo",
+      "size": 1958,
+      "sha256": "f2e44b97cddd8e19f72c1424b119270140393179cddbcbfbac7866070fb85c89"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/letltxmacro.sty",
       "size": 5766,
       "sha256": "3a5e77870557530b7bef361a2d5af7346121807e335dcc291cb6fb6a773b569a"
@@ -4950,6 +5050,16 @@
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/linew10.tfm",
       "size": 748,
       "sha256": "925de632e8afb641692c58bf6c464fb1aa79782212523532590dd6b91b78c40f"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/listings.cfg",
+      "size": 1830,
+      "sha256": "dfff35d5535e3edd1e1ac6ea6f82c8e2eec4c2edc5f1d1a498c04ec059223b00"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/listings.sty",
+      "size": 80184,
+      "sha256": "5740c8634abaa38900d13dc8053e70e9ef3f20c36a6d7c94d6125331d5806ddf"
     },
     {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/lmroman10-bold.otf",
@@ -5382,14 +5492,29 @@
       "sha256": "314e0af4d7edcc038eb4dab681b2ccb472d4282f282f4188c8154c2403eb842e"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/ltluatex.tex",
+      "size": 8587,
+      "sha256": "1847960bf09fec43221d21cad3576170c868f03f4b5d582fee3016e924435bc6"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/ltxcmds.sty",
       "size": 17859,
       "sha256": "72a45b7f07d85a66605bbec6c0f783527995722e15c3bc5963b3048b9831bbc0"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/luaotfload.sty",
+      "size": 1812,
+      "sha256": "1453fba08f38423ec995c3992756a617c8b77d4a706c758d38fc4ddde1b5415c"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/mathtools.sty",
       "size": 59398,
       "sha256": "a2b78a3b17d486d75ad904b5215aa5200a3a0253d50da1f2580e2eabb29bc0b1"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/memhfixc.sty",
+      "size": 11339,
+      "sha256": "b4968a9f4fbc33351ee1cf94115632b18abbc1b72a98da75eb6188a514f6b5f5"
     },
     {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/mhsetup.sty",
@@ -5517,6 +5642,11 @@
       "sha256": "dc7174ebd0d08486f26bd97a994ad317b7259b0a591064ca1c297b592a75bf09"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/MULEenc.sty",
+      "size": 12177,
+      "sha256": "413ae23420d96ee86d251b0e42ffa7986cb9ae31aa397f3d09602df8b720ff9d"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/multirow.sty",
       "size": 6149,
       "sha256": "5c33cb1717024ebe00adb88514357ab394ae5f9433418fd0442ba8c64462db14"
@@ -5612,9 +5742,29 @@
       "sha256": "05d0c64b1212bb3e6d733290a504773f64ce030f64ee91b0daf9992f20815404"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/psdextra.def",
+      "size": 37411,
+      "sha256": "b1f15fb6b755e8b9c710090cbcc379ee4c6d73ee6d74ac2370d62af8e180f80b"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/puarenc.def",
+      "size": 3867,
+      "sha256": "b769fcdd03adaaff4457db14e029684ae76344d079d5681bb169978073150c5e"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/puenc-greekbasic.def",
+      "size": 6697,
+      "sha256": "ac3a71d2dfe358dfa9074f51d602c85ab3fdda21ad7dfc45543bb33f80329305"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/puenc.def",
       "size": 117004,
       "sha256": "69ac820f22e954a34cc9b1a24b74107366effd89a196516b58b00c89e748a677"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/puvnenc.def",
+      "size": 9415,
+      "sha256": "57ef702d959f899bde035c312162563f255647a549b20740f818ae1a52482623"
     },
     {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/pzdr.tfm",
@@ -5742,6 +5892,11 @@
       "sha256": "85f78f04e6a9625407f86d519344d3135ff5225f18ef624665a4c0b2e1befdd3"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/ulem.sty",
+      "size": 15682,
+      "sha256": "c97c15736b46cf13071c52070c07aa933fc8253748422d0df56e97286b563685"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/umsa.fd",
       "size": 961,
       "sha256": "48355e960333be747dd7b4500e76fde7c3ef0b1fa9c74ec0f1438af0d3a661a4"
@@ -5782,6 +5937,11 @@
       "sha256": "95718f62527966b22816d91d433f5bb7baf5204e7d7cdb51275ace15bb8ed716"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/xeCJK-listings.sty",
+      "size": 13930,
+      "sha256": "52298d959b5142f3e054df4698c1535d9a3c56494e933b7bc96a7db7af2775f2"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/xeCJK.cfg",
       "size": 408,
       "sha256": "d00c2b56efa858dc83077ae89cf6ca90c38fea38b568bf5082932d371ab6e928"
@@ -5817,6 +5977,16 @@
       "sha256": "c14a350598ab3f6f75d231d824324d3d3f57fff106e46dbec1aea236a5eed2da"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/xunicode-addon.sty",
+      "size": 26486,
+      "sha256": "0b21183d5e8181e043ec600fedb3f32eb05832ca1c99d845643d6cc167e93c07"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/xunicode.sty",
+      "size": 205722,
+      "sha256": "7664327147458c159dd0e4ed95b27ce5b8d6fe8fa3d5d407e437184f5358b114"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/xurl.sty",
       "size": 4675,
       "sha256": "5cf09de8dd52b5e77a12145d4987ab4df75a304174d224aa9562eed3dd141ef3"
@@ -5825,6 +5995,11 @@
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/zerohyph.tex",
       "size": 402,
       "sha256": "80b6e5b7ff3bcd2ff1d32599f9fcd7d3aa40a4c67aa06f72527dd6eb741b551c"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/zhnumber.sty",
+      "size": 31921,
+      "sha256": "a324376d169185aa4bfb3aed1afea96de41e2e26510c5cf92842aada82a7fc50"
     },
     {
       "path": "cache/tectonic/bundles/hashes/https,58,,47,,47,relay.fullyjustified.net,47,default_bundle_v33.lock",

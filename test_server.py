@@ -266,5 +266,38 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual((server.ROOT / 'main.tex').read_text(encoding='utf-8'), content)
 
 
+    def test_consistency_choices_persist_and_code_stays_unconfirmed(self):
+        (server.ROOT/'report.tex').write_text('learning_rate = 0.1','utf8')
+        (server.ROOT/'result.py').write_text('learning_rate = 0.5','utf8')
+        server.STATE['main']='report.tex'
+        status,report=self.call('/api/review/consistency',{})
+        self.assertEqual(status,200);item=report['items'][0];self.assertEqual(item['status'],'ambiguous')
+        bindings={item['claim']['id']:item['sources'][0]['id']}
+        status,confirmed=self.call('/api/review/consistency',{'bindings':bindings})
+        self.assertEqual(status,200);self.assertEqual(confirmed['items'][0]['status'],'mismatch')
+        _,again=self.call('/api/review/consistency',{});self.assertEqual(again['bindings'],bindings);self.assertEqual(again['items'][0]['status'],'mismatch')
+
+    def test_terms_http_extract_preview_apply_restore_and_undo(self):
+        import time
+        from unittest.mock import patch
+        p=server.ROOT/'report.tex';p.write_text('反向传播。训练使用反向传递。','utf8');original=p.read_bytes();server.STATE['main']='report.tex'
+        result={'groups':[{'preferred':'反向传播','variants':['反向传递'],'target':'backpropagation','relation':'same'}]}
+        config={'deepseek':{'model':'mock','key':'test-only','configured':True}}
+        with patch('studio_ai.Assistant.config',return_value=config),patch('studio_ai.request_json',return_value={'choices':[{'message':{'content':json.dumps(result)}}]}):
+            status,job=self.call('/api/ai/start',{'task':'terms'})
+            self.assertEqual(status,200,job)
+            for _ in range(100):
+                _,job=self.call('/api/ai/job?id='+job['id'])
+                if not job['running']:break
+                time.sleep(.01)
+            self.assertTrue(job['success'],job)
+        _,report=self.call('/api/review/terms');self.assertEqual(len(report['groups']),1)
+        status,plan=self.call('/api/review/terms-plan',{'id':report['id'],'choices':[{'id':0}]});self.assertEqual(status,200,plan);self.assertEqual(plan['count'],1)
+        status,res=self.call('/api/review/terms-apply',{'id':report['id'],'plan':plan['id']});self.assertEqual(status,200,res)
+        self.assertEqual(p.read_text('utf8'),'反向传播。训练使用反向传播。')
+        _,restored=self.call('/api/review/terms');self.assertTrue(restored['applied'])
+        status,res=self.call('/api/review/terms-undo',{'id':report['id'],'plan':plan['id']});self.assertEqual(status,200,res);self.assertEqual(p.read_bytes(),original)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -26,7 +26,7 @@ sys.dont_write_bytecode = True
 if sys.version_info < (3, 10):
     raise RuntimeError('LaTeX Studio requires Python 3.10 or later. Use the desktop launcher to select a compatible runtime.')
 
-from studio_storage import storage_for, project_id, detect_main, read_json
+from studio_storage import storage_for, project_id, detect_main, read_json, write_json
 from studio_packages import packages_for
 from studio_engine import engine_environment
 from studio_ai import assistant_for
@@ -354,6 +354,14 @@ class Handler(BaseHTTPRequestHandler):
                 if path.endswith('page-context'):return self.send(pages_for(storage()).context(ident,ROOT))
                 if path.endswith('page-preview'):return self.send(pages_for(storage()).status(ident,ROOT))
                 return self.file(pages_for(storage()).image(ident,ROOT,query.get('which',[''])[0],query.get('page',[None])[0]))
+            if path == '/api/review/terms':
+                with LOCK:
+                    from studio_terms import Terms
+                    manager=Terms(storage().data);files=sorted(manager.folder(ROOT).glob('*.json'),key=lambda p:p.stat().st_mtime_ns,reverse=True)
+                    for f in files:
+                        s=manager.load(ROOT,f.stem)
+                        if s.get('groups'):return self.send({k:s[k] for k in ['id','groups','applied','plan'] if k in s})
+                    return self.send({})
             if path == '/api/review/glossary':
                 return self.send(glossary_get(storage().data, project_id(ROOT)))
             if path == '/api/review/health':
@@ -493,7 +501,15 @@ class Handler(BaseHTTPRequestHandler):
                     on_progress = None
                     on_finish = None
                     bound_context = None
-                    if data.get('task') == 'pages_edit':
+                    if data.get('task') == 'terms':
+                        require_idle()
+                        from studio_terms import Terms
+                        manager=Terms(storage().data);page_root=ROOT
+                        sources={f['path']:project_path(f['path']).read_text('utf-8-sig') for f in tree() if Path(f['path']).suffix in {'.tex','.bib'} and f['size']<2_000_000}
+                        ident,text=manager.prepare(ROOT,sources,STATE['main'])
+                        on_result=lambda result:manager.attach(page_root,ident,result)
+                        data={'task':'terms','provider':'deepseek','text':text}
+                    elif data.get('task') == 'pages_edit':
                         require_idle();manager=pages_for(storage());ident=data.get('pageContext','');page_root=ROOT
                         parts,attachments=manager.batch_input(ident,page_root,current_preview(),data.get('retryPages'))
                         session=manager._session(ident,page_root)
@@ -574,6 +590,13 @@ class Handler(BaseHTTPRequestHandler):
                         session['preview']={}
                     pages_for(storage()).remember(session)
                     return self.send({'ok':True,'path':changes[0][0].relative_to(ROOT).as_posix(),'files':[p.relative_to(ROOT).as_posix() for p,_ in changes],'revision':digest(changes[0][1]),'page':session['page']})
+            if route in {'/api/review/terms-plan','/api/review/terms-apply','/api/review/terms-undo'}:
+                with LOCK:
+                    require_idle()
+                    from studio_terms import Terms
+                    manager=Terms(storage().data)
+                    if route.endswith('-plan'):return self.send(manager.plan(ROOT,data.get('id'),data.get('choices')))
+                    return self.send(manager.apply(ROOT,data.get('id'),data.get('plan'),snapshot,route.endswith('-undo')))
             if route == '/api/review/glossary':
                 with LOCK:
                     return self.send(glossary_save(storage().data, project_id(ROOT), data))
@@ -602,7 +625,15 @@ class Handler(BaseHTTPRequestHandler):
                     if route=='/api/review/references':result=analyze_references(sources,STATE['main'])
                     elif route=='/api/review/consistency':
                         from studio_document_tools import check_consistency
-                        result=check_consistency(sources,data.get('bindings'),data.get('dataFiles'),STATE['main'])
+                        settings_path=storage().data/'consistency'/(project_id(ROOT)+'.json')
+                        saved=read_json(settings_path,{})
+                        bindings=data.get('bindings',saved.get('bindings',{}));data_files=data.get('dataFiles',saved.get('dataFiles'))
+                        if 'dataFiles' not in data and data_files is not None:data_files=[p for p in data_files if p in sources]
+                        result=check_consistency(sources,bindings,data_files,STATE['main'])
+                        valid_ids={i['claim']['id'] for i in result['items']};source_ids={i['id'] for i in result['data']}
+                        bindings={k:v for k,v in bindings.items() if k in valid_ids and v in source_ids}
+                        write_json(settings_path,{'bindings':bindings,'dataFiles':data_files})
+                        result['bindings']=bindings;result['dataFiles']=data_files
                     else:
                         from studio_document_tools import impact
                         meta=read_json(storage().data/'previews'/(project_id(ROOT)+'.synctex.json'),{})

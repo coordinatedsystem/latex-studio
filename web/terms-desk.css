@@ -1,0 +1,45 @@
+/* Quiet document tools: white surfaces, readable text, one restrained accent. */
+#aiPage .ai-heading p,.writing-panel-symbol,#writingPhaseNumber{display:none}
+#aiPage .ai-heading h1{font-size:25px;font-weight:550}
+#writingWorkbench .writing-grid{gap:0}
+#writingWorkbench .writing-canvas,#writingWorkbench .writing-review{border-radius:7px;box-shadow:none}
+#writingWorkbench .writing-panel-heading{background:#fff;border-bottom:1px solid #c9d0d8;padding:12px 16px}
+#writingWorkbench .writing-panel-heading h2{font-size:17px;font-weight:550}
+#writingWorkbench .writing-steps{margin-bottom:10px;height:30px;opacity:1}
+#writingWorkbench .writing-steps li{font-size:13px}
+#writingWorkbench .writing-steps li>span{width:20px;height:20px;font-size:11px}
+#writingWorkbench .writing-request-heading h2{display:none}
+#writingWorkbench .writing-request-heading{justify-content:flex-end;margin-bottom:8px}
+#writingWorkbench .writing-request{padding:12px 16px}
+#writingWorkbench .writing-options{display:flex;gap:12px}
+#writingWorkbench .writing-options label{flex:1;min-width:0;color:#111}
+#writingWorkbench .writing-options select{width:100%;font-size:14px;padding:8px;border-color:#bfc7d1;border-radius:5px}
+#writingWorkbench #writingInstruction{min-height:90px;border-radius:5px;font-size:14px;line-height:1.7}
+#writingWorkbench .writing-result-empty{align-items:flex-start;justify-content:flex-start;text-align:left;padding:28px 6px;background:transparent;gap:4px}
+#writingWorkbench .writing-result-empty strong{font-size:15px;font-weight:500}
+#writingWorkbench .writing-result-empty p{font-size:14px;line-height:1.7;margin:0;color:#333}
+#writingWorkbench .writing-results{padding:10px 14px}
+#writingWorkbench .writing-edit{border-radius:5px;box-shadow:none}
+#writingWorkbench .writing-next-action{padding:12px 16px}
+#writingWorkbench .writing-next-action .primary{border-radius:5px;min-height:40px;font-size:15px}
+#writingWorkbench .writing-content{background:#f3f4f5!important}
+#writingWorkbench .writing-chip{background:#f4f5f6!important;border-color:#d0d4da!important;border-radius:4px;color:#111!important}
+.analysis-purpose{font-size:14px;line-height:1.8;margin:10px 0;color:#111}
+.terms-toolbar{display:flex;gap:8px;flex-wrap:wrap;padding:6px 0}
+.terms-toolbar button,.terms-footer button{font-size:14px;min-height:36px}
+.terms-status{font-size:14px;line-height:1.7;min-height:24px;border-bottom:1px solid #ccd2da;padding-bottom:12px;color:#111}
+.terms-status.error{border-left:3px solid #bb2828;padding-left:10px}
+.term-group{border:1px solid #cbd2db;border-radius:6px;margin:12px 0;background:white;padding:13px}
+.term-group>header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14px}
+.term-group>header label{display:flex;align-items:center;gap:9px}.term-group input[type=checkbox]{width:17px;height:17px;accent-color:#0f62fe}
+.term-group strong{font-weight:550}.term-group>header>span{font-size:13px;background:#f4f5f6;padding:4px 7px;border-radius:4px;color:#111}
+.term-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.term-fields label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:#111}
+.term-fields input{width:100%;font-size:14px;padding:8px;border:1px solid #bfc8d2;border-radius:4px;font-family:var(--ui-font);color:#111}.term-fields input[readonly]{background:#f6f7f8}
+.term-group p{font-size:14px;line-height:1.7;margin:9px 0;color:#111}.term-group details{border-top:1px solid #d5dae1;margin-top:10px;padding-top:9px}
+.term-group summary{font-size:14px;cursor:pointer}.term-variant{padding:9px 0;display:flex;flex-wrap:wrap;align-items:center;gap:7px;border-bottom:1px solid #e0e4e9;font-size:14px}.term-variant button{font-size:13px}
+.term-group .term-caution{font-size:13px;margin-bottom:0}.terms-footer{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:8px;padding:12px 0;background:#fff;border-top:1px solid #cbd2db}
+.term-plan-file{border:1px solid #cbd2db;margin:12px 0;border-radius:5px;padding:11px;font-size:14px}.term-plan-file summary{cursor:pointer;font-weight:500}
+.term-change{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0;border-top:1px solid #e0e4e9;margin-top:8px;line-height:1.7}.term-change del{background:#fdecec;color:#111;text-decoration:none;padding:3px 6px}.term-change ins{background:#e8f5ec;color:#111;text-decoration:none;padding:3px 6px}
+.terms-empty{font-size:14px;padding:20px 0;color:#111}
+@media(prefers-reduced-motion:no-preference){.term-group{animation:term-enter .16s ease-out}@keyframes term-enter{from{opacity:.5;transform:translateY(3px)}to{opacity:1;transform:none}}}
+@media(max-width:650px){.term-fields{grid-template-columns:1fr}.terms-toolbar button{flex:1}.term-group{padding:10px}}

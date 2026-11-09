@@ -17,6 +17,8 @@ python -B tools/build_release.py `
 
 构建脚本通过白名单复制应用文件，仅复制索引中存在且大小一致的 TeX 资源，不复制本机配置、项目、历史或 format 缓存。发布前检查 `build-manifest.json`。
 
+应用复制后会逐文件比较源码与载荷的 SHA256，缺失、变化或额外残留文件都会阻止打包。尤其新增 `studio_*.py`、前端脚本及样式时，无需手工维护复制清单。构建目录应专用于发布，不放入安装后的本机设置；Python 运行环境放在 `payload/python/`。
+
 运行 `python -B tools/audit_release.py .`，在独立目录实际安装、离线编译、生成 PDF 页面图像并测试升级保留文档。完成后提交源码、`distribution/` 与 `updates/latest.json`，打 `v版本号` 标签并推送。
 
 本版本安装包小于 100 MiB，暂随仓库分发；后续若使用 GitHub Releases，需要相应维护发布流程和只读下载接口，不能把发布写入凭据内置进应用。

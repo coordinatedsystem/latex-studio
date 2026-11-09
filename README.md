@@ -2,15 +2,23 @@
 
 面向 Windows 的本地 LaTeX 写作工具：源码编辑、PDF 预览、宏包管理与可审阅的 AI 修改，在同一个工作区完成。
 
-当前版本：**1.4.0** · Windows 10 / 11 x64 · 公开仓库
+当前版本：**1.5.1** · Windows 10 / 11 x64 · 公开仓库
 
 ## 安装
 
-从 [安装包目录](distribution/) 下载 `LaTeX-Studio-1.4.0-win64-Setup.exe`。使用旁边的 `SHA256SUMS.txt` 核对文件，再双击安装。默认位置为 `D:\LaTeXStudio`，首次安装和升级均显示安装位置选择页。更换位置不会自动迁移原有项目和设置；原位置升级保留用户数据。
+从 [安装包目录](distribution/) 下载 `LaTeX-Studio-1.5.1-win64-Setup.exe`。使用旁边的 `SHA256SUMS.txt` 核对文件，再双击安装。默认位置为 `D:\LaTeXStudio`，首次安装和升级均显示安装位置选择页。更换位置不会自动迁移原有项目和设置；原位置升级保留用户数据。
 
 安装包包含独立 Python、Tectonic 编译器、PDF 渲染组件、离线前端与基础 TeX 资源；无需另装 Python、Node.js 或 LaTeX。界面不依赖公共 CDN。未缓存的宏包需要联网下载。
 
 程序尚未购买 Windows 代码签名证书，安装程序的发布者可能显示为“未知”。SHA256 用来核对下载文件，不等同于代码签名。
+
+## 术语与数据审阅
+
+在编辑器的“文档工具 → 术语表”点击“AI 提取术语”，查看全文重要术语、原文位置及不同写法。勾选同义写法后先预览、再应用并编译，可撤销；全称缩写和相关概念保持独立。审核过的条目可去重导入术语表，不覆盖已有译词。公式、引用、代码和定义说明受保护；AI 判断仍需审阅。全文提取一次发送可读正文，支持 18 万字符以内的项目。
+
+数据检查用于核对论文指标与实验导出的 CSV / JSON。Python 常量只作候选，需要确认属于相同实验；没有来源表示尚未核对，不表示有错。可直接导入实验数据，来源选择按项目保存。
+
+“改动关联”展示选区、图表标签、引用位置和已编译 PDF 页面，便于改动后逐项复核；它不预测所有分页变化。
 
 ## 主要功能
 
@@ -63,7 +71,7 @@ AI 服务默认需要用户自行配置。密钥由 Windows DPAPI 加密，绑�
 
 `version.json` 是版本信息的唯一来源：`version` 使用语义版本，`build` 标识内部兼容性，`channel` 当前为 `stable`。
 
-下次发布先运行 `python tools/set_version.py 1.4.1 --build studio-22`，补充更新记录，再构建和测试。构建脚本会写出 SHA256 清单和对应版本清单；提交后创建同名 `v1.4.1` 标签并推送。
+下次发布先运行 `python tools/set_version.py <新版本> --build <studio-N>`，补充更新记录，再构建和测试。构建脚本会写出 SHA256 清单和对应版本清单；提交后创建同名 `v<新版本>` 标签并推送。
 
 构建入口见 [`tools/build_release.py`](tools/build_release.py)，安装脚本为 [`installer/LaTeXStudio.iss`](installer/LaTeXStudio.iss)。发布前运行 `python tools/audit_release.py .`，并实际测试独立安装与升级保留数据。
 

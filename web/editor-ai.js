@@ -113,13 +113,14 @@ $('#editorAiConfig').onclick=editorAiWatch(()=>aiSettings());$('#editorAiFull').
 $('#editorAiSummaryTab').onclick=()=>editorAiView(false);$('#editorAiDiffTab').onclick=()=>editorAiView(true);$('#editorAiFiles').onchange=()=>editorAiShowDiff().catch(e=>toast(e.message,true));
 $('#editorAiApply').onclick=editorAiWatch(()=>editorAiApply());$('#editorAiUndo').onclick=editorAiWatch(()=>editorAiApply(true));$('#editorAiPreview').onclick=editorAiWatch(editorAiShowEffects);$('#editorAiEffectTab').onclick=editorAiWatch(editorAiShowEffects);$('#editorAiOpenPdf').onclick=editorAiWatch(editorAiShowPdf);$('#editorAiReturnPdf').onclick=editorAiWatch(editorAiRestorePdf);$('#editorAiEffectPage').onchange=editorAiEffectImages;$('#editorAiExpand').onclick=editorAiExpand;
 $('#editorAiAfter').onload=()=>{$('#editorAiEffectState').textContent='编译通过';};for(const id of ['editorAiBefore','editorAiAfter'])$('#'+id).onerror=()=>{$('#editorAiEffectState').textContent='页面绘制失败，可在右侧打开 PDF';};
-const editorAiOldToggleLogs=toggleLogs;toggleLogs=function(force){if(force===true||($('#workspace').classList.contains('editor-ai-open')&&force===undefined)){editorAiDock('log');return;}editorAiOldToggleLogs(force);};
-const editorAiOldNotify=hubNotifyState;hubNotifyState=function(next){
- editorAiOldNotify(next);$('#editorAiRepair').hidden=next.success!==false||next.running||(!$('#editorAiPanel').hidden&&!$('#logPanel').hidden);
+toggleLogs=uiPatchRegistry.wrap('toggleLogs',toggleLogs,'editor-ai.js',previous=>function(force){if(force===true||($('#workspace').classList.contains('editor-ai-open')&&force===undefined)){editorAiDock('log');return;}previous(force);});
+let editorAiActionsInstalled=false;
+hubNotifyState=uiPatchRegistry.wrap('hubNotifyState',hubNotifyState,'editor-ai.js',previous=>function(next){
+ previous(next);$('#editorAiRepair').hidden=next.success!==false||next.running||(!$('#editorAiPanel').hidden&&!$('#logPanel').hidden);
  if(editorAiProject!==next.projectId){editorAiProject=next.projectId;editorAiSequence++;editorAiEffectTicket++;editorAiEffectMeta=null;editorAiJob=null;editorAiTarget=null;editorAiView(false);editorAiDiscardDiff();editorAiClearPdf();editorAiRefresh(true).catch(()=>{});}
  else editorAiRefresh().catch(()=>{});editorAiRender();
- if(editor&&!editorAiOldNotify.editorAiActions){editorAiOldNotify.editorAiActions=true;editor.addAction({id:'studio.editorAi',label:'编辑器 AI：解释或修改选区',keybindings:[monacoApi.KeyMod.CtrlCmd|monacoApi.KeyMod.Alt|monacoApi.KeyCode.KeyA],contextMenuGroupId:'9_ai',contextMenuOrder:1,run:()=>editorAiOpen('edit')});editor.addAction({id:'studio.repairAi',label:'AI 修复编译报错',contextMenuGroupId:'9_ai',contextMenuOrder:2,run:()=>editorAiOpen('repair')});}
-};
+ if(editor&&!editorAiActionsInstalled){editorAiActionsInstalled=true;editor.addAction({id:'studio.editorAi',label:'编辑器 AI：解释或修改选区',keybindings:[monacoApi.KeyMod.CtrlCmd|monacoApi.KeyMod.Alt|monacoApi.KeyCode.KeyA],contextMenuGroupId:'9_ai',contextMenuOrder:1,run:()=>editorAiOpen('edit')});editor.addAction({id:'studio.repairAi',label:'AI 修复编译报错',contextMenuGroupId:'9_ai',contextMenuOrder:2,run:()=>editorAiOpen('repair')});}
+});
 document.addEventListener('studio-source-change',()=>{if(editorAiJob)editorAiRender();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#modal').open&&!$('#editorAiPanel').hidden&&!$('#logPanel').hidden){editorAiMinimize();e.preventDefault();}});
 commands.push(['编辑器 AI','editorAi','Ctrl+Alt+A']);editorAiMode();

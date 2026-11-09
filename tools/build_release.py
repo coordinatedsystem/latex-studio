@@ -4,6 +4,17 @@ import argparse,hashlib,json,shutil,subprocess,sys
 from audit_release import audit
 
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+def verify_app(repo, app):
+    """Check every shipped module and frontend asset against its source."""
+    repo,app=Path(repo),Path(app)
+    expected={p.relative_to(repo) for folder in ('web','vendor','assets') for p in (repo/folder).rglob('*') if p.is_file()}
+    expected.update(Path(p.name) for p in repo.glob('studio_*.py'))
+    expected.update(map(Path, ('server.py','bootstrap_install.py','launch.ps1','Launch.vbs','version.json','README.md','CHANGELOG.md','THIRD_PARTY_NOTICES.md')))
+    bad=[str(p) for p in sorted(expected) if not (app/p).is_file() or sha(repo/p)!=sha(app/p)]
+    bad.extend(str(p.relative_to(app))+' (unexpected)' for p in app.rglob('*') if p.is_file() and p.relative_to(app) not in expected)
+    if bad:raise ValueError('Application payload missing or changed: '+', '.join(bad))
+    return len(expected)
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--runtime',required=True);parser.add_argument('--tex-cache',required=True);parser.add_argument('--payload',required=True);parser.add_argument('--iscc',required=True)
     args=parser.parse_args();repo=Path(__file__).resolve().parents[1];payload=Path(args.payload).resolve();runtime=Path(args.runtime).resolve();cache=Path(args.tex_cache).resolve()
@@ -14,6 +25,7 @@ def main():
     names=['server.py','studio_version.py','bootstrap_install.py','launch.ps1','Launch.vbs','version.json','README.md','CHANGELOG.md','THIRD_PARTY_NOTICES.md']
     names+= [p.name for p in repo.glob('studio_*.py') if p.name not in names]
     for name in names:shutil.copy2(repo/name,app/name)
+    verify_app(repo,app)
     shutil.copy2(repo/'Launch.vbs',payload/'Launch.vbs')
     compiler=payload/'runtime/bin';compiler.mkdir(parents=True,exist_ok=True)
     shutil.copy2(runtime/'bin/tectonic.exe',compiler/'tectonic.exe');shutil.copy2(runtime/'release.json',payload/'runtime/release.json')

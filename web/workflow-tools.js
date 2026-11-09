@@ -30,16 +30,15 @@ showHistory=async function(){
  $('#workflowCheckpoint').onclick=async()=>{try{if(state.projectId!==project||active!==path)throw new Error('项目或文件已切换');await saveFile(path);await api('history-checkpoint',{path,revision:models.get(path).revision});closeModal();await showHistory();toast('版本已保存');}catch(e){toast(e.message,true)}};
  if(versions.length)await select();
 };
-const workflowOldAiRender=editorAiRender;
-editorAiRender=function(){
- workflowOldAiRender();
+editorAiRender=uiPatchRegistry.wrap('editorAiRender',editorAiRender,'workflow-tools.js',previous=>function(){
+ previous();
  const j=editorAiJob,steps=$('#workflowRepairSteps');steps.hidden=!j||j.mode==='explain';
  if(!j)return;
  let current=j.applied?4:j.verified?3:j.changedPaths?.length?2:j.requestCount?1:0;
  const labels=['定位','生成','验证','应用'];
  steps.innerHTML=labels.map((label,i)=>`<li class="${i<current?'done':i===current?'current':''}"${i===current?' aria-current="step"':''}><span>${i<current?'✓':i+1}</span>${label}</li>`).join('');
  if(j.error&&!j.running&&!j.verified){const li=steps.children[Math.min(current,3)];li?.classList.add('failed');}
-};
+});
 async function workflowLocate(){
  if(editorAiDirty())throw new Error('请先保存并编译，再定位 PDF');
  if(editorAiPreview)throw new Error('请先返回原 PDF，再定位源码');
@@ -70,6 +69,6 @@ $('#pdfFrame').addEventListener('load',()=>{
 $('#workflowHistory').onclick=()=>{ $('#editorToolsMenu').open=false;showHistory().catch(e=>toast(e.message,true));};
 $('#workflowLocate').onclick=()=>{ $('#editorToolsMenu').open=false;workflowLocate().catch(e=>toast(e.message,true));};
 commands.push(['定位到 PDF（反向：Ctrl＋双击 PDF）','workflowLocate','']);
-const workflowOldRun=run;run=async function(action){if(action==='workflowLocate')return workflowLocate();return workflowOldRun(action);};
+run=uiPatchRegistry.wrap('run',run,'workflow-tools.js',previous=>async function(action){if(action==='workflowLocate')return workflowLocate();return previous(action);});
 
 

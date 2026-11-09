@@ -1,7 +1,7 @@
 {
-  "version": "1.4.0",
-  "file": "distribution/LaTeX-Studio-1.4.0-win64-Setup.exe",
-  "size": 74229894,
-  "sha256": "1d96b3a11b8e40bbc52eec64c293adf632aac0494075010907efaa161bd4ad83",
-  "notes": "1.4.0：修改前后版本与最近 AI 任务、锁定公式引用、完整段落翻译、质量复核提示、首页 PDF 缩略图修复。"
+  "version": "1.5.1",
+  "file": "distribution/LaTeX-Studio-1.5.1-win64-Setup.exe",
+  "size": 74398254,
+  "sha256": "6f291b583994a35432f7c8d87a96671428e26ab210d9b5af0fc760a25de2cd7d",
+  "notes": "LaTeX Studio 1.5.1：本地编辑、PDF、宏包管理、AI 审阅与安全更新。"
 }

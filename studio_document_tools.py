@@ -47,7 +47,7 @@ def data_values(sources):
     def add(file,line,label,value,scope='',unit=''):
         if len(result)>=1500:return
         key,inferred=_key(label);parsed=_numeric(value,key,unit)
-        if parsed and key:result.append({'id':_id(file,line,label,len(result)),'file':file,'line':line,'column':1,'label':label,'key':key,'scope':(_key(scope)[1] or scope.casefold()) if scope else inferred,**parsed})
+        if parsed and key:result.append({'id':_id(file,line,label,parsed['display']),'file':file,'line':line,'column':1,'label':label,'evidence':'code' if file.lower().endswith('.py') else 'export','key':key,'scope':(_key(scope)[1] or scope.casefold()) if scope else inferred,**parsed})
     def flatten(file,line,label,value,depth=0):
         if depth>5:return
         if isinstance(value,dict):
@@ -145,7 +145,7 @@ def check_consistency(sources,bindings=None,data_files=None,main=None):
                 if not header:continue
                 for col,cell in enumerate(cells[:len(header)]):
                     key,scope=_key(header[col]);unit='%' if '%' in header[col] else next((u for u in UNITS if re.search(r'[([]\s*'+re.escape(u)+r'\s*[)\]]',header[col],re.I)),'');parsed=_numeric(cell,key,unit)
-                    if not parsed or not key:continue
+                    if not parsed or key not in ALIASES:continue
                     pos=table.start()+row.start()+len(row[1])-len(row[1].lstrip());line_no=clean[:pos].count('\n')+1;identity=(file,line_no,key,col,'table')
                     claims.append({'id':_id(*identity),'file':file,'line':line_no,'column':1,'label':header[col],'key':key,'scope':scope or _key(cells[0])[1],'row':cells[0],'context':row[1].strip()[:600],'pdfText':cell[:160],'kind':'table',**parsed})
     items=[];counts=defaultdict(int)
@@ -153,22 +153,31 @@ def check_consistency(sources,bindings=None,data_files=None,main=None):
         candidates=[d for d in data if d['key']==claim['key'] and (not claim['scope'] or d['scope']==claim['scope'])]
         selected=next((d for d in candidates if d['id']==bindings.get(claim['id'])),None)
         signatures={(d['unitGroup'],d['normalized']) for d in candidates}
-        if not selected and len(signatures)==1:selected=candidates[0]
-        if not candidates:status='unlinked';message='未找到明确对应的静态数据'
-        elif not selected:status='ambiguous';message='存在不同基准，请选择数据来源'
+        explicit=selected is not None
+        # Code literals can belong to different experiments or be function defaults.
+        exports=[d for d in candidates if d.get('evidence')=='export']
+        row_context=claim.get('row','')
+        if not selected and exports and len({(d['unitGroup'],d['normalized']) for d in exports})==1 and not row_context:selected=exports[0]
+        if not candidates:status='unlinked';message='项目没有该指标的结果数据，尚未核对；这不是论文错误'
+        elif not selected:status='ambiguous';message='请选择与这一实验对应的数据。代码常量可能是默认参数，不能直接作为论文依据'
         elif selected['unitGroup']!=claim['unitGroup']:status='unit';message='单位或比例表示不同，需要确认'
         elif abs(selected['normalized']-claim['normalized'])<=claim['step']/2+max(1e-12,abs(selected['normalized'])*1e-9):status='match';message='与数据一致（允许正文显示精度内的舍入）'
         else:status='mismatch';message='与选定数据不一致'
-        counts[status]+=1;items.append({'claim':claim,'sources':candidates[:60],'source':selected,'status':status,'message':message})
+        counts[status]+=1;items.append({'claim':claim,'sources':candidates[:60],'source':selected,'status':status,'message':message,'binding':('manual' if explicit else 'export') if selected else None})
     return {'items':items,'data':data,'counts':dict(counts),'warnings':warnings,'sourceFiles':sorted({i['file'] for i in data}),
-        'note':'只核对静态数据与明确标注的指标；不会运行代码。未关联、歧义和单位差异都需要人工确认。'}
+        'note':'只核对已关联的指标；不会运行实验。无来源表示尚未核对，不代表有错。建议导入实际实验导出的 CSV 或 JSON。'}
 
 def impact(sources,main,path,start,end,meta=None,assets=None):
     from studio_review import analyze_references
     if path not in sources:raise ValueError('请选择项目中的文本文件')
     if any(isinstance(n,bool) or not isinstance(n,int) for n in (start,end)) or start<1 or end<start or end>sources[path].count('\n')+1:raise ValueError('请选择有效源码行范围')
     report=analyze_references(sources,main);catalog=report['catalog'];selected='\n'.join(sources[path].splitlines()[start-1:end]);locations=[{'file':path,'line':start,'endLine':end,'reason':'所选源码'}]
-    labels=[e for e in catalog['labels'] if any(d['file']==path and d['line']<=end and d.get('endLine',d['line'])>=start for d in e['definitions'])]
+    # A caption/body change belongs to its surrounding float even when label is on another line.
+    a,b=start,end
+    for env in re.finditer(r'\\begin\{(figure\*?|table\*?|equation\*?)\}.*?\\end\{\1\}',sources[path],re.S):
+        first=sources[path].count('\n',0,env.start())+1;last=sources[path].count('\n',0,env.end())+1
+        if first<=end and last>=start:a=min(a,first);b=max(b,last)
+    labels=[e for e in catalog['labels'] if any(d['file']==path and d['line']<=b and d.get('endLine',d['line'])>=a for d in e['definitions'])]
     bibliography=[e for e in catalog['bibliography'] if any(d['file']==path and d['line']<=end and d.get('endLine',d['line'])>=start for d in e['definitions'])]
     usages=[]
     for entry in labels+bibliography:
