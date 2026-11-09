@@ -1,9 +1,11 @@
 'use strict';
 const termsDesk={project:null,result:null,chosen:new Set(),plan:null,busy:false,job:null};
 function termsControls(){
- const busy=termsDesk.busy||!!state?.running||!!state?.aiBusy;$('#termsExtract').disabled=busy;$('#termsExtract').textContent=termsDesk.busy&&termsDesk.action==='extract'?'正在提取…':'AI 提取术语';
+ const busy=termsDesk.busy||!!state?.running||!!state?.aiBusy;$('#termsExtract').disabled=busy;$('#termsExtract').textContent=termsDesk.busy&&termsDesk.action==='extract'?'正在检索…':'AI 提取全文术语';
+ const selected=typeof glossarySelection==='undefined'?[]:[...glossarySelection].filter(t=>glossaryData?.terms.includes(t));
+ $('#termsSearchSelected').disabled=busy||!selected.length;$('#termsSearchSelected').textContent='AI 检索所选术语'+(selected.length?'（'+selected.length+'）':'');
  for(const id of ['termsPreview','termsImport','termsSelectAll'])$('#'+id).disabled=busy||!termsDesk.result?.groups.length;
- $('#termsApply').disabled=busy||!termsDesk.plan?.count||!!termsDesk.result?.applied;
+ $('#termsApply').disabled=busy||![...termsDesk.chosen].some(id=>termsDesk.result?.groups.find(g=>g.id===id)?.relation==='same')||!!termsDesk.result?.applied;
  $('#termsUndo').hidden=!termsDesk.result?.applied;$('#termsUndo').disabled=busy;
  $('#termsStop').hidden=!busy||!termsDesk.job?.running;
  $('#termsPreview').disabled||=!!termsDesk.result?.applied;
@@ -17,7 +19,7 @@ async function termsStop(){
 }
 function termsGuard(){reviewGuard(termsDesk.project);if([...models.values()].some(i=>i.dirty))throw new Error('源码有未保存的改动。请先保存，再重新提取术语。');}
 function termsWatch(fn){return async(...args)=>{try{await fn(...args);}catch(e){termsMessage(e.message,true);}finally{termsControls();}};}
-function termsShow(report=true){for(const id of ['glossaryImport','glossaryExport','glossarySave'])$('#'+id).hidden=report;$('#termsDesk').hidden=!report;$('#review-glossary>.review-card').hidden=report;$('#termsShow').textContent=report?'返回术语表':'查看提取结果';}
+function termsShow(report=true){for(const id of ['glossaryImport','glossaryExport','glossarySave','termsSearchSelected'])$('#'+id).hidden=report;$('#termsDesk').hidden=!report;$('#review-glossary>.review-card').hidden=report;$('#termsShow').textContent=report?'返回术语表':'查看提取结果';}
 function termsRender(){
  const result=termsDesk.result;$('#termsReport').innerHTML=(result?.groups||[]).map(g=>{
  const total=g.variants.reduce((n,v)=>n+v.count,0),labels={same:'同义写法',abbreviation:'全称与缩写',related:'独立或相关术语'};
@@ -25,16 +27,26 @@ function termsRender(){
  }).join('')||'<p class="terms-empty">尚未提取术语。</p>';
  termsControls();
 }
-async function termsExtract(){
- await saveAll();await reviewLoadGlossary();const project=state.projectId;
+async function termsSearchSelected(){
+ const targets=[...glossarySelection].filter(t=>glossaryData.terms.includes(t)).map(t=>({...t}));
+ if(!targets.length)throw new Error('请先在术语表中勾选要检索的术语。');
+ if(targets.length>100)throw new Error('每次最多检索 100 个术语，请分批选择。');
+ await termsExtract(targets);
+}
+async function termsExtract(targets=null){
+ const project=state.projectId;await saveAll();reviewGuard(project);await reviewLoadGlossary();reviewGuard(project);
  if(termsDesk.busy)return;termsDesk.project=project;termsDesk.busy=true;termsDesk.action='extract';termsDesk.job=null;termsShow();$('#termsReport').hidden=true;$('#termsPlan').hidden=true;termsMessage('正在阅读全文，提取重要术语…');termsControls();
  try{
-  let job=await api('ai/start',{task:'terms',provider:'deepseek'});termsDesk.job=job;termsControls();
+  let job=await api('ai/start',{task:'terms',provider:'deepseek',...(targets?{termTargets:targets}:{})});termsDesk.job=job;termsControls();
   while(job.running){await new Promise(resolve=>setTimeout(resolve,500));reviewGuard(project);job=await api('ai/job?id='+encodeURIComponent(job.id));termsDesk.job=job;}
   reviewGuard(project);if(!job.success){if(job.stage==='已停止'){termsMessage('已停止提取，原有术语和文档未改动。');return;}throw new Error(job.error||'提取未完成');}
-  termsDesk.result={...job.result,id:job.result.termContext,applied:false};termsDesk.chosen.clear();termsDesk.plan=null;$('#termsPlan').replaceChildren();$('#termsShow').hidden=false;termsRender();
-  termsMessage(`${job.result.groups.length} 组术语 · 先查看原文位置，再勾选需要统一或导入的条目。`);
+  termsDesk.result={...job.result,id:job.result.termContext,applied:false};termsDesk.chosen=new Set(targets?job.result.groups.filter(g=>g.relation==='same'&&g.variants.length).map(g=>g.id):[]);termsDesk.plan=null;$('#termsPlan').replaceChildren();$('#termsShow').hidden=false;termsRender();
+  termsMessage(`${job.result.groups.length} 组术语 · 可修改“统一为”，勾选后直接点击“统一替换并编译”；也可先预览修改。`);
  }finally{termsDesk.busy=false;termsDesk.job=null;$('#termsReport').hidden=false;$('#termsPlan').hidden=false;termsControls();}
+}
+async function termsReplace(){
+ if(termsDesk.busy)return;
+ await termsPreview();if(termsDesk.plan?.count)await termsApply();
 }
 async function termsPreview(){
  termsGuard();const choices=[...termsDesk.chosen].filter(id=>termsDesk.result.groups[id].relation==='same').map(id=>({id,preferred:termsDesk.result.groups[id].preferred}));
@@ -67,8 +79,9 @@ async function termsImport(){
 function termsInstall(){
  $('#glossaryImport').insertAdjacentHTML('beforebegin','<button type="button" id="termsShow" class="secondary" hidden>查看提取结果</button>');
  $('#review-glossary>.review-card').insertAdjacentHTML('beforebegin','<section id="termsDesk" hidden><div class="terms-toolbar"><button id="termsSelectAll" class="secondary">全选条目</button><button id="termsPreview" class="secondary">预览统一修改</button><button id="termsImport" class="secondary">导入所选术语</button><button id="termsStop" class="secondary" hidden>停止</button></div><p id="termsStatus" class="terms-status" role="status">尚未提取</p><div id="termsPlan"></div><div id="termsReport"></div><footer class="terms-footer"><button id="termsApply" class="primary" disabled>应用修改并编译</button><button id="termsUndo" class="secondary" hidden>撤销统一</button></footer></section>');
- $('#termsExtract').onclick=termsWatch(termsExtract);$('#termsShow').onclick=()=>termsShow($('#termsDesk').hidden);
- $('#termsPreview').onclick=termsWatch(termsPreview);$('#termsApply').onclick=termsWatch(()=>termsApply());$('#termsUndo').onclick=termsWatch(()=>termsApply(true));$('#termsImport').onclick=termsWatch(termsImport);
+ $('#termsApply').textContent='统一替换并编译';
+ $('#termsExtract').onclick=termsWatch(()=>termsExtract());$('#termsSearchSelected').onclick=termsWatch(termsSearchSelected);$('#termsShow').onclick=()=>termsShow($('#termsDesk').hidden);
+ $('#termsPreview').onclick=termsWatch(termsPreview);$('#termsApply').onclick=termsWatch(termsReplace);$('#termsUndo').onclick=termsWatch(()=>termsApply(true));$('#termsImport').onclick=termsWatch(termsImport);
  $('#termsStop').onclick=termsWatch(termsStop);
  $('#termsSelectAll').onclick=()=>{termsDesk.chosen=new Set(termsDesk.chosen.size===termsDesk.result.groups.length?[]:termsDesk.result.groups.map(g=>g.id));if(!termsDesk.result.applied){termsDesk.plan=null;$('#termsPlan').replaceChildren();}termsRender();};
  $('#termsReport').onchange=e=>{const check=e.target.closest('[data-term-choice]');if(check){const id=Number(check.dataset.termChoice);check.checked?termsDesk.chosen.add(id):termsDesk.chosen.delete(id);}if(!termsDesk.result?.applied){termsDesk.plan=null;$('#termsPlan').replaceChildren();}termsControls();};

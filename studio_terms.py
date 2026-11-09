@@ -37,6 +37,17 @@ def occurrences(text,term,view=None):
 def valid_term(value):
     return isinstance(value,str) and bool(re.search(r'[A-Za-z\u4e00-\u9fff]',value)) and 1<len(value.strip())<=120 and not re.search(r'[\\{}$%\n\r\x00-\x1f]',value)
 
+def selected_terms(value):
+    if value is None:return []
+    if not isinstance(value,list) or not 1<=len(value)<=100:raise ValueError('请选择 1～100 个术语')
+    result=[];seen=set()
+    for item in value:
+        if not isinstance(item,dict) or not valid_term(item.get('source')):raise ValueError('所选术语原词无效')
+        source=item['source'].strip()
+        if source.casefold() in seen:continue
+        seen.add(source.casefold());result.append({'source':source,'target':str(item.get('target',''))[:160],'note':str(item.get('note',''))[:300]})
+    return result
+
 class Terms:
     def __init__(self,data):self.data=Path(data)
     def folder(self,root):return self.data/'terminology'/project_id(root)
@@ -48,18 +59,20 @@ class Terms:
         if not value:raise ValueError('术语任务不存在，请重新提取')
         return value
     def save(self,root,s):write_json(self.path(root,s['id']),s)
-    def prepare(self,root,sources,main):
+    def prepare(self,root,sources,main,targets=None):
+        targets=selected_terms(targets)
         reachable=analyze_references(sources,main)['files'];files={}
         for name in reachable:
             if not name.endswith('.tex'):continue
             raw=(Path(root)/name).read_bytes();text=raw.decode('utf-8-sig');files[name]={'text':text,'hash':digest(raw),'bom':raw.startswith(b'\xef\xbb\xbf')}
         document='\n\n'.join('FILE '+name+'\n'+prose_mask(f['text']) for name,f in files.items())
         if not document.strip() or len(document)>180000:raise ValueError('全文提取支持 18 万字符以内的正文项目，请拆分过长项目')
-        ident=uuid.uuid4().hex;s={'id':ident,'files':files,'groups':[],'main':main,'applied':False}
+        ident=uuid.uuid4().hex;s={'id':ident,'files':files,'groups':[],'main':main,'applied':False,'targets':targets}
         self.save(root,s);return ident,document
     def attach(self,root,ident,result):
         s=self.load(root,ident);groups=[];seen=set();views={n:prose_mask(f['text']) for n,f in s['files'].items()}
         proposed=result.get('groups',[])
+        targets={t['source'].casefold():t for t in s.get('targets',[])}
         if not isinstance(proposed,list):raise ValueError('术语响应格式无效')
         for item in proposed[:100]:
             if not isinstance(item,dict):continue
@@ -67,6 +80,12 @@ class Terms:
             if not valid_term(preferred) or preferred.casefold() in seen:continue
             values=item.get('variants',[])
             if not isinstance(values,list):continue
+            target=targets.get(preferred.casefold())
+            if targets and not target:
+                target=next((targets[v.casefold()] for v in values if isinstance(v,str) and v.casefold() in targets),None)
+            if targets and not target:continue
+            if target:preferred=target['source']
+            if preferred.casefold() in seen:continue
             variants=[]
             for term in dict.fromkeys([preferred]+[v for v in values if isinstance(v,str)]):
                 if not valid_term(term):continue
@@ -78,14 +97,16 @@ class Terms:
                 if locs:variants.append({'text':term,'count':len(locs),'locations':locs[:300]})
             if not variants:continue
             # Proposed spellings must already be found in the paper.
-            if preferred not in [v['text'] for v in variants]:preferred=variants[0]['text']
+            if not target and preferred not in [v['text'] for v in variants]:preferred=variants[0]['text']
             relation=item.get('relation','related')
             relation=relation if relation in {'same','abbreviation','related'} else 'related'
-            if relation=='same' and len({tuple(re.findall(r'\d+(?:\.\d+)?',v['text'])) for v in variants})>1:relation='related'
-            target=str(item.get('target',''))[:160].strip()
-            if re.search(r'[\x00-\x1f]',target):target=''
-            groups.append({'id':len(groups),'preferred':preferred,'target':target,'note':str(item.get('note',''))[:300], 'relation':relation,'variants':variants})
+            if relation=='same' and len({tuple(re.findall(r'\d+(?:\.\d+)?',value)) for value in [preferred]+[v['text'] for v in variants]})>1:relation='related'
+            translation=str(target['target'] if target else item.get('target',''))[:160].strip()
+            if re.search(r'[\x00-\x1f]',translation):translation=''
+            groups.append({'id':len(groups),'preferred':preferred,'target':translation,'note':str(item.get('note',''))[:300], 'relation':relation,'variants':variants})
             seen.add(preferred.casefold())
+        for key,target in targets.items():
+            if key not in seen:groups.append({'id':len(groups),'preferred':target['source'],'target':target['target'],'note':'未找到可核对的正文位置，请检查术语或重新检索。','relation':'related','variants':[]})
         s['groups']=groups;self.save(root,s)
         result.clear();result.update({'termContext':ident,'groups':groups,'summary':f'已找到 {len(groups)} 组术语','files':list(s['files'])})
     def check(self,root,s,applied=False):

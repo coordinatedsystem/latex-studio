@@ -506,9 +506,10 @@ class Handler(BaseHTTPRequestHandler):
                         from studio_terms import Terms
                         manager=Terms(storage().data);page_root=ROOT
                         sources={f['path']:project_path(f['path']).read_text('utf-8-sig') for f in tree() if Path(f['path']).suffix in {'.tex','.bib'} and f['size']<2_000_000}
-                        ident,text=manager.prepare(ROOT,sources,STATE['main'])
+                        ident,text=manager.prepare(ROOT,sources,STATE['main'],data.get('termTargets'))
                         on_result=lambda result:manager.attach(page_root,ident,result)
-                        data={'task':'terms','provider':'deepseek','text':text}
+                        targets=manager.load(ROOT,ident)['targets']
+                        data={'task':'terms','provider':'deepseek','text':text,**({'termTargets':targets} if targets else {})}
                     elif data.get('task') == 'pages_edit':
                         require_idle();manager=pages_for(storage());ident=data.get('pageContext','');page_root=ROOT
                         parts,attachments=manager.batch_input(ident,page_root,current_preview(),data.get('retryPages'))

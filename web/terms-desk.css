@@ -1,4 +1,6 @@
 /* Quiet document tools: white surfaces, readable text, one restrained accent. */
+.glossary-table th.glossary-pick,.glossary-table td.glossary-pick{width:44px;min-width:44px;text-align:center}.glossary-pick input[type=checkbox]{width:16px;height:16px}#review-glossary .review-toolbar{flex-wrap:wrap}
+.glossary-table th:nth-child(2),.glossary-table th:nth-child(3){width:30%}
 #aiPage .ai-heading p,.writing-panel-symbol,#writingPhaseNumber{display:none}
 #aiPage .ai-heading h1{font-size:25px;font-weight:550}
 #writingWorkbench .writing-grid{gap:0}

@@ -52,6 +52,27 @@ class TermTests(unittest.TestCase):
         self.assertEqual((self.root/'chapter.tex').read_bytes(),self.original['chapter.tex'])
 
 class EvidenceTests(unittest.TestCase):
+    def test_selected_targets_anchor_custom_spelling_filter_other_concepts_and_undo(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);p=root/'main.tex';original='训练使用反向传递。神经网络用于分类。'.encode('utf8');p.write_bytes(original);m=Terms(root/'private')
+            ident,_=m.prepare(root,{'main.tex':original.decode()},'main.tex',[{'source':'反向传播','target':'backpropagation'}])
+            result={'groups':[{'preferred':'反向传播','variants':['反向传递'],'relation':'same'},{'preferred':'神经网络','variants':['神经网络'],'relation':'same'}]}
+            m.attach(root,ident,result);self.assertEqual(len(result['groups']),1);self.assertEqual(result['groups'][0]['preferred'],'反向传播')
+            plan=m.plan(root,ident,[{'id':0}]);self.assertEqual(plan['count'],1);m.apply(root,ident,plan['id'],lambda *a:None)
+            self.assertIn('反向传播',p.read_text('utf8'));m.apply(root,ident,plan['id'],lambda *a:None,True);self.assertEqual(p.read_bytes(),original)
+
+    def test_selected_model_number_cannot_be_merged_and_unmatched_target_is_visible(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);(root/'main.tex').write_text('Model 1 is used.','utf8');m=Terms(root/'private');ident,_=m.prepare(root,{'main.tex':'Model 1 is used.'},'main.tex',[{'source':'Model 2'},{'source':'unmatched term'}])
+            result={'groups':[{'preferred':'Model 2','variants':['Model 1'],'relation':'same'}]};m.attach(root,ident,result)
+            self.assertEqual([g['relation'] for g in result['groups']],['related','related']);self.assertEqual(result['groups'][1]['variants'],[])
+            with self.assertRaisesRegex(ValueError,'相关概念'):m.plan(root,ident,[{'id':0}])
+
+    def test_selected_terms_reject_invalid_input_before_model_request(self):
+        from studio_terms import selected_terms
+        for value in [[],{},[{'source':r'\input{bad}'}],[{'source':'x'}],[{'source':'valid'}]*101]:
+            with self.assertRaises(ValueError):selected_terms(value)
+
     def test_code_constant_is_not_paper_ground_truth_until_confirmed(self):
         sources={'main.tex':'学习率为 0.1。','config.py':'lr = 0.5\n'}
         r=check_consistency(sources);self.assertEqual(r['items'][0]['status'],'ambiguous')

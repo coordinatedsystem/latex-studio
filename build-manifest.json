@@ -1,5 +1,5 @@
 {
-  "version": "1.5.2",
+  "version": "1.5.3",
   "files": [
     {
       "path": "Launch.vbs",
@@ -13,8 +13,8 @@
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 7712,
-      "sha256": "2780364e294f5cd9bc83106f49ca18b7d1119b0b269621d0b521b05860f1ca16"
+      "size": 8322,
+      "sha256": "ffe53113fa04d25eca81bf72353c06f882a61b13f425294539e9c7e5f1d058f6"
     },
     {
       "path": "app/launch.ps1",
@@ -28,18 +28,18 @@
     },
     {
       "path": "app/README.md",
-      "size": 7667,
-      "sha256": "bad7201b74dd7fcef992cf5765851c644fdca890863fb152197b5f0558b31ee2"
+      "size": 7766,
+      "sha256": "00d99eec11c25f8714488229ad7336609802f90fb82537454ded1225652edbd5"
     },
     {
       "path": "app/server.py",
-      "size": 50652,
-      "sha256": "6e04f21abd1282f2079cc75829ac0d4c0d32bc34556340c2335673be54c134ec"
+      "size": 50792,
+      "sha256": "36d35451c80bd0e5888af1aa75fcd681cbf34b4c6d21957a7deab36977eadb6e"
     },
     {
       "path": "app/studio_ai.py",
-      "size": 44906,
-      "sha256": "5372e9afbc8414152769239aa0b1b58a10ed4fcfac267fa5b1e683e204267dca"
+      "size": 45607,
+      "sha256": "0cc85330712489669daa107a16c9666d3c8509761925596f54df4f6ebc85734c"
     },
     {
       "path": "app/studio_ai_quality.py",
@@ -133,8 +133,8 @@
     },
     {
       "path": "app/studio_terms.py",
-      "size": 10408,
-      "sha256": "aaab7c99c005260b5006bd0ae3940f1fa3744b6c0d443831488867a122ddc396"
+      "size": 11899,
+      "sha256": "a9bd33963c59d5040f99a5d3c16067c33cdde4dbe482fb0ae23f390aaaba47ee"
     },
     {
       "path": "app/studio_updates.py",
@@ -154,7 +154,7 @@
     {
       "path": "app/version.json",
       "size": 128,
-      "sha256": "fc99c07c9f6c25668d43628805c08e14c9a101c89fd569b85a691e4907a4c841"
+      "sha256": "c55d81132fe7bc19348b83f09fe6813f6f7d0db9aa1f488f52d4a82f26f3191d"
     },
     {
       "path": "app/assets/studio.ico",
@@ -3098,8 +3098,8 @@
     },
     {
       "path": "app/web/index.html",
-      "size": 49635,
-      "sha256": "2c5b4b0c31fa89fa9cdae933e66a36c39635dabe71f602bc4b39b74b4b6c75ca"
+      "size": 49861,
+      "sha256": "fdd06987af8cb020278e88635aca72304db8a1210798c5c66bd98c7db31cc274"
     },
     {
       "path": "app/web/interface-polish.css",
@@ -3158,8 +3158,8 @@
     },
     {
       "path": "app/web/review-studio.js",
-      "size": 20915,
-      "sha256": "d269ca3d20c80f0c95ecff5e4fe819d0bac61bb76ff5d5c86efef07eada59f71"
+      "size": 21537,
+      "sha256": "784f1c73d3a6e7f505c9637adc9680ab234795807bb31898e92083febc280b95"
     },
     {
       "path": "app/web/style.css",
@@ -3168,13 +3168,13 @@
     },
     {
       "path": "app/web/terms-desk.css",
-      "size": 4811,
-      "sha256": "e1692dadb50147c832155d830ef1de8a16964986ac8bb2b46cc027803d55718b"
+      "size": 5106,
+      "sha256": "514e79cfd55c0ce66e539229283e1a44c07133fd5c767cfad7bda27041788676"
     },
     {
       "path": "app/web/terms-desk.js",
-      "size": 12362,
-      "sha256": "5f405ade8f68a43d0ee77b58735b3b69aa898115d144a49966c495799d44e768"
+      "size": 13597,
+      "sha256": "dda6635f950a84a8b1d28585bb0c60b1beffc659f3086e9352470cf225bbeb08"
     },
     {
       "path": "app/web/ui-patch-registry.js",

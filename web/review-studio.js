@@ -1,5 +1,6 @@
 'use strict';
 let reviewTool='assistant',layoutReport=null,layoutSelection=new Set(),layoutCurrent=1,referenceReport=null;
+let glossarySelection=new Set();
 let glossaryData=null,glossaryProject='',glossaryDirty=false,glossaryRemoved=[],reviewRemote=null,reviewRemoteTimer=null,reviewRemotePolling=false,reviewRemoteStarting=false;
 function reviewError(message=''){$('#reviewError').hidden=!message;$('#reviewError').textContent=message;}
 function reviewGuard(project){if(project!==state?.projectId)throw new Error('项目已切换，请重新载入检查结果。');}
@@ -55,9 +56,11 @@ async function reviewLoadGlossary(force=false){
  const project=state?.projectId,result=await api('review/glossary');reviewGuard(project);glossaryData=result;glossaryProject=project;glossaryDirty=false;glossaryRemoved=[];glossaryRender();
 }
 function glossaryRender(){
+ glossarySelection=new Set([...glossarySelection].filter(term=>glossaryData?.terms.includes(term)));
  const query=$('#glossaryQuery').value.toLocaleLowerCase();
- $('#glossaryRows').innerHTML=(glossaryData?.terms||[]).map((t,i)=>({t,i})).filter(({t})=>Object.values(t).join(' ').toLocaleLowerCase().includes(query)).map(({t,i})=>`<tr data-term-row="${i}">${['source','target','note'].map((key,j)=>`<td><input data-term-index="${i}" data-term-field="${key}" aria-label="术语 ${i+1} 的${['原词','译词','备注'][j]}" value="${esc(t[key])}" maxlength="${[120,160,300][j]}" placeholder="${['例如：反向传播','backpropagation','可选说明'][j]}"></td>`).join('')}<td><button class="tiny" data-term-remove="${i}" aria-label="移除术语 ${i+1}" title="移除术语，可撤销">${icon('close')}</button></td></tr>`).join('')||'<tr><td colspan="4" class="review-placeholder">暂无匹配术语。点击「添加术语」开始。</td></tr>';
+ $('#glossaryRows').innerHTML=(glossaryData?.terms||[]).map((t,i)=>({t,i})).filter(({t})=>Object.values(t).join(' ').toLocaleLowerCase().includes(query)).map(({t,i})=>`<tr data-term-row="${i}"><td class="glossary-pick"><input type="checkbox" data-term-pick="${i}" aria-label="选择术语 ${i+1}" ${glossarySelection.has(t)?'checked':''}></td>${['source','target','note'].map((key,j)=>`<td><input data-term-index="${i}" data-term-field="${key}" aria-label="术语 ${i+1} 的${['原词','译词','备注'][j]}" value="${esc(t[key])}" maxlength="${[120,160,300][j]}" placeholder="${['例如：反向传播','backpropagation','可选说明'][j]}"></td>`).join('')}<td><button class="tiny" data-term-remove="${i}" aria-label="移除术语 ${i+1}" title="移除术语，可撤销">${icon('close')}</button></td></tr>`).join('')||'<tr><td colspan="5" class="review-placeholder">暂无匹配术语。点击「添加术语」开始。</td></tr>';
  glossaryStatus();
+ if(typeof termsControls==='function')termsControls();
 }
 function glossaryStatus(){$('#glossaryStatus').textContent=(glossaryData?.terms.length||0)+' / 200 条'+(glossaryDirty?' · 尚未保存':' · 已载入');$('#glossaryUndo').disabled=!glossaryRemoved.length;}
 async function glossarySave(){reviewGuard(glossaryProject);const b=$('#glossarySave');b.disabled=true;try{glossaryData=await api('review/glossary',glossaryData);glossaryDirty=false;glossaryRender();$('#glossaryStatus').textContent=glossaryData.terms.length+' 条 · 已保存';toast('项目术语表已保存');}finally{b.disabled=false;}}
@@ -110,6 +113,7 @@ $('#visionResults').onclick=reviewWatch(async e=>{const modify=e.target.closest(
 $('#referencesScan').onclick=reviewWatch(referencesScan);$('#referenceSeverity').onchange=referencesRender;$('#referenceQuery').oninput=referencesRender;
 async function referenceOpen(e){const b=e.target.closest('[data-reference-file]');if(b){reviewGuard(referenceReport.projectId);await openFile(b.dataset.referenceFile,Number(b.dataset.referenceLine||1));hubView('editor');}}
 $('#referenceIssues').onclick=reviewWatch(referenceOpen);$('#referenceFiles').onclick=reviewWatch(referenceOpen);$('#referencesCopy').onclick=reviewWatch(async()=>{reviewGuard(referenceReport.projectId);await navigator.clipboard.writeText(JSON.stringify(referenceReport,null,2));toast('引用检查结果已复制');});
+$('#glossaryRows').onchange=e=>{const check=e.target.closest('[data-term-pick]');if(check){const term=glossaryData.terms[Number(check.dataset.termPick)];check.checked?glossarySelection.add(term):glossarySelection.delete(term);if(typeof termsControls==='function')termsControls();}};
 $('#glossaryQuery').oninput=glossaryRender;$('#glossarySave').onclick=reviewWatch(glossarySave);$('#glossaryReload').onclick=reviewWatch(()=>reviewLoadGlossary(true));$('#glossaryExport').onclick=reviewWatch(glossaryExport);$('#glossaryImport').onclick=glossaryImport;
 $('#glossaryAdd').onclick=reviewWatch(async()=>{reviewGuard(glossaryProject);if(glossaryData.terms.length>=200)throw new Error('已达到 200 条上限');$('#glossaryQuery').value='';glossaryData.terms.push({source:'',target:'',note:''});glossaryDirty=true;glossaryRender();$('#glossaryRows tr:last-child input')?.focus();});
 $('#glossaryRows').oninput=e=>{const input=e.target.closest('[data-term-field]');if(input){glossaryData.terms[Number(input.dataset.termIndex)][input.dataset.termField]=input.value;glossaryDirty=true;glossaryStatus();}};
