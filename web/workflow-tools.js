@@ -67,7 +67,6 @@ $('#pdfFrame').addEventListener('load',()=>{
  });
 });
 $('#workflowHistory').onclick=()=>{ $('#editorToolsMenu').open=false;showHistory().catch(e=>toast(e.message,true));};
-$('#workflowLocate').onclick=()=>{ $('#editorToolsMenu').open=false;workflowLocate().catch(e=>toast(e.message,true));};
 commands.push(['定位到 PDF（反向：Ctrl＋双击 PDF）','workflowLocate','']);
 run=uiPatchRegistry.wrap('run',run,'workflow-tools.js',previous=>async function(action){if(action==='workflowLocate')return workflowLocate();return previous(action);});
 

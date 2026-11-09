@@ -43,8 +43,8 @@ class EditorAITests(unittest.TestCase):
         diff=self.ai.changes(self.root,j['id'],'main.tex');self.assertIn('textbf',diff['after']);self.assertIn('textbff',diff['before'])
         self.ai.apply(self.root,j['id']);raw=(self.root/'main.tex').read_bytes();self.assertTrue(raw.startswith(b'\xef\xbb\xbf'));self.assertIn(b'\r\n',raw);self.assertNotIn(b'textbff',raw)
         self.ai.apply(self.root,j['id'],True);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
-    def test_no_model_when_baseline_compiles_or_resource_missing(self):
-        for output in [(True,'ok'),(False,"! LaTeX Error: File `missing.sty' not found."),(False,"! LaTeX Error: File `size12.clo' not found.")]:
+    def test_no_model_when_baseline_compiles(self):
+        for output in [(True,'ok')]:
             with patch.object(self.ai,'compile_copy',return_value=output),patch('studio_ai.request_json') as call:
                 self.start();j=self.wait();call.assert_not_called();self.assertEqual(j['requestCount'],0)
     def test_limit_stops_and_does_not_apply_failed_candidate(self):
@@ -53,9 +53,43 @@ class EditorAITests(unittest.TestCase):
         self.assertFalse(j['verified']);self.assertEqual(j['requestCount'],1)
         with self.assertRaises(ValueError):self.ai.apply(self.root,j['id'])
         self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
-    def test_repeated_error_stops_early(self):
-        with patch.object(self.ai,'compile_copy',return_value=(False,'error: main.tex:3: same')),patch('studio_ai.request_json',return_value=self.response('textbff','textbf')) as call:
-            self.start();j=self.wait();self.assertEqual(call.call_count,1);self.assertIn('没有改善',j['error'])
+    def test_repeated_error_gets_another_bounded_attempt_with_feedback(self):
+        with patch.object(self.ai,'compile_copy',return_value=(False,'error: main.tex:3: same')),patch('studio_ai.request_json',side_effect=[self.response('textbff','textbf'),self.response('empph','emph')]) as call:
+            self.start(limit=2);j=self.wait();self.assertEqual(call.call_count,2);self.assertIn('上限',j['error'])
+            content=json.loads(call.call_args_list[1].args[1]['messages'][1]['content']);self.assertTrue(content['readOnlyContext']['previousAttempts'])
+
+    def test_known_missing_bundle_resource_is_downloaded_and_recompiled(self):
+        index=self.storage.tex_cache/'bundles/data/public.index';index.parent.mkdir(parents=True);index.write_text('missing.sty 0 10\n','utf8')
+        def compiler(s,clone,n):
+            if not s.get('allowNetwork'):return False,"! LaTeX Error: File `missing.sty' not found."
+            folder=self.ai.folder(s['root'],s['id'],True);(folder/'candidate.pdf').write_bytes(b'%PDF-1.5 mock');return True,'passed'
+        with patch.object(self.ai,'compile_copy',side_effect=compiler),patch('studio_ai.request_json') as call:
+            self.start();job=self.wait();call.assert_not_called()
+        self.assertTrue(job['resourceRecovered']);self.assertTrue(job['verified']);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+
+    def test_font_failure_reaches_ai_instead_of_only_showing_advice(self):
+        (self.root/'main.tex').write_text('\\documentclass{article}\n\\usepackage{fontspec}\n\\setmainfont{UnavailableFamily}\n\\begin{document}Hello\\end{document}','utf8')
+        with patch.object(self.ai,'compile_copy',side_effect=[(False,'font cannot be found'),(True,'passed')]),patch('studio_ai.request_json',return_value=self.response('UnavailableFamily','Arial')) as call:
+            self.start();job=self.wait()
+        self.assertEqual(call.call_count,1);self.assertTrue(job['success'])
+        content=json.loads(call.call_args.args[1]['messages'][1]['content']);self.assertEqual(content['readOnlyContext']['engine'],'Tectonic / XeLaTeX')
+
+    def test_resource_recovery_after_an_ai_edit_keeps_candidate_for_review(self):
+        index=self.storage.tex_cache/'bundles/data/public.index';index.parent.mkdir(parents=True);index.write_text('missing.sty 0 10\n','utf8')
+        def compiler(s,clone,n):
+            if n==0:return False,'error: main.tex:3: Undefined control sequence'
+            if not s.get('allowNetwork'):return False,"File `missing.sty' not found"
+            (self.ai.folder(s['root'],s['id'],True)/'candidate.pdf').write_bytes(b'%PDF-1.5 mock');return True,'passed'
+        with patch.object(self.ai,'compile_copy',side_effect=compiler),patch('studio_ai.request_json',return_value=self.response('textbff','textbf')):
+            self.start();job=self.wait()
+        self.assertTrue(job['verified']);self.assertTrue(job['changedPaths']);self.assertIn('等待确认',job['summary']);self.assertNotIn('原文无需修改',job['summary']);self.assertEqual(job['rounds'][-1]['status'],'passed');self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+
+    def test_advice_without_edits_is_retried_with_actionable_feedback(self):
+        advice={'choices':[{'finish_reason':'stop','message':{'content':json.dumps({'summary':'建议修正','answer':'请修正拼写','edits':[]})}}]}
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler),patch('studio_ai.request_json',side_effect=[advice,self.response('textbff','textbf'),self.response('empph','emph')]) as call:
+            self.start();job=self.wait()
+        self.assertTrue(job['verified']);self.assertEqual(call.call_count,3)
+        content=json.loads(call.call_args_list[1].args[1]['messages'][1]['content']);self.assertIn('只返回了解释',content['readOnlyContext']['previousAttempts'][0]['problem'])
     def test_explicit_continuation_reuses_candidate_and_has_a_new_bounded_batch(self):
         with patch.object(self.ai,'compile_copy',side_effect=self.compiler),patch('studio_ai.request_json',side_effect=[self.response('textbff','textbf'),self.response('empph','emph')]) as request:
             self.start(limit=1);first=self.wait();self.assertTrue(first['canContinue'])

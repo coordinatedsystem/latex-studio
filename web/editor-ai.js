@@ -1,6 +1,7 @@
 'use strict';
 let editorAiJob=null,editorAiTarget=null,editorAiProject=null,editorAiPending=false,editorAiLastPoll=0,editorAiDiffEditor=null,editorAiDiffModels=[],editorAiDiffKey='',editorAiDiffView=false,editorAiPreview=null,editorAiSequence=0;
 let editorAiEffectView=false,editorAiEffectMeta=null,editorAiEffectTicket=0;
+let editorAiRecoveredJob=null;
 const editorAiWatch=fn=>async(...args)=>{try{return await fn(...args)}catch(e){toast(e.message,true);$('#editorAiStage').textContent=e.message;}};
 function editorAiSelection(model,range){
  if(!model||!range||range.isEmpty())return null;
@@ -74,7 +75,7 @@ function editorAiRender(){
 async function editorAiRefresh(force=false){
  if(!state?.projectId||editorAiPending)return;const now=Date.now();if(!force&&(!editorAiJob?.running||now-editorAiLastPoll<850))return;
  editorAiPending=true;editorAiLastPoll=now;const project=state.projectId,seq=editorAiSequence;
- try{const j=await api('editor-ai/job'+(editorAiJob?.id?'?id='+editorAiJob.id:''));if(state?.projectId!==project||seq!==editorAiSequence)return;editorAiJob=j.id?j:null;editorAiRender();}finally{editorAiPending=false;}
+ try{const j=await api('editor-ai/job'+(editorAiJob?.id?'?id='+editorAiJob.id:''));if(state?.projectId!==project||seq!==editorAiSequence)return;editorAiJob=j.id?j:null;editorAiRender();if(j.resourceRecovered&&j.success&&!j.running&&!j.changedPaths?.length&&editorAiRecoveredJob!==j.id){editorAiRecoveredJob=j.id;await compile();}}finally{editorAiPending=false;}
 }
 async function editorAiStart(resume=false){
  if(!state?.projectId||editorAiJob?.running)return;

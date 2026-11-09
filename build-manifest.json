@@ -1,5 +1,5 @@
 {
-  "version": "1.5.1",
+  "version": "1.5.2",
   "files": [
     {
       "path": "Launch.vbs",
@@ -13,8 +13,8 @@
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 6823,
-      "sha256": "50ec1e27a82828611745a60a968e42a230dd1d23e5ae0fb8f329e2baa5e1b819"
+      "size": 7712,
+      "sha256": "2780364e294f5cd9bc83106f49ca18b7d1119b0b269621d0b521b05860f1ca16"
     },
     {
       "path": "app/launch.ps1",
@@ -29,7 +29,7 @@
     {
       "path": "app/README.md",
       "size": 7667,
-      "sha256": "8698502f5b1082af6017138967a73865f500fbb86a30ab91a35a8e41121b1920"
+      "sha256": "bad7201b74dd7fcef992cf5765851c644fdca890863fb152197b5f0558b31ee2"
     },
     {
       "path": "app/server.py",
@@ -38,8 +38,8 @@
     },
     {
       "path": "app/studio_ai.py",
-      "size": 44329,
-      "sha256": "fc70fa3ff6b4856e2f8703a277f51e8ed87e7e2e84440d4e4fef052f6cbb5f11"
+      "size": 44906,
+      "sha256": "5372e9afbc8414152769239aa0b1b58a10ed4fcfac267fa5b1e683e204267dca"
     },
     {
       "path": "app/studio_ai_quality.py",
@@ -68,8 +68,8 @@
     },
     {
       "path": "app/studio_editor_ai.py",
-      "size": 28667,
-      "sha256": "76bdc20c1cc1d296176c6304160ebe343b933066c6b2297ff6a63e28bc03f02c"
+      "size": 31384,
+      "sha256": "4091862216e455e830123f9794c325420cf51187b38f09a60dff4cf3bf200174"
     },
     {
       "path": "app/studio_engine.py",
@@ -153,8 +153,8 @@
     },
     {
       "path": "app/version.json",
-      "size": 122,
-      "sha256": "659fdbb1844dd989207a2058bf8bbd94adef63f0bed7b58899f8822d351b02aa"
+      "size": 128,
+      "sha256": "fc99c07c9f6c25668d43628805c08e14c9a101c89fd569b85a691e4907a4c841"
     },
     {
       "path": "app/assets/studio.ico",
@@ -3053,8 +3053,8 @@
     },
     {
       "path": "app/web/editor-ai.js",
-      "size": 17778,
-      "sha256": "477bb52dc1adfbade0d6ef8915b4406504c2ed796d65aaca9033962e5b47078c"
+      "size": 17953,
+      "sha256": "f059df441a86742069798e2e40996ac77ebb3d8a5dc4c33ed6d9d43860035ef8"
     },
     {
       "path": "app/web/editor-dock-resize.css",
@@ -3098,8 +3098,8 @@
     },
     {
       "path": "app/web/index.html",
-      "size": 49661,
-      "sha256": "fcb9db782e51580f16b705eeaaa3b56d1039b220d215488964b137fbc2570e1a"
+      "size": 49635,
+      "sha256": "2c5b4b0c31fa89fa9cdae933e66a36c39635dabe71f602bc4b39b74b4b6c75ca"
     },
     {
       "path": "app/web/interface-polish.css",
@@ -3130,6 +3130,11 @@
       "path": "app/web/page-edits.js",
       "size": 12293,
       "sha256": "761ef856a4de5f95ae643db94433b1c1be26754814b5ab759359c517d59ef0d2"
+    },
+    {
+      "path": "app/web/pdf-resize.js",
+      "size": 1066,
+      "sha256": "829b445e2091280b6d4d50480af83639ff327fc945facf53515572a9878f8152"
     },
     {
       "path": "app/web/pdf-theme.css",
@@ -3168,8 +3173,8 @@
     },
     {
       "path": "app/web/terms-desk.js",
-      "size": 12022,
-      "sha256": "b3d590aae5c9251cb775d59004249e21f08fc2434afb1aee1f5b9b009e078436"
+      "size": 12362,
+      "sha256": "5f405ade8f68a43d0ee77b58735b3b69aa898115d144a49966c495799d44e768"
     },
     {
       "path": "app/web/ui-patch-registry.js",
@@ -3213,8 +3218,8 @@
     },
     {
       "path": "app/web/workflow-tools.js",
-      "size": 6867,
-      "sha256": "bc5c6ef5c0b5287d4bfa2100453d74a990714f6083db96631a16f739add85be5"
+      "size": 6747,
+      "sha256": "bb8b4841e19ec31342300acdfa1fddfc3a5b649afe3febabc61e58a37d957b7c"
     },
     {
       "path": "app/web/workspace-hub.js",
@@ -5052,6 +5057,16 @@
       "sha256": "925de632e8afb641692c58bf6c464fb1aa79782212523532590dd6b91b78c40f"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/lipsum.ltd.tex",
+      "size": 95525,
+      "sha256": "27c2623a2799a8b3c87ebc8b4c5e01e46286907eff3d5ffce66ad563949c7a98"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/lipsum.sty",
+      "size": 14690,
+      "sha256": "1ac9e7892621c020cfb22f081821b11625eb93c7c32fa47fd3e32a31c072c9d4"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/listings.cfg",
       "size": 1830,
       "sha256": "dfff35d5535e3edd1e1ac6ea6f82c8e2eec4c2edc5f1d1a498c04ec059223b00"
@@ -5722,6 +5737,11 @@
       "sha256": "9d7bee92b7cfdaa6e03c7df895003145ed982be0bf6d1e78fdd5eb71bf4945aa"
     },
     {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/pdftex.def",
+      "size": 19103,
+      "sha256": "62c3a2892e6acc3d94b1e8a50ecc2a11a16565ddee3f68006a84822eb5b93a5d"
+    },
+    {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/pdftex.map",
       "size": 4408061,
       "sha256": "16bbb011215db3c7b919e0274bf1a95dc478e6b3712b9cb478149551e0820a6d"
@@ -5805,6 +5825,11 @@
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/subcaption.sty",
       "size": 11546,
       "sha256": "0e12359365beef3e1bc45e7577743611b654fcfa02b3c04cc3bc457467792e10"
+    },
+    {
+      "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/supp-pdf.mkii",
+      "size": 71627,
+      "sha256": "5dd3675b88c7b61d3703e6bf35ed75623acc6b163dff7b1477b485cee8ad71cb"
     },
     {
       "path": "cache/tectonic/bundles/data/6ffe055852f8faf66c0acbe1a7fb27f87b869a90bad1204f3bf4d9683f597c7c/t1cmr.fd",

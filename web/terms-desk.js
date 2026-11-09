@@ -10,6 +10,11 @@ function termsControls(){
  $('#termsReport').querySelectorAll('input,select').forEach(el=>el.disabled=busy||(!!termsDesk.result?.applied&&el.hasAttribute('data-term-preferred')));
 }
 function termsMessage(text,error=false){$('#termsStatus').textContent=text;$('#termsStatus').classList.toggle('error',error);}
+async function termsStop(){
+ const job=termsDesk.job;if(!job?.running)return;
+ $('#termsStop').disabled=true;termsMessage('正在停止提取，返回的结果不会应用…');
+ try{await api('ai/cancel',{id:job.id});}finally{$('#termsStop').disabled=false;}
+}
 function termsGuard(){reviewGuard(termsDesk.project);if([...models.values()].some(i=>i.dirty))throw new Error('源码有未保存的改动。请先保存，再重新提取术语。');}
 function termsWatch(fn){return async(...args)=>{try{await fn(...args);}catch(e){termsMessage(e.message,true);}finally{termsControls();}};}
 function termsShow(report=true){for(const id of ['glossaryImport','glossaryExport','glossarySave'])$('#'+id).hidden=report;$('#termsDesk').hidden=!report;$('#review-glossary>.review-card').hidden=report;$('#termsShow').textContent=report?'返回术语表':'查看提取结果';}
@@ -26,7 +31,7 @@ async function termsExtract(){
  try{
   let job=await api('ai/start',{task:'terms',provider:'deepseek'});termsDesk.job=job;termsControls();
   while(job.running){await new Promise(resolve=>setTimeout(resolve,500));reviewGuard(project);job=await api('ai/job?id='+encodeURIComponent(job.id));termsDesk.job=job;}
-  reviewGuard(project);if(!job.success)throw new Error(job.error||'提取未完成');
+  reviewGuard(project);if(!job.success){if(job.stage==='已停止'){termsMessage('已停止提取，原有术语和文档未改动。');return;}throw new Error(job.error||'提取未完成');}
   termsDesk.result={...job.result,id:job.result.termContext,applied:false};termsDesk.chosen.clear();termsDesk.plan=null;$('#termsPlan').replaceChildren();$('#termsShow').hidden=false;termsRender();
   termsMessage(`${job.result.groups.length} 组术语 · 先查看原文位置，再勾选需要统一或导入的条目。`);
  }finally{termsDesk.busy=false;termsDesk.job=null;$('#termsReport').hidden=false;$('#termsPlan').hidden=false;termsControls();}
@@ -64,7 +69,7 @@ function termsInstall(){
  $('#review-glossary>.review-card').insertAdjacentHTML('beforebegin','<section id="termsDesk" hidden><div class="terms-toolbar"><button id="termsSelectAll" class="secondary">全选条目</button><button id="termsPreview" class="secondary">预览统一修改</button><button id="termsImport" class="secondary">导入所选术语</button><button id="termsStop" class="secondary" hidden>停止</button></div><p id="termsStatus" class="terms-status" role="status">尚未提取</p><div id="termsPlan"></div><div id="termsReport"></div><footer class="terms-footer"><button id="termsApply" class="primary" disabled>应用修改并编译</button><button id="termsUndo" class="secondary" hidden>撤销统一</button></footer></section>');
  $('#termsExtract').onclick=termsWatch(termsExtract);$('#termsShow').onclick=()=>termsShow($('#termsDesk').hidden);
  $('#termsPreview').onclick=termsWatch(termsPreview);$('#termsApply').onclick=termsWatch(()=>termsApply());$('#termsUndo').onclick=termsWatch(()=>termsApply(true));$('#termsImport').onclick=termsWatch(termsImport);
- $('#termsStop').onclick=termsWatch(()=>api('ai/cancel',{id:termsDesk.job.id}));
+ $('#termsStop').onclick=termsWatch(termsStop);
  $('#termsSelectAll').onclick=()=>{termsDesk.chosen=new Set(termsDesk.chosen.size===termsDesk.result.groups.length?[]:termsDesk.result.groups.map(g=>g.id));if(!termsDesk.result.applied){termsDesk.plan=null;$('#termsPlan').replaceChildren();}termsRender();};
  $('#termsReport').onchange=e=>{const check=e.target.closest('[data-term-choice]');if(check){const id=Number(check.dataset.termChoice);check.checked?termsDesk.chosen.add(id):termsDesk.chosen.delete(id);}if(!termsDesk.result?.applied){termsDesk.plan=null;$('#termsPlan').replaceChildren();}termsControls();};
  $('#termsReport').oninput=e=>{const field=e.target.closest('[data-term-preferred],[data-term-target]');if(!field)return;const id=Number(field.dataset.termPreferred??field.dataset.termTarget),key=field.hasAttribute('data-term-preferred')?'preferred':'target';termsDesk.result.groups[id][key]=field.value;if(key==='preferred'&&!termsDesk.result.applied){termsDesk.plan=null;$('#termsPlan').replaceChildren();}termsControls();};

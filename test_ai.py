@@ -139,6 +139,22 @@ class AssistantTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self.ai.start({'text':'document','task':'format','provider':'deepseek'}, 'project-a')
 
+    def test_cancel_finishes_promptly_and_late_response_cannot_replace_next_job(self):
+        entered,release=threading.Event(),threading.Event();attached=[]
+        self.ai.config=lambda raw=False:{'deepseek':{'configured':True,'model':'mock','key':'mock'}}
+        def response(*args,**kwargs):
+            entered.set();release.wait(3)
+            return {'choices':[{'message':{'content':'{"groups":[]}'}}]}
+        with patch('studio_ai.request_json',side_effect=response):
+            job=self.ai.start({'text':'synthetic terms','task':'terms','provider':'deepseek'},'project-a',on_result=attached.append)
+            self.assertTrue(entered.wait(1));self.ai.cancel('project-a',job['id'])
+            deadline=time.monotonic()+1
+            while self.ai.busy() and time.monotonic()<deadline:time.sleep(.01)
+            self.assertFalse(self.ai.busy());self.assertEqual(self.ai.status('project-a')['stage'],'已停止')
+            next_job=self.ai.start({'text':'clean text','task':'check','provider':'local'},'project-a');self.wait_job()
+            release.set();time.sleep(.1)
+            self.assertEqual(self.ai.status('project-a')['id'],next_job['id']);self.assertEqual(attached,[])
+
 
 if __name__ == '__main__':
     unittest.main()
