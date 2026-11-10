@@ -1,17 +1,9 @@
 """Native function contracts and response decoding for the document assistant."""
 import json
 
-def function(name,description,properties=None,required=()):
-    return {'type':'function','function':{'name':name,'description':description,'parameters':{'type':'object','properties':properties or {},'required':list(required)}}}
-S={'type':'string'};I={'type':'integer'};B={'type':'boolean'}
 def tool_definitions(mode):
-    tools=[function('list_files','列出项目文件'),function('read_file','读取指定文件行范围；start>=1，每次最多160行。默认80行。',{'path':S,'start':{'type':'integer','minimum':1},'lines':{'type':'integer','minimum':1,'maximum':160}},('path',)),
-           function('search','字面检索，优先检索必要片段',{'query':S,'path':S},('query',)),function('diagnostics','读取精简编译报错'),function('environment','查看可用字体与编译环境'),function('references','检查引用'),function('glossary','读取术语表'),
-           function('layout_check','检查 PDF 版面几何和页次，默认关联页或代表页，不重读全文。',{'pages':{'type':'array','items':I,'maxItems':12}}),
-           function('read_page','读取 PDF 页面；需要视觉判断时 visual=true，最多按需查看代表页。',{'page':I,'visual':B},('page',)),
-           function('read_attachment','读取明确关联的附件，PDF 可指定 page 和 visual',{'id':S,'start':I,'lines':I,'page':I,'visual':B},('id',))]
-    if mode=='agent':tools.extend([function('edit','先读取文件，再按准确原文替换副本',{'path':S,'before':S,'after':S,'replace_all':B},('path','before','after')),function('compile','编译候选并验证 PDF；源码未变则复用结果'),function('resources','恢复编译器已知缺少的公共资源')])
-    return tools
+    from studio_assistant_tools import builtin_schemas
+    return builtin_schemas(mode)
 
 def decode(choice):
     message=choice.get('message',{});calls=message.get('tool_calls') or []

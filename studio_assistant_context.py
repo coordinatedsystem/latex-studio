@@ -45,5 +45,6 @@ def tool_history(trail):
     from studio_assistant_protocol import replay
     compact=[compact_tool(t) for t in trail]
     older=[{'tool':t['tool'],'args':t['args'],'outcome':t['summary'],'result':t.get('content','')[:2500] if isinstance(t.get('content'),str) else '[图像需按需重新查看]'} for t in compact[:-4]]
-    prefix=[{'role':'user','content':'已执行步骤摘要（历史替换正文省略，不能再次执行）：'+json.dumps(older,ensure_ascii=False)[-10000:]}] if older else []
+    while older and len(json.dumps(older,ensure_ascii=False))>10000:older.pop(0)
+    prefix=[{'role':'user','content':'已执行步骤摘要（历史替换正文省略，不能再次执行）：'+json.dumps(older,ensure_ascii=False)}] if older else []
     return prefix+[message for t in compact[-4:] for message in replay(t)]

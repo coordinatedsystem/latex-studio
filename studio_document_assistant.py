@@ -1,10 +1,10 @@
 """Document agent: project-scoped tools, compact context, verified transactions."""
 from __future__ import annotations
-import base64,copy,hashlib,io,json,os,re,shutil,threading,time,uuid
+import base64,copy,json,os,re,shutil,threading,time,uuid
 from pathlib import Path
 import studio_ai
-from studio_editor_ai import EditorAI,EDITABLE,cached_resource_missing
-from studio_assistant_protocol import tool_definitions,decode,replay
+from studio_editor_ai import EditorAI
+from studio_assistant_content import TEXT,bounded_int,window,image_payload
 from studio_assistant_context import layout_requested,conversation_history,runtime_instruction,tool_history
 from studio_page_edits import project_files,sha
 from studio_storage import project_id,safe_relative,read_json,write_json
@@ -14,36 +14,26 @@ SYSTEM='''你是 Studio 学术文档助手，擅长 LaTeX、学术写作、引�
 SYSTEM+='同一文件中多个已定位的独立删改可以一次调用多个 edit，完成后统一编译；不要每改一句就重新读取全文。总 token 是统计信息，不是用户的停止要求。'
 SYSTEM+='用户引用文章中某一节、某类内容说不用这么详细、删掉时，这是编辑文章的要求，不能理解为缩短你的回答。修改只生成候选，不得声称已经写回原文件或主预览已更新；说明候选是否编译通过、等待确认应用。读取足够定位目标的片段后立即修改，不要反复搜索已知内容。'
 SYSTEM+='事实判断必须基于文内明确矛盾、真实工具结果或用户提供的依据。不能仅凭学号、年级、常见学制或当前年份就推断报告日期错误；此类猜测不能列为确定问题，更不能据此修改日期。排版检查不要越界审查无关的个人信息。用户明确要求修改日期等事实时仍按用户要求执行。'
-TEXT={'.tex','.bib','.sty','.cls','.txt','.md','.csv','.json','.bbl','.cfg','.def'}
 LABELS={'thinking':'分析目标','response':'纠正响应','list_files':'浏览项目','read_file':'读取源码','search':'检索内容','environment':'查看编译环境','diagnostics':'查看报错','references':'检查引用','glossary':'读取术语表','read_attachment':'读取附件','layout_check':'检查文档版面','read_page':'查看 PDF 页面','edit':'修改副本','compile':'编译与预览验证','resources':'补齐编译资源'}
 
-def bounded_int(value,low,high):
-    if isinstance(value,bool) or not isinstance(value,int) or not low<=value<=high:raise ValueError('参数范围无效')
-    return value
 
-def window(text,start=1,lines=100):
-    start=bounded_int(start,1,1000000);lines=bounded_int(lines,1,160)
-    rows=text.splitlines();body='\n'.join(f'{i+1}: {row[:1600]}' for i,row in enumerate(rows[start-1:start-1+lines],start-1))
-    return {'text':body[:12000],'totalLines':len(rows),'start':start,'nextLine':start+lines if start+lines<=len(rows) else None}
 
-def image_payload(path):
-    from PIL import Image
-    with Image.open(path) as image:
-        image.thumbnail((1600,1600))
-        if image.mode in {'RGBA','LA'}:
-            background=Image.new('RGB',image.size,'white');background.paste(image,mask=image.getchannel('A'));image=background
-        else:image=image.convert('RGB')
-        buffer=io.BytesIO();image.save(buffer,'JPEG',quality=85,optimize=True)
-    return 'data:image/jpeg;base64,'+base64.b64encode(buffer.getvalue()).decode()
 
 class DocumentAssistant(EditorAI):
+    def __init__(self,storage):
+        super().__init__(storage)
+        from studio_assistant_tools import StudioTools
+        self.capabilities=StudioTools(self)
+        from studio_assistant_provider import DeepSeekProvider
+        self.provider=DeepSeekProvider(self)
+
     def folder(self,root,ident,cache=False):
         if not isinstance(ident,str) or not re.fullmatch(r'[a-f0-9]{32}',ident):raise ValueError('会话标识无效')
         return (self.storage.cache if cache else self.storage.data)/'assistant'/project_id(root)/ident
 
     def public(self,s):
         result=super().public(s)
-        result.update({k:copy.deepcopy(s.get(k)) for k in ('chatMode','messages','events','revision','questionForUser','contextInfo','usage','stepLimit','attachments','pages','stopRequested','candidateReady')})
+        result.update({k:copy.deepcopy(s.get(k)) for k in ('chatMode','messages','events','revision','questionForUser','contextInfo','usage','stepLimit','attachments','pages','stopRequested','candidateReady','runtime')})
         return result
 
     def history(self,root):
@@ -117,6 +107,7 @@ class DocumentAssistant(EditorAI):
                     for key in ('originals','candidates','changedPaths'):s[key]=copy.deepcopy(previous[key])
             s['activeGoal']=(previous.get('activeGoal') or next((m['content'] for m in reversed(history) if m['role']=='user' and not re.fullmatch(r'(?:继续|接着|继续处理|继续执行|继续吧|continue)[。.!！\s]*',m['content'],re.I)),previous['question'])) if continuing else question
             if continuing and previous.get('sourceStats')==s['sourceStats'] and not s.get('carryNotice') and not previous.get('applied'):
+                s['resumeId']=previous['id'] if previous.get('chatMode')==mode else None
                 s['workingTrail']=copy.deepcopy(previous.get('workingTrail',[]))
                 s['readPaths']=copy.deepcopy(previous.get('readPaths',[]))
                 for key in ('editRevision','lastLog','compiledRevision','lastCompiled'):
@@ -178,108 +169,10 @@ class DocumentAssistant(EditorAI):
         return relative,p
 
     def tool(self,s,clone,name,args,read):
-        self.checkpoint()
-        if name in {'edit','compile','resources'} and s['chatMode']!='agent':raise ValueError('Chat 模式只读，请切换 Agent 执行')
-        if name=='list_files':return {'files':s.get('knownFiles',[p.relative_to(clone).as_posix() for p in project_files(clone)])[:350]}
-        if name=='read_file':
-            path,p=self.file(clone,args.get('path',''));read.add(path);return window(p.read_text('utf-8-sig'),args.get('start',1),min(160,max(1,int(args.get('lines',80)))))
-        if name=='search':
-            query=args.get('query','')
-            if not isinstance(query,str) or not 1<=len(query)<=200:raise ValueError('检索词应为 1～200 字符')
-            paths=[self.file(clone,args['path'])[1]] if args.get('path') else [p for p in project_files(clone) if p.suffix.lower() in TEXT and p.stat().st_size<=2*1024*1024]
-            hits=[]
-            for p in paths:
-                for i,line in enumerate(p.read_text('utf-8-sig',errors='replace').splitlines(),1):
-                    if query.casefold() in line.casefold():hits.append({'path':p.relative_to(clone).as_posix(),'line':i,'text':line[:350]})
-                    if len(hits)>=40:return {'hits':hits,'truncated':True}
-            return {'hits':hits}
-        if name=='environment':
-            fonts=[family for filename,family in [('arial.ttf','Arial'),('times.ttf','Times New Roman'),('simsun.ttc','SimSun'),('msyh.ttc','Microsoft YaHei'),('simhei.ttf','SimHei')] if (Path(os.environ.get('WINDIR',r'C:\Windows'))/'Fonts'/filename).is_file()]
-            return {'engine':'Tectonic / XeTeX','installedFonts':fonts,'fontHint':'用 fontspec 的 setmainfont 选择已安装字体；不支持 shell-escape 或更换引擎'}
-        if name=='diagnostics':return {'compiler':'Tectonic/XeTeX','log':s.get('lastLog',s['errorContext'])[-6000:],'compiled':s.get('lastCompiled',False)}
-        if name=='references':
-            from studio_review import analyze_references
-            sources={p.relative_to(clone).as_posix():p.read_text('utf-8-sig',errors='replace') for p in project_files(clone) if p.suffix.lower() in {'.tex','.bib'} and p.stat().st_size<2*1024*1024}
-            report=analyze_references(sources,s['main']);return {k:report.get(k) for k in ('issues','labels','references','bibliography')}
-        if name=='glossary':
-            from studio_review import glossary_get
-            return {'terms':glossary_get(self.storage.data,s['projectId']).get('terms',[])[:100]}
-        if name=='layout_check':
-            from pypdf import PdfReader
-            from studio_review import inspect_pdf
-            pdf=self.folder(s['root'],s['id'],True)/('candidate.pdf' if s.get('verified') else 'before.pdf')
-            if not pdf.exists():return {'error':'尚无 PDF，请先 compile 再检查版面'}
-            total=len(PdfReader(pdf).pages)
-            selected=args.get('pages') or s.get('pages',[])[:12] or sorted({1,min(2,total),max(1,(total+1)//2),total})
-            if not isinstance(selected,list) or len(selected)>12:raise ValueError('每次检查 1～12 页')
-            selected=sorted(set(bounded_int(n,1,total) for n in selected));report=inspect_pdf(pdf,','.join(map(str,selected)),checkpoint=self.checkpoint)
-            report['measurementNotes']='contentBottom 是最后一个对象距页面顶端的比例，包含页脚页码；0.89 表示89%处，不能用来计算正文留白。少量留白、末页和缺少某些论文结构不自动构成错误，小字号也要区分正文、脚注和公式。'
-            report['scope']='仅检查列出的页次，未检查的页不能宣称已审核'
-            s['layoutEvidence']={'pages':selected,'issues':report['issues'],'totalPages':total}
-            return report
-        if name=='read_page':
-            from pypdf import PdfReader
-            pdf=self.folder(s['root'],s['id'],True)/('candidate.pdf' if s.get('verified') else 'before.pdf')
-            if not pdf.is_file():raise ValueError('尚无 PDF，请在 Agent 中编译或先在主页面编译')
-            reader=PdfReader(pdf);page=bounded_int(args.get('page',1),1,len(reader.pages))
-            if args.get('visual') is True:
-                from studio_review import page_image
-                image=page_image(pdf,self.folder(s['root'],s['id'],True)/'pages',s['projectId'],page,pdf.stat().st_mtime_ns)
-                return {'image':image_payload(image),'name':'PDF 第 '+str(page)+' 页'}
-            return {'page':page,'pages':len(reader.pages),**window(reader.pages[page-1].extract_text() or '本页无文字层，可用 visual:true 检查图片。',1,100)}
-        if name=='read_attachment':
-            ident=args.get('id')
-            if ident not in {m['id'] for m in s['attachments']}:raise ValueError('该附件未关联到当前会话')
-            meta,p=self.attachment_meta(s['root'],ident);suffix=meta['suffix']
-            if suffix in {'.png','.jpg','.jpeg','.webp'}:
-                return {'image':image_payload(p),'name':meta['name']}
-            if suffix=='.pdf':
-                from pypdf import PdfReader
-                reader=PdfReader(p);page=bounded_int(args.get('page',1),1,len(reader.pages))
-                if args.get('visual') is True:
-                    from studio_review import page_image
-                    image=page_image(p,self.folder(s['root'],s['id'],True)/'attachment-pages',ident,page,p.stat().st_mtime_ns)
-                    return {'image':image_payload(image),'name':meta['name']+' 第 '+str(page)+' 页'}
-                return {'page':page,'pages':len(reader.pages),**window(reader.pages[page-1].extract_text() or '本页无文字层，可用 visual:true 查看扫描页面。',args.get('start',1),args.get('lines',80))}
-            if suffix=='.docx':
-                import zipfile,xml.etree.ElementTree as ET
-                with zipfile.ZipFile(p) as archive:
-                    entry=archive.getinfo('word/document.xml')
-                    if entry.file_size>4*1024*1024:raise ValueError('Word 文档内容过大')
-                    text='\n'.join(''.join(e.itertext()) for e in ET.fromstring(archive.read(entry)).iter('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}p'))
-            else:text=p.read_text('utf-8-sig')
-            return window(text,args.get('start',1),args.get('lines',80))
-        if name=='edit':
-            path,p=self.file(clone,args.get('path',''))
-            if p.suffix.lower() not in EDITABLE or path not in read:raise ValueError('修改前请读取相应 LaTeX 文件')
-            full=p.read_text('utf-8-sig');count=self.accept(s,clone,path,0,len(full),full,{'edits':[args]});s['verified']=False;s['lastCompiled']=False;s['candidateReady']=False;s['editRevision']=s.get('editRevision',0)+1
-            return {'edits':count,'path':path,'revision':s['editRevision']}
-        if name in {'compile','resources'}:
-            revision=s.get('editRevision',0)
-            if s.get('compiledRevision')==revision and name=='compile':return {'success':s['lastCompiled'],'unchanged':True,'log':s.get('lastLog','')[-4500:]}
-            if name=='resources':
-                missing=cached_resource_missing(s.get('lastLog',s['errorContext']),self.storage.tex_cache)
-                if not missing:raise ValueError('当前没有可自动恢复的官方宏包缺失记录')
-                s['allowNetwork']=True
-            ok,log=self.compile_copy(s,clone,len(s['events']));s.update(lastLog=log,lastCompiled=ok,compiledRevision=revision,verified=ok)
-            return {'success':ok,'previewRendered':ok,'log':log[-6000:]}
-        raise ValueError('不支持的 Studio 工具')
+        return self.capabilities.execute(s,clone,name,args,read)
 
     def request(self,s,messages):
-        config=studio_ai.assistant_for(self.storage.data).config(True)['deepseek']
-        if not config.get('configured'):raise ValueError('请先配置 DeepSeek 服务')
-        result={};done=threading.Event()
-        def send():
-            try:result['value']=studio_ai.request_json('https://api.deepseek.com/chat/completions',{'model':config['model'],'messages':messages,'tools':tool_definitions(s['chatMode']),'tool_choice':'auto','thinking':{'type':'disabled'},'stream':False,'max_tokens':4000},{'Authorization':'Bearer '+config['key']})
-            except Exception as exc:result['error']=exc
-            finally:done.set()
-        self.update(s,requestCount=s['requestCount']+1);threading.Thread(target=send,daemon=True).start()
-        while not done.wait(.1):self.checkpoint()
-        self.checkpoint()
-        if 'error' in result:raise result['error']
-        response=result['value'];usage=response.get('usage',{});s['tokens']+=max(0,int(usage.get('total_tokens',0)))
-        for key,field in [('prompt_tokens','prompt_tokens'),('completion_tokens','completion_tokens'),('cached_tokens','prompt_cache_hit_tokens')]:s['usage'][key]+=max(0,int(usage.get(field,0)))
-        return decode(response['choices'][0])
+        return self.provider.request(s,messages,self.capabilities.registry.schemas(s['chatMode']),getattr(self,'journal',None))
 
     def initial_layout_context(self,s,clone,read,trail):
         if not layout_requested(s['question']):return
@@ -310,7 +203,11 @@ class DocumentAssistant(EditorAI):
 
     def work(self,s):
         folder=self.folder(s['root'],s['id'],True);clone=folder/'project';read=set(s.get('readPaths',[]));seen={};trail=copy.deepcopy(s.get('workingTrail',[]))
+        from studio_assistant_session import SessionJournal,ModelContext,ToolCallRecovery
+        journal=None;context=None;pending=ToolCallRecovery()
         try:
+            self.journal=journal=SessionJournal(self.folder(s['root'],s['id'])/'events.jsonl')
+            journal.append('turn/start',{'mode':s['chatMode'],'goal':s.get('activeGoal',s['question'])})
             clone.mkdir(parents=True,exist_ok=True)
             if s['chatMode']=='agent':self.fresh(s)
             for p in project_files(s['root']):
@@ -323,19 +220,31 @@ class DocumentAssistant(EditorAI):
             brief={'mode':s['chatMode'],'main':s['main'],'selection':s['contexts'],'selectedPages':s['pages'],'attachments':s['attachments'],'compilerError':s['errorContext'][-2500:],'carriedChanges':s['changedPaths'],'carryNotice':s.get('carryNotice'),'activeGoal':s.get('activeGoal',s['question'])}
             history=conversation_history(s['messages'][:-1])
             base=[{'role':'system','content':SYSTEM+'\n'+runtime_instruction(s['chatMode'])},*history,{'role':'user','content':'本轮用户要求：'+s['question']+'\n当前上下文（仅供本轮按需使用）：'+json.dumps(brief,ensure_ascii=False)}]
+            seed=None;accepted=0
+            if s.get('resumeId'):
+                try:
+                    parent=SessionJournal(self.folder(s['root'],s['resumeId'])/'events.jsonl')
+                    parent.recover_interrupted_turn()
+                    if parent.messages and parent.messages[0]==base[0]:seed=parent.messages+[base[-1]];accepted=len(trail)
+                except (ValueError,OSError):pass
+            if seed is None and trail:
+                seed=base[:-1]+tool_history(trail)+base[-1:];accepted=len(trail)
+            context=ModelContext(base,journal,seed=seed,accepted=accepted)
             maximum=s['stepLimit']*2 if s['chatMode']=='agent' and s['stepLimit']==24 else s['stepLimit']
             progress_at=-1
             for number in range(maximum):
                 self.checkpoint();self.update(s,stage='思考下一步')
                 if number>=s['stepLimit'] and number-progress_at>12:raise ValueError('多步分析未产生新的修改或验证进展，已保留当前结果')
-                messages=base+tool_history(trail)
-                if maximum-number<=3:
-                    messages.append({'role':'user','content':'当前执行接近本轮步数上限。优先完成剩余必要修改，并调用 compile 验证；不要重复阅读已知内容。只有用户目标已完成才能报告完成，否则准确说明剩余事项。'})
+                journal.close_step()
+                journal.append('step/start',{'step':number+1})
+                notice='当前执行接近本轮步数上限。优先完成剩余必要修改，并调用 compile 验证；不要重复阅读已知内容。只有用户目标已完成才能报告完成，否则准确说明剩余事项。' if maximum-number<=3 else None
+                messages,s['runtime']=context.prepare(trail,notice)
                 try:value=self.request(s,messages)
                 except (json.JSONDecodeError,KeyError,IndexError,TypeError) as exc:
                     self.event(s,'response','failed','响应格式无效，要求模型修正')
                     if sum(t['tool']=='format' for t in trail)>=2:raise ValueError('响应格式多次无效，已保留结果')
                     trail.append({'tool':'format','args':{},'summary':'JSON 格式无效','content':'上次响应不是有效 JSON，工具未执行。重新给出有效 JSON，所有 LaTeX 反斜杠必须转义，当前错误：'+str(exc)[:200]});continue
+                journal.append('assistant/response',{'step':number+1,'value':value})
                 message=str(value.get('message',''))[:8000];calls=value.get('calls',[])
                 if not isinstance(calls,list) or len(calls)>12:raise ValueError('工具调用格式无效')
                 if value.get('done') or value.get('question') or (not calls and message.strip()):
@@ -353,29 +262,49 @@ class DocumentAssistant(EditorAI):
                     if sum(t['tool']=='empty' for t in trail)>=1:raise ValueError('模型未返回有效回答，已保留检查结果')
                     trail.append({'tool':'empty','args':{},'summary':'响应为空','content':'请根据当前任务继续调用必要工具，或给出已经完成的具体检查结论。'});continue
                 if message:self.event(s,'thinking','done',message)
+                pending=ToolCallRecovery(calls)
                 for call in calls:
                     self.checkpoint();name=call.get('tool');args=call.get('args',{})
                     if not isinstance(name,str) or not isinstance(args,dict):raise ValueError('工具参数无效')
                     signature=json.dumps([name,args,s.get('editRevision',0)],ensure_ascii=False,sort_keys=True);seen[signature]=seen.get(signature,0)+1
                     if seen[signature]>=3:raise ValueError('检测到重复且无进展的工具调用，已保留结果；请补充要求后继续')
+                    journal.append('tool/call',{'step':number+1,'id':call.get('id'),'name':name,'args':args})
                     self.update(s,stage=LABELS.get(name,name));self.event(s,name,'running',self.describe_tool(name,args))
                     cached=next((t.get('output') for t in reversed(trail) if t.get('signature')==signature and t.get('output') is not None),None) if name in {'list_files','read_file','search','environment','references','glossary'} else None
+                    pending.started(call)
                     try:
                         output=copy.deepcopy(cached) if cached is not None else self.tool(s,clone,name,args,read)
-                        self.checkpoint();status='failed' if output.get('success') is False or output.get('error') else 'done'
+                        status='failed' if output.get('success') is False or output.get('error') else 'done'
                     except (ValueError,OSError,UnicodeError) as exc:output={'error':str(exc)[:1500]};status='failed'
+                    journal.append('tool/result',{'step':number+1,'id':call.get('id'),'name':name,'status':status,'result':output})
                     if status=='done' and ((name=='edit' and output.get('edits',0)>0) or (name in {'compile','resources'} and output.get('success') and not output.get('unchanged'))):progress_at=number
-                    self.checkpoint();self.event(s,name,status,self.describe_tool(name,args,output))
+                    self.event(s,name,status,self.describe_tool(name,args,output))
                     summary={k:v for k,v in output.items() if k in {'error','success','edits','path','revision','totalLines','pages'}}
                     if output.get('image'):content=[{'type':'text','text':'工具 read_attachment '+json.dumps({'id':args.get('id'),'name':output['name']})},{'type':'image_url','image_url':{'url':output['image']}}]
                     else:content='工具 '+name+' '+json.dumps(args,ensure_ascii=False)+' 返回：'+json.dumps(output,ensure_ascii=False)[:9000]
                     if cached is not None:content+='\n此结果来自缓存，源码未变化。已取得必要信息，请执行当前删改目标，勿再次检索同一内容。'
                     trail.append({'tool':name,'args':args,'summary':summary or '已返回内容，必要时按新范围读取','content':content,'nativeCall':{'id':call['id'],'type':'function','function':{'name':name,'arguments':json.dumps(args,ensure_ascii=False)}} if call.get('id') else None,'signature':signature,'output':output if not output.get('image') else None,'full':not isinstance(content,str) or '返回 unchanged' not in content})
+                    pending.settled(call)
+                    self.checkpoint()
+                journal.append('step/end',{'step':number+1})
             raise ValueError('本轮步骤预算已用完，已保留结果；可继续任务，避免无效循环')
         except Exception as exc:
             text=str(exc) if isinstance(exc,(ValueError,OSError)) else '助手响应或文件处理失败，请补充要求后重试'
             s['messages'].append({'role':'assistant','content':'已停止。已有候选和检查记录已保留，未自动写回文件。' if self.cancel_event.is_set() else self.partial_report(s,text),'mode':s['chatMode']});self.update(s,success=False,error=text,stage='已停止' if self.cancel_event.is_set() else '待继续')
         finally:
+            try:
+                if journal:
+                    for record in pending.recover():
+                        trail.append(record);journal.append('tool/recovered',record)
+                    if context:
+                        context.prepare(trail,request=False)
+                        if s['messages'][-1].get('role')=='assistant':
+                            journal.context(journal.messages+[{'role':'assistant','content':s['messages'][-1]['content']}],request=False)
+                    journal.close_step('canceled' if self.cancel_event.is_set() else 'settled')
+                    journal.append('turn/end',{'success':s.get('success'),'canceled':self.cancel_event.is_set(),'verified':s.get('verified'),'error':s.get('error')})
+            except (OSError,ValueError) as exc:
+                s.update(success=False,candidateReady=False,error='会话记录未能完整保存：'+str(exc)[:300],stage='记录保存失败')
+            self.journal=None
             s['workingTrail']=[t for t in trail[-20:] if isinstance(t.get('content'),str)]
             s['readPaths']=sorted(read)
             self.update(s,running=False,duration=round(time.time()-s['created'],1));s.pop('contexts',None)

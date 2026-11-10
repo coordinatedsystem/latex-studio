@@ -1,32 +1,42 @@
-# Document assistant architecture
+# Studio document assistant architecture
 
-The conversation UI lives in `web/document-assistant.js` and `.css`. It owns its project ID, request ticket, polling state, attachments and conversation ID. Existing document panes and their resizer are reused; legacy review remains accessible through its own surface. Late replies cannot replace another project's conversation. Tool details and scroll position are retained during progress updates.
+## Upstream and scope
 
-`studio_assistant_protocol.py` defines native function contracts, response decoding and paired assistant/tool replay. `studio_document_assistant.py` implements the conversation loop and a finite Studio tool catalog. It reuses `EditorAI` for disposable compilation, exact edit anchoring, freshness checks, candidate PDF rendering, atomic writeback and exact undo. It does not invoke an arbitrary shell. The server only routes authenticated, project-scoped requests to this manager; project switching and installation respect its busy state.
+Core contracts are ported from [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), pinned at `fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159` (MIT). This is a Python architecture adaptation integrated with Studio, not an embedded copy of the complete Cordis/Node product. The upstream license is distributed in `assets/licenses/DeepSeek-Harness-LICENSE.txt`. See `HARNESS_PORT.md` for the mapping and limits.
 
-Chat may inspect project text, selected PDF pages, explicitly associated attachments, diagnostics, references, environment and the glossary. Agent additionally edits the disposable copy, compiles, and recovers known public bundle resources. Each tool result is returned to the model; a failed compilation does not count as completion. Only a successful task with a compiled candidate can be applied. Source hashes are checked before writeback, and later source changes prevent overwriting.
+## Components
 
-The loop batches up to four ordered tools per response, limits read windows and search matches, sends images only on demand, downscales images, keeps recent full results and locally summarizes older tool actions. Stable prompt prefixes support provider caching. Chat avoids copying project media. A compile result is reused until an edit changes the candidate. Three consecutive identical calls stop the loop. Per-turn steps and token limits bound runaway work; pending candidate changes and conversation history survive a follow-up. Cancellation releases the local task promptly and discards late model output.
+| Studio module | Responsibility |
+| --- | --- |
+| `studio_document_assistant.py` | Document turn/step driver, current goal, candidate readiness and UI projection |
+| `studio_assistant_session.py` | Append-only durable events, reconstructable request contexts, stable-prefix model projection, interrupted-call recovery |
+| `studio_assistant_provider.py` | DeepSeek frozen request envelope, route credentials, native protocol decoding, bounded transient retries and cooperative cancellation |
+| `studio_assistant_tools.py` | Tool registry with reversible registrations, mode admission, schemas and domain handlers |
+| `studio_assistant_content.py` | Shared bounded text windows and image evidence |
+| `studio_assistant_protocol.py` | Native/legacy response decoding and paired assistant/tool replay |
+| `studio_assistant_context.py` | Current-turn policy, bounded natural-language history, edit-body projection and local compaction |
+| `studio_editor_ai.py` | Exact edit anchoring, source freshness, disposable compilation, PDF verification, atomic application and byte-exact undo |
 
-Attachments are stored outside the publication tree and scoped by project plus an explicit association list. Text, paged PDF, DOCX and image reading never executes document code. Project files cannot authorize additional tools or override user instructions. No API secrets are returned to the UI.
+## Session and model history
 
-Design references (independent implementation, no copied framework code):
+Each task owns `data/assistant/<project>/<id>/events.jsonl`, alongside the existing UI/candidate snapshot. Session events contain local user/document content but no authorization headers or API keys. Context append/reset events and immutable request metadata reconstruct the exact messages for prepared steps and transport attempts. Existing messages remain byte-identical during ordinary tool-history growth. Tool outputs are projected once rather than moving the most recent four results on every request. The provider schema envelope is logged only when changed; transport retries reuse the frozen payload.
 
-- [OpenCode agents](https://opencode.ai/docs/agents/)
-- [OpenCode tools](https://opencode.ai/docs/tools/)
+Text evidence is compacted locally at a soft 60000-character context threshold, retaining the current goal, recent evidence and bounded older results. This starts a new cache series only when needed. Executed replacement bodies are omitted from model replay while exact audit events remain local. Image byte length is not counted as text; images remain on-demand evidence. No extra model request is used solely to summarize history.
 
-Verification: deterministic mode/tool/transaction/cancellation tests; UI state and project-race tests; HTTP route and project-isolation checks; real API tests on synthetic two-file documents, with an attachment, compiler error recovery, rendered PDF, application and byte-exact undo. Native browser visual verification remains incomplete because the desktop automation tool could not reliably identify the browser URL.
+Explicit continuation with unchanged sources and the same mode restores the logged prefix before appending the new user input. Legacy sessions fall back to their bounded history and retained tool trail. Source changes invalidate read permissions and carried candidates. Read/search cache keys include edit revision. Candidate compilation is reused until an edit changes the candidate.
 
-Layout checks seed a short preamble and local PDF geometry before requesting model analysis. Findings remain available when a later request fails. Natural final answers do not require a JSON completion flag.
+## Execution and recovery
 
-Cancellation covers creation-pending UI state, monotonic job revisions, retryable stop requests, and checkpoints between tools and PDF pages. Per-tool operational summaries are generated locally; model reasoning fields are never surfaced. Conversation focus is independent of the document splitter. Browser validation for 1.6.2 used a synthetic project and delayed mock transport, with no provider requests.
+Chat and Agent share the same driver/provider/registry. Chat admits inspection capabilities only; Agent additionally admits editing, compilation and known resource recovery. Every tool resolves against the same registration that produced its schema. Mutations are exclusive and current execution remains serial, preserving model order. No arbitrary shell or dynamically downloaded plugins are enabled.
 
-Current-turn policy is isolated in studio_assistant_context.py: explicit layout intent, bounded history retaining the latest reply ending, and trusted current mode. Verified candidate PDFs may be reused for follow-up discussion; conversation success is separate from candidate readiness. Only modifications made in the current turn force a new candidate compilation, and unverified inherited candidates cannot be applied.
+Each native call is settled before the next step. Cancellation records skipped calls as `ABORTED_BEFORE_DISPATCH`; calls whose effects cannot be confirmed are `TOOL_OUTCOME_UNKNOWN`, and recovery instructs the model to inspect current candidate state before another edit. Cold resume closes an interrupted turn and projects logged results without redispatching tools. The JSONL reader preserves an incomplete last frame before repairing it; a complete corrupt record is rejected. Storage initialization failure cannot strand the manager as busy.
 
-## 1.6.4 continuation
+Only transient HTTP 429/500/502/503/504 failures receive at most two transport retries with cancellable backoff; credential, permission and balance errors do not. Cancellation releases local waiting and prevents later tools, but does not promise to reverse a request already accepted by the provider. Raw model reasoning is not exposed as user-visible work explanations.
 
-Explicit continuation preserves the active goal, bounded textual tool trail, read permissions and candidate compilation revision when source stats remain unchanged. Read/search cache keys include edit revision. Source changes invalidate resume context. Alternating identical tool requests are counted across a run, with actual cached results returned instead of inaccessible unchanged references. Older trail entries retain bounded evidence, and the last 20 textual results persist; images are not persisted as base64 conversation state. Final claims of completed edits without candidates are rejected. Candidate images render in continuous lazy-loaded page pairs using the existing cached effect-image endpoint, with no compile on scrolling.
+A default 24-request Agent turn may extend to 48 while actual edits or successful noncached compilation show progress. More than 12 requests without such progress during extension stops it. Repeated signatures are counted across the run. Explicit lower limits remain honored. Cumulative provider tokens are telemetry, not a hard stop condition. Near the limit, the driver reminds the model to complete necessary work and verify it; unfinished work never becomes apply-ready automatically.
 
-## 1.6.5 execution budget
+## Candidate and UI boundaries
 
-Cumulative provider token usage remains telemetry, not a hard interruption threshold. The default 24-request Agent run may extend to at most 48 requests while edits or successful noncached compilation show progress; explicit smaller limits remain honored. At the extended phase, more than 12 requests without such progress stops execution. Repeated-call detection and cancellation remain active. Historical edit bodies are redacted only in model replay copies; native call/result IDs and local exact audit data remain intact. Older tool evidence is bounded to 10000 characters, with 2500 characters per old result. The last three requests receive a completion/verification reminder without granting unfinished candidates apply permission.
+Edits operate on a project clone. Changed candidates must compile and render before application. Conversation success and candidate readiness are distinct; readonly discussion does not recompile an already verified candidate. Source hashes are checked before atomic writeback, and undo restores exact original bytes. Neither a natural-language claim nor an exhausted budget can bypass verification.
+
+The existing `web/document-assistant.js` conversation and document split remain compatible. It owns project/request tickets, monotonic poll revisions, context associations and stop controls. Work records show operational summaries, and normal conversations stay lightweight. Candidate PDFs use continuous lazy-loaded page pairs through the cached effect-image endpoint; scrolling does not compile. Attachments require explicit project-scoped association, and document content cannot expand tool permissions.

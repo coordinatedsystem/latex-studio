@@ -1,6 +1,6 @@
 {
-  "version": "1.6.5",
-  "build": "studio-34",
+  "version": "1.7.0",
+  "build": "studio-35",
   "channel": "stable",
   "repository": "coordinatedsystem/latex-studio"
 }

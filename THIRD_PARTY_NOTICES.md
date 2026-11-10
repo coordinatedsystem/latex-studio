@@ -17,3 +17,7 @@
 编译器及基础资源在安装包中分发，源码仓库不包含个人 TeX 源文件。Windows 系统字体不打包。
 
 安装包构建工具 Inno Setup：https://jrsoftware.org/ ，仅用于构建，不安装到最终用户环境。
+
+## DeepSeek Harness 架构移植
+
+Studio 助手的事件会话、稳定前缀投影、工具注册与未完成调用恢复，依据 DeepSeek Harness 的核心协议移植为 Python 实现；未嵌入完整 Cordis/Node 应用或第三方插件生态。来源：https://github.com/deepseek-ai/deepseek-harness ，固定版本 `fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159`。重点对应 `packages/core/agent-loop/src/agent.ts`、`packages/core/session/src/repair.ts`、`packages/core/tools/src/batch.ts` 和 `packages/llm/llm-deepseek/src/adapter.ts`。保留 DeepSeek 2026 MIT 许可，见 `assets/licenses/DeepSeek-Harness-LICENSE.txt`。具体差异与验证见 `ASSISTANT_ARCHITECTURE.md`。

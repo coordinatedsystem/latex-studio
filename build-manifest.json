@@ -1,5 +1,5 @@
 {
-  "version": "1.6.5",
+  "version": "1.7.0",
   "files": [
     {
       "path": "Launch.vbs",
@@ -13,8 +13,8 @@
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 13721,
-      "sha256": "43017c24d7f39eb2be3755e252fb5e8b115e7465973b98ccf69588a5ef004c49"
+      "size": 14531,
+      "sha256": "f4c39e06ce1a90aad88863632e45410e07365c12f1ae6607982b0533dcd23b59"
     },
     {
       "path": "app/launch.ps1",
@@ -29,7 +29,7 @@
     {
       "path": "app/README.md",
       "size": 8890,
-      "sha256": "b79426ac9a14170edc5bd26e95aa21302fdc73bed802183364cb3bcb08548cff"
+      "sha256": "bf06ccd1b3bb843d8c5f84ac83ef73b5fe9ca3bc1ecbb0765e5cb09444be557e"
     },
     {
       "path": "app/server.py",
@@ -47,14 +47,34 @@
       "sha256": "e0f3b0e6de561240383f6d76e4c25b8fee9d72a5876150cf5749f62d84e5185e"
     },
     {
+      "path": "app/studio_assistant_content.py",
+      "size": 1230,
+      "sha256": "bda8c55652696d128e8af86646ae092cab18c0444a935e5e18dad3333151ecfb"
+    },
+    {
       "path": "app/studio_assistant_context.py",
-      "size": 3733,
-      "sha256": "1f6ae36d2badacb954853f514f18846373441f5fbc7267dda266b6261d39587a"
+      "size": 3806,
+      "sha256": "394b700f642e750cac70911c40a7b9cd4993608eddf6a4f3f3fb177dccb11e17"
     },
     {
       "path": "app/studio_assistant_protocol.py",
-      "size": 3548,
-      "sha256": "98f37b09bff5dd1c88351744ce01229517f976db1641b307452891fda5d89c27"
+      "size": 1945,
+      "sha256": "70e16b3eb99efa558e87f80b0d4439dc5bdff99a1752997b7eea856f2f5c6f9f"
+    },
+    {
+      "path": "app/studio_assistant_provider.py",
+      "size": 2970,
+      "sha256": "36d193dd9699da790732a03be2456cea00d42323a0aee77c8f73712cf7a8ff5e"
+    },
+    {
+      "path": "app/studio_assistant_session.py",
+      "size": 9055,
+      "sha256": "da45c7dac03885014997323457171300fcb8be33073a25e8d71895f5f6a546dd"
+    },
+    {
+      "path": "app/studio_assistant_tools.py",
+      "size": 11229,
+      "sha256": "754fdc2950c0d193973fffcd8157566dba92f5b4f69d0b06fbc0c3965d2435c7"
     },
     {
       "path": "app/studio_batch_edits.py",
@@ -68,8 +88,8 @@
     },
     {
       "path": "app/studio_document_assistant.py",
-      "size": 38105,
-      "sha256": "cf33eaab63ea129a991d0c39f3db46cdf0ecacff023eeb9611b36f6418b71841"
+      "size": 31112,
+      "sha256": "c7adbf93dbfc33c5c05e14aecb5b0fd9589436b911b1d807aedf7699d764d098"
     },
     {
       "path": "app/studio_document_context.py",
@@ -163,13 +183,13 @@
     },
     {
       "path": "app/THIRD_PARTY_NOTICES.md",
-      "size": 1703,
-      "sha256": "f853828a6a28933f3b1acac9e6a986a2e2acede645d6248faf04e7eba0feb324"
+      "size": 2399,
+      "sha256": "271c98f4fba4feedcb41f7c7a1dfe02865df1202f1c0ce04cc145c1771cbac80"
     },
     {
       "path": "app/version.json",
       "size": 128,
-      "sha256": "2cd47bb89f75478342f0d2eb8fe8f71c777914aa46b4bdb8731321235a755944"
+      "sha256": "87e30f393116372f3937e70d398aa15cf3a55d6a4578bc76f2374942b54a344a"
     },
     {
       "path": "app/assets/studio.ico",
@@ -185,6 +205,11 @@
       "path": "app/assets/studio.svg",
       "size": 348,
       "sha256": "5adc037f02c7b51ccd31ebe1fd64f4dbcb4b3ed0501c3ace1cf543685399100b"
+    },
+    {
+      "path": "app/assets/licenses/DeepSeek-Harness-LICENSE.txt",
+      "size": 1065,
+      "sha256": "ebb4f09972aee8608be255debaf78451a68e95c290f55c240dec2ecfa16ea6be"
     },
     {
       "path": "app/assets/licenses/LaTeX-LPPL-1.3c.txt",
