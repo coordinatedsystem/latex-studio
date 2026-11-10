@@ -2,7 +2,7 @@
 
 The conversation UI lives in `web/document-assistant.js` and `.css`. It owns its project ID, request ticket, polling state, attachments and conversation ID. Existing document panes and their resizer are reused; legacy review remains accessible through its own surface. Late replies cannot replace another project's conversation. Tool details and scroll position are retained during progress updates.
 
-`studio_document_assistant.py` implements the conversation loop and a finite Studio tool catalog. It reuses `EditorAI` for disposable compilation, exact edit anchoring, freshness checks, candidate PDF rendering, atomic writeback and exact undo. It does not invoke an arbitrary shell. The server only routes authenticated, project-scoped requests to this manager; project switching and installation respect its busy state.
+`studio_assistant_protocol.py` defines native function contracts, response decoding and paired assistant/tool replay. `studio_document_assistant.py` implements the conversation loop and a finite Studio tool catalog. It reuses `EditorAI` for disposable compilation, exact edit anchoring, freshness checks, candidate PDF rendering, atomic writeback and exact undo. It does not invoke an arbitrary shell. The server only routes authenticated, project-scoped requests to this manager; project switching and installation respect its busy state.
 
 Chat may inspect project text, selected PDF pages, explicitly associated attachments, diagnostics, references, environment and the glossary. Agent additionally edits the disposable copy, compiles, and recovers known public bundle resources. Each tool result is returned to the model; a failed compilation does not count as completion. Only a successful task with a compiled candidate can be applied. Source hashes are checked before writeback, and later source changes prevent overwriting.
 
@@ -16,3 +16,5 @@ Design references (independent implementation, no copied framework code):
 - [OpenCode tools](https://opencode.ai/docs/tools/)
 
 Verification: deterministic mode/tool/transaction/cancellation tests; UI state and project-race tests; HTTP route and project-isolation checks; real API tests on synthetic two-file documents, with an attachment, compiler error recovery, rendered PDF, application and byte-exact undo. Native browser visual verification remains incomplete because the desktop automation tool could not reliably identify the browser URL.
+
+Layout checks seed a short preamble and local PDF geometry before requesting model analysis. Findings remain available when a later request fails. Natural final answers do not require a JSON completion flag.

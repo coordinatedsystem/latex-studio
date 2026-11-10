@@ -1,5 +1,5 @@
 {
-  "version": "1.6.0",
+  "version": "1.6.1",
   "files": [
     {
       "path": "Launch.vbs",
@@ -13,8 +13,8 @@
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 10726,
-      "sha256": "5704c9a6895f868bc37e45e92f3c229ac691da6957646b34a0a901953f7727e9"
+      "size": 11226,
+      "sha256": "d77fab6a8f2ad4f3c7340071a7c8ccbb0ea1e9660a7fbaae804cdfbae92c0f68"
     },
     {
       "path": "app/launch.ps1",
@@ -29,7 +29,7 @@
     {
       "path": "app/README.md",
       "size": 8744,
-      "sha256": "11fa940167f5d42cf778aaafd40a91970ed6cb7485a6c31630e24bd44acb8b5e"
+      "sha256": "46493b42ce5717f8739016cfbae6f2a9ac5e7304c6b9d7fb00000527f08eab23"
     },
     {
       "path": "app/server.py",
@@ -47,6 +47,11 @@
       "sha256": "e0f3b0e6de561240383f6d76e4c25b8fee9d72a5876150cf5749f62d84e5185e"
     },
     {
+      "path": "app/studio_assistant_protocol.py",
+      "size": 3548,
+      "sha256": "98f37b09bff5dd1c88351744ce01229517f976db1641b307452891fda5d89c27"
+    },
+    {
       "path": "app/studio_batch_edits.py",
       "size": 10687,
       "sha256": "ceeffd573061681a95985af523ffe294260866a9fcf732a2b2f6634e0dffab8d"
@@ -58,8 +63,8 @@
     },
     {
       "path": "app/studio_document_assistant.py",
-      "size": 27391,
-      "sha256": "7c38e0a2f77be60a43b23a99d29128e8d5a0e4840d115ecf8d3030cd638ecc6c"
+      "size": 30518,
+      "sha256": "f837d4b051ca1d0038d384912f6969b8bfe088594bf3a57d10b331bc29a8bf2d"
     },
     {
       "path": "app/studio_document_context.py",
@@ -159,7 +164,7 @@
     {
       "path": "app/version.json",
       "size": 128,
-      "sha256": "3974bdb1fa01498d4352c86998500a20c2c58a96de53cf9518061ebe38ffff07"
+      "sha256": "d89464db6466574ff0b7e2ba8a9aa53b91d609867ec4a131b99cd03d4519b6d1"
     },
     {
       "path": "app/assets/studio.ico",
@@ -3063,13 +3068,13 @@
     },
     {
       "path": "app/web/document-assistant.css",
-      "size": 6973,
-      "sha256": "4688635066aec325761e43472e7ad2af18bfe4325cb6b52c42aecd8d275b3c37"
+      "size": 7394,
+      "sha256": "38c9fb1e57b75dae3ab9ca39624e7faa81fb5a7ff9ee65edfbf0b2c6d7a20fe7"
     },
     {
       "path": "app/web/document-assistant.js",
-      "size": 19389,
-      "sha256": "f855fcd17cb0ad3e99b4f99e7fafb9b7a98f99475a4d46b549064e0b4a081dea"
+      "size": 20389,
+      "sha256": "8239dcfb7f175b17e4948e3431c3ffac3f490fd57a506d2503ab2aa0fba68825"
     },
     {
       "path": "app/web/editor-ai.css",

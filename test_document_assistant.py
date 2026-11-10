@@ -76,7 +76,7 @@ class AssistantTests(unittest.TestCase):
         with patch.object(self.ai,'compile_copy',side_effect=self.compiler):j=self.run_job([batch,self.response(message='完成',done=True)])
         self.assertTrue(j['verified']);self.assertEqual(j['requestCount'],2)
     def test_bad_json_can_be_corrected_without_restarting_the_task(self):
-        bad={'choices':[{'finish_reason':'stop','message':{'content':'not json'}}]}
+        bad={'choices':[{'finish_reason':'stop','message':{'content':'{' }}]}
         j=self.run_job([bad,self.response(message='已纠正格式',done=True)],'chat')
         self.assertTrue(j['success']);self.assertEqual(j['requestCount'],2)
 
@@ -94,5 +94,19 @@ class AssistantTests(unittest.TestCase):
         self.assertTrue(second['changedPaths'])
         with self.assertRaisesRegex(ValueError,'Chat'):self.ai.apply(self.root,second['id'])
         self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+
+    def test_native_tool_results_are_linked_to_the_actual_assistant_call(self):
+        native={'choices':[{'finish_reason':'tool_calls','message':{'content':None,'tool_calls':[{'id':'call-read','type':'function','function':{'name':'read_file','arguments':json.dumps({'path':'main.tex'})}}]}}]}
+        answer={'choices':[{'finish_reason':'stop','message':{'content':'已查看源码，命令拼写有误。'}}]}
+        with patch('studio_ai.request_json',side_effect=[native,answer]) as remote:
+            start=self.ai.start(self.root,'main.tex',{'mode':'chat','question':'解释文件'});j=self.wait(start['id'])
+        self.assertTrue(j['success']);payload=remote.call_args.args[1];self.assertIn('tools',payload);self.assertNotIn('response_format',payload)
+        self.assertTrue(any(m['role']=='tool' and m['tool_call_id']=='call-read' for m in payload['messages']))
+    def test_final_legacy_answer_does_not_require_done_flag(self):
+        answer=self.response();answer['choices'][0]['message']['content']=json.dumps({'message':'检查结果：字号较小，应核对正文可读性。','calls':[]})
+        j=self.run_job([answer],'chat');self.assertTrue(j['success']);self.assertIn('检查结果',j['answer'])
+    def test_partial_layout_findings_are_not_replaced_by_a_generic_error(self):
+        result=self.ai.partial_report({'layoutEvidence':{'pages':[1,3],'totalPages':5,'issues':[{'page':3,'message':'正文过小'}]}},'模型连接失败')
+        self.assertIn('第 3 页',result);self.assertIn('正文过小',result);self.assertIn('模型连接失败',result)
 
 if __name__=='__main__':unittest.main()

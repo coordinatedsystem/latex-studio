@@ -18,14 +18,31 @@ function conversationControls(){
  $('#conversationStage').textContent=studioAssistant.sending?'准备中…':job?.stage||'就绪';
  $('#conversationContextList').innerHTML=[...studioAssistant.contexts.map((c,i)=>`<span>${esc(c.path)} · 选区<button type="button" data-context-remove="${i}" aria-label="移除选区">×</button></span>`),...studioAssistant.pages.map((n,i)=>`<span>第 ${n} 页<button type="button" data-page-remove="${i}" aria-label="移除页面">×</button></span>`),...studioAssistant.attachments.map((a,i)=>`<span>${esc(a.name)}<button type="button" data-attachment-remove="${i}" aria-label="移除附件">×</button></span>`)].join('');
 }
+function conversationToolSteps(events){
+ const steps=[];
+ for(const [index,event] of events.entries()){
+  if(event.tool==='thinking')continue;
+  const previous=steps.at(-1);
+  if(previous?.tool===event.tool&&previous.status==='running'&&event.status!=='running')Object.assign(previous,event,{detail:[previous.detail,event.detail].filter(Boolean).join(' · ')});
+  else steps.push({...event,index});
+ }
+ return steps;
+}
+function conversationMessageHtml(text){
+ return esc(text).split(/(```[\s\S]*?```)/g).map(part=>{
+  if(part.startsWith('```'))return '<pre class="conversation-code">'+part.replace(/^```[^\n]*\n?|```$/g,'')+'</pre>';
+  return part.split('\n').map(line=>line.replace(/^#{1,4}\s+(.+)$/,'<strong class="conversation-answer-heading">$1</strong>').replace(/^[-*]\s+(.+)$/,'<span class="conversation-answer-item">• $1</span>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>')).join('\n');
+ }).join('');
+}
 function conversationRender(){
  const job=studioAssistant.job,key=job?.id+':'+job?.revision+':'+job?.applied+':'+job?.undone;
  conversationControls();if(key===studioAssistant.renderKey)return;studioAssistant.renderKey=key;
  const list=$('#conversationMessages'),nearBottom=list.scrollHeight-list.scrollTop-list.clientHeight<100,scrollTop=list.scrollTop;
  const expanded=[...list.querySelectorAll('[data-event-index] details[open]')].map(el=>el.closest('[data-event-index]').dataset.eventIndex);
  const messages=job?.messages||[];
- list.innerHTML=messages.length?messages.map(m=>`<article class="conversation-message ${m.role==='user'?'from-user':'from-assistant'}"><header>${m.role==='user'?'你':'Studio'}</header><div>${esc(m.content)}</div></article>`).join(''):'<div class="conversation-empty"><span>✦</span><p>从文档开始对话</p></div>';
- if(job?.events?.length){list.insertAdjacentHTML('beforeend',`<details class="conversation-tools" ${job.running?'open':''}><summary>${job.running?'<span class="spinner"></span> ':''}${esc(job.stage)} · ${job.events.filter(e=>e.status!=='running').length} 个步骤</summary><ol>${job.events.map((e,i)=>`<li data-event-index="${i}" class="${e.status}"><span>${esc(e.label)}</span>${e.detail?`<details><summary>详情</summary><pre>${esc(e.detail)}</pre></details>`:''}</li>`).join('')}</ol></details>`);}
+ list.innerHTML=messages.length?messages.map(m=>`<article class="conversation-message ${m.role==='user'?'from-user':'from-assistant'}"><header>${m.role==='user'?'你':'Studio'}</header><div>${conversationMessageHtml(m.content)}</div></article>`).join(''):'<div class="conversation-empty"><span>✦</span><p>从文档开始对话</p></div>';
+ const steps=conversationToolSteps(job?.events||[]);
+ if(steps.length){list.insertAdjacentHTML('beforeend',`<details class="conversation-tools" ${job.running?'open':''}><summary>${job.running?'<span class="spinner"></span> ':''}${esc(job.stage)} · ${steps.length} 个步骤</summary><ol>${steps.map(e=>`<li data-event-index="${e.index}" class="${e.status}"><span>${esc(e.label)}</span>${e.detail?`<details><summary>详情</summary><pre>${esc(e.detail)}</pre></details>`:''}</li>`).join('')}</ol></details>`);}
  if(job?.changedPaths?.length)list.insertAdjacentHTML('beforeend',`<div class="conversation-changes">${job.changedPaths.map(path=>`<button type="button" data-assistant-diff="${esc(path)}">${esc(path)} <span>查看修改</span></button>`).join('')}</div>`);
  if(job?.running)list.insertAdjacentHTML('beforeend',`<div class="conversation-working"><span class="spinner"></span>${esc(job.stage)}</div>`);
  for(const index of expanded){const details=list.querySelector('[data-event-index="'+index+'"] details');if(details)details.open=true;}

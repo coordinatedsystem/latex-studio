@@ -58,3 +58,7 @@
 .conversation-pdf-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px}.conversation-pdf-pair figure{min-width:0;margin:0}.conversation-pdf-pair img{width:100%;display:block;background:#fff;border:1px solid #dbe2ec}.conversation-pdf-pair figcaption{font-size:11px;color:#7e8ba0;padding:5px 0}
 @media(max-width:760px){.conversation-diff,.conversation-pdf-pair{grid-template-columns:1fr}#writingWorkbench.conversation-enabled .writing-review{height:65dvh;max-height:85dvh}#conversationModeHint{display:none}}
 @media(prefers-reduced-motion:reduce){#studioConversation .spinner{animation:none}}
+.conversation-answer-heading{display:block;margin:9px 0 3px;color:#30445f;font-size:13px}
+.conversation-answer-item{display:block;padding-left:10px;margin:3px 0}
+.conversation-message code{font-size:12px;background:#f0f3f8;padding:1px 4px;border-radius:4px}
+.conversation-code{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7fa;border:1px solid #e2e7ef;border-radius:6px;padding:9px;font:12px/1.6 monospace}

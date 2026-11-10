@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 function fixture(){
  const nodes=new Map(),calls=[];const $=selector=>{if(!nodes.has(selector))nodes.set(selector,{value:'',hidden:false,disabled:false,textContent:'',classList:{toggle(){}},getBoundingClientRect:()=>({height:200})});return nodes.get(selector);};
- const c=vm.createContext({console,Map,Set,JSON,Array,String,Number,Promise,encodeURIComponent,$,$$:()=>[],state:{projectId:'p1'},prefs:{main:'main.tex'},models:new Map(),saveAll:async()=>{},setInterval:()=>1,clearInterval(){},localStorage:{setItem(){},getItem(){return null;}},api:async(path,data)=>{calls.push([path,data]);return {};}});
+ const c=vm.createContext({console,Map,Set,JSON,Array,String,Number,Promise,encodeURIComponent,esc:text=>String(text).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'),$,$$:()=>[],state:{projectId:'p1'},prefs:{main:'main.tex'},models:new Map(),saveAll:async()=>{},setInterval:()=>1,clearInterval(){},localStorage:{setItem(){},getItem(){return null;}},api:async(path,data)=>{calls.push([path,data]);return {};}});
  let source=fs.readFileSync(__dirname+'/web/document-assistant.js','utf8');source=source.slice(0,source.indexOf('function conversationInstall'));vm.runInContext(source+';this.assistant=studioAssistant;',c);c.conversationControls=()=>{};c.conversationRender=()=>{};c.conversationNotice=()=>{};
  c.assistant.project='p1';return {c,$,calls};
 }
@@ -36,3 +36,6 @@ test('composer dragging is clamped and supports keyboard resizing',()=>{
  const f=fixture(),handle=f.$('#conversationComposerResize'),panel=f.$('#studioConversation');const values=[];panel.clientHeight=600;panel.style={setProperty:(name,value)=>values.push(value)};handle.setPointerCapture=()=>{};handle.hasPointerCapture=()=>true;handle.releasePointerCapture=()=>{};
  f.c.conversationSetupResize();handle.onpointerdown({button:0,clientY:300,pointerId:1,preventDefault(){}});handle.onpointermove({pointerId:1,clientY:-500});assert.equal(values.at(-1),'390px');handle.onkeydown({key:'Home',preventDefault(){}});assert.equal(values.at(-1),'200px');
 });
+
+test('tool progress merges start and finish instead of counting them twice',()=>{const f=fixture();const steps=f.c.conversationToolSteps([{tool:'thinking',status:'done'},{tool:'read_file',status:'running',detail:'main.tex'},{tool:'read_file',status:'done',detail:'已完成'}]);assert.equal(steps.length,1);assert.equal(steps[0].status,'done');assert.match(steps[0].detail,/main.tex/);});
+test('answers show readable structure while escaping document HTML',()=>{const f=fixture();const html=f.c.conversationMessageHtml('## 检查结果\n- **字号**过小\n<script>alert(1)</script>');assert.match(html,/conversation-answer-heading/);assert.match(html,/<strong>字号<\/strong>/);assert.ok(!html.includes('<script>'));});
