@@ -1,5 +1,5 @@
 {
-  "version": "1.5.5",
+  "version": "1.5.6",
   "files": [
     {
       "path": "Launch.vbs",
@@ -13,8 +13,8 @@
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 9570,
-      "sha256": "8cf8a9996babc22562bf85534275a25b3f610d1998f6b2ccc16224719590169a"
+      "size": 10010,
+      "sha256": "bc26ba56ac765acc8628cb19033945368d72896b99f6a497956a4bbcbbe73043"
     },
     {
       "path": "app/launch.ps1",
@@ -29,7 +29,7 @@
     {
       "path": "app/README.md",
       "size": 7818,
-      "sha256": "11c59c5c7a87dc24304c0c69115ca5c283d67202b3387320baf67e8271248d56"
+      "sha256": "5095003fb04e230e53e1f14fa9bf39d557cbe1555dc977d6b4836d2aad7350f3"
     },
     {
       "path": "app/server.py",
@@ -154,7 +154,7 @@
     {
       "path": "app/version.json",
       "size": 128,
-      "sha256": "6a147ec95304e785bd30357ac874b832160f0fccc89bc2a4a5bd8023a9d4bf8f"
+      "sha256": "4b3f04fe055daf99811159f3d481126a2a0b5422ffe72fa7f6ff42fd7f531bbc"
     },
     {
       "path": "app/assets/studio.ico",
@@ -3033,8 +3033,8 @@
     },
     {
       "path": "app/web/app.js",
-      "size": 57948,
-      "sha256": "e751ae343f2b7388b2730a1edb3a36e7bbc11564b0306c50e5d12c34b4c38051"
+      "size": 58577,
+      "sha256": "a5f1c97ae1b49d0986c69661cbfb3356e816231ea7070fa475434e7a3fbbda0d"
     },
     {
       "path": "app/web/assistant-refresh.css",
@@ -3043,8 +3043,8 @@
     },
     {
       "path": "app/web/assistant-refresh.js",
-      "size": 1671,
-      "sha256": "e72ce6a62ae6a8646e1675a69a4031beed29f16fbdf576546e22c6f1062edc2a"
+      "size": 1709,
+      "sha256": "e797f97502f89554c27ea1289b594e3df2eb63da44a388d85690a96f809e8cb1"
     },
     {
       "path": "app/web/document-analysis.css",
@@ -3153,8 +3153,8 @@
     },
     {
       "path": "app/web/reference-navigation.js",
-      "size": 16955,
-      "sha256": "685f0e35a4a6077bae18e74cc3d7690c9886037471ad9e94467506766438b564"
+      "size": 17136,
+      "sha256": "4b42b9cc9d8d5850deeff20cefcd3865539a48662bbc05234700356d85ecbcde"
     },
     {
       "path": "app/web/reference-tools.css",

@@ -51,3 +51,14 @@ test('offers the native reader only after the PDF bytes have been validated',asy
  assert.equal(f.phases.at(-1).phase,'native');assert.equal(f.sandbox.pdfBlobUrl,'blob:local/verified-pdf');
  assert.equal(f.errors.length,1);
 });
+const toggleCode=source.slice(source.indexOf('async function toggleNativePreview'),source.indexOf('async function setPdf'));
+test('system preview toggles back to the built-in reader and preserves a candidate PDF',async()=>{
+ const calls=[];const c=vm.createContext({pdfPhase:'native',lastPdf:5,state:{pdfVersion:5},editorAiPreview:{id:'candidate',project:'project',version:5},encodeURIComponent,useNativePreview:()=>calls.push('native'),setPdf:(...args)=>calls.push(args)});
+ vm.runInContext(toggleCode,c);await c.toggleNativePreview();assert.equal(calls[0][1],true);assert.equal(calls[0][2],false);assert.match(calls[0][4],/candidate/);
+ c.pdfPhase='ready';await c.toggleNativePreview();assert.equal(calls[1],'native');
+});
+test('source navigation recovers from an inaccessible system PDF frame',async()=>{
+ const navigation=fs.readFileSync(__dirname+'/web/reference-navigation.js','utf8');const code=navigation.slice(navigation.indexOf('async function studioPdfApplication'),navigation.indexOf('async function studioHighlightPdf'));
+ let recovered=false;const viewer={pdfDocument:{}};const frame={get contentWindow(){if(!recovered)throw new Error('cross-origin system reader');return {PDFViewerApplication:viewer};}};
+ const c=vm.createContext({editorAiPreview:null,state:{hasPdf:true,pdfVersion:3},$:()=>frame,setPdf:async()=>{recovered=true;}});vm.runInContext(code,c);assert.equal(await c.studioPdfApplication(),viewer);
+});

@@ -2,11 +2,11 @@
 
 面向 Windows 的本地 LaTeX 写作工具：源码编辑、PDF 预览、宏包管理与可审阅的 AI 修改，在同一个工作区完成。
 
-当前版本：**1.5.5** · Windows 10 / 11 x64 · 公开仓库
+当前版本：**1.5.6** · Windows 10 / 11 x64 · 公开仓库
 
 ## 安装
 
-从 [安装包目录](distribution/) 下载 `LaTeX-Studio-1.5.5-win64-Setup.exe`。使用旁边的 `SHA256SUMS.txt` 核对文件，再双击安装。默认位置为 `D:\LaTeXStudio`，首次安装和升级均显示安装位置选择页。更换位置不会自动迁移原有项目和设置；原位置升级保留用户数据。
+从 [安装包目录](distribution/) 下载 `LaTeX-Studio-1.5.6-win64-Setup.exe`。使用旁边的 `SHA256SUMS.txt` 核对文件，再双击安装。默认位置为 `D:\LaTeXStudio`，首次安装和升级均显示安装位置选择页。更换位置不会自动迁移原有项目和设置；原位置升级保留用户数据。
 
 安装包包含独立 Python、Tectonic 编译器、PDF 渲染组件、离线前端与基础 TeX 资源；无需另装 Python、Node.js 或 LaTeX。界面不依赖公共 CDN。未缓存的宏包需要联网下载。
 

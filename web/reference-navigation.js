@@ -58,8 +58,9 @@ async function studioLocateSource(loc){
 }
 async function studioPdfApplication(){
  if(editorAiPreview)throw new Error('请先返回原 PDF，再定位');
- let app=$('#pdfFrame').contentWindow?.PDFViewerApplication;
- if(!app?.pdfDocument){if(!state?.hasPdf)throw new Error('请先保存并编译文档');await setPdf(state.pdfVersion,true,false);app=$('#pdfFrame').contentWindow?.PDFViewerApplication;}
+ const current=()=>{try{return $('#pdfFrame').contentWindow?.PDFViewerApplication;}catch{return null;}};
+ let app=current();
+ if((typeof pdfPhase!=='undefined'&&pdfPhase==='native')||!app?.pdfDocument){if(!state?.hasPdf)throw new Error('请先保存并编译文档');await setPdf(state.pdfVersion,true,false);app=current();}
  if(!app?.pdfDocument)throw new Error('请使用内置 PDF 预览后定位');return app;
 }
 async function studioHighlightPdf(point){
