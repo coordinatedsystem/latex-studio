@@ -31,6 +31,7 @@ from studio_packages import packages_for
 from studio_engine import engine_environment
 from studio_ai import assistant_for
 from studio_sync import locate
+from studio_document_assistant import document_assistant_for
 from studio_editor_ai import editor_ai_for
 from studio_page_edits import pages_for, project_files, save_source_map, sha
 from studio_batch_edits import atomic_write_set
@@ -80,6 +81,7 @@ def package_busy():
 
 
 def require_idle():
+    if document_assistant_for(storage()).busy():raise ValueError('AI 助手正在处理，请先等待或停止')
     if STATE['running']:
         raise ValueError('正在编译，请等待完成后再操作项目或宏包')
     if package_busy():
@@ -88,7 +90,7 @@ def require_idle():
         raise ValueError('AI 任务尚未结束，请先等待或停止任务')
     if pages_for(storage()).busy():
         raise ValueError('正在编译修改效果预览，请等待完成')
-    if editor_ai_for(storage()).busy():raise ValueError('编辑器 AI 正在处理，请先等待或停止')
+    if editor_ai_for(storage()).busy() or document_assistant_for(storage()).busy():raise ValueError('AI 正在处理，请先等待或停止')
 
 
 def seed_preview():
@@ -320,7 +322,7 @@ class Handler(BaseHTTPRequestHandler):
                 with LOCK:
                     return self.send({**STATE, 'pdfVersion':str(STATE.get('pdfVersion',0)), 'root': str(ROOT), 'projectName': ROOT.name, 'projectId': project_id(ROOT), 'serverBuild': SERVER_BUILD, 'version':VERSION, 'app': str(APP),
                                       'hasPdf': current_preview().exists(), 'files': tree(),
-                                      'runtime': str(storage().runtime), 'packageBusy': package_busy(), 'aiBusy': assistant_for(storage().data).busy() or editor_ai_for(storage()).busy(), 'editorAiBusy':editor_ai_for(storage()).busy(),
+                                      'runtime': str(storage().runtime), 'packageBusy': package_busy(), 'aiBusy': assistant_for(storage().data).busy() or editor_ai_for(storage()).busy() or document_assistant_for(storage()).busy(), 'editorAiBusy':editor_ai_for(storage()).busy() or document_assistant_for(storage()).busy(),
                                       'pythonVersion': sys.version.split()[0], 'pythonExecutable': sys.executable, 'pid': os.getpid(),'pagePreviewBusy':pages_for(storage()).busy()})
             if path == '/api/editor-ai/history':
                 with LOCK:return self.send(editor_ai_for(storage()).history(ROOT))
@@ -334,6 +336,19 @@ class Handler(BaseHTTPRequestHandler):
                 with LOCK:return self.send(editor_ai_for(storage()).effects(ROOT,query.get('id',[''])[0]))
             if path == '/api/editor-ai/effect-image':
                 return self.file(editor_ai_for(storage()).effect_image(ROOT,query.get('id',[''])[0],query.get('which',[''])[0],query.get('page',['1'])[0]))
+            if path.startswith('/api/ai/assistant/'):
+                manager=document_assistant_for(storage());ident=query.get('id',[''])[0]
+                if path.endswith('/history'):return self.send(manager.history(ROOT))
+                if path.endswith('/job'):
+                    with manager.lock:
+                        session=manager.session(ROOT,ident)
+                        if query.get('revision',[''])[0]==str(session.get('revision')) and session.get('running'):return self.send({'unchanged':True,'id':ident,'running':True})
+                        return self.send(manager.public(session))
+                if path.endswith('/diff'):return self.send(manager.changes(ROOT,ident,query.get('path',[''])[0]))
+                if path.endswith('/preview.pdf'):return self.file(manager.preview(ROOT,ident))
+                if path.endswith('/effects'):return self.send(manager.effects(ROOT,ident))
+                if path.endswith('/effect-image'):return self.file(manager.effect_image(ROOT,ident,query.get('which',[''])[0],query.get('page',['1'])[0]))
+                raise ValueError('助手接口不存在')
             if path == '/api/ai/config':
                 return self.send(assistant_for(storage().data).config())
             if path == '/api/ai/readiness':
@@ -491,11 +506,22 @@ class Handler(BaseHTTPRequestHandler):
                 with LOCK:
                     require_idle()
                     return self.send(editor_ai_for(storage()).apply(ROOT,data.get('id'),route.endswith('/undo'),snapshot))
+            if route.startswith('/api/ai/assistant/'):
+                with LOCK:
+                    manager=document_assistant_for(storage())
+                    if route.endswith('/start'):
+                        require_idle()
+                        return self.send(manager.start(ROOT,data.get('main') or STATE['main'],data,STATE['lines']))
+                    if route.endswith('/attachment'):return self.send(manager.attachment(ROOT,data))
+                    if route.endswith('/cancel'):return self.send(manager.cancel(ROOT,data.get('id')))
+                    if route.endswith('/apply') or route.endswith('/undo'):
+                        require_idle();return self.send(manager.apply(ROOT,data.get('id'),route.endswith('/undo'),snapshot))
+                    raise ValueError('助手接口不存在')
             if route == '/api/ai/config':
                 return self.send(assistant_for(storage().data).configure(data))
             if route == '/api/ai/start':
                 with LOCK:
-                    if editor_ai_for(storage()).busy():raise ValueError('编辑器 AI 正在处理，请先等待或停止')
+                    if editor_ai_for(storage()).busy() or document_assistant_for(storage()).busy():raise ValueError('AI 正在处理，请先等待或停止')
                     attachments = None
                     on_result = None
                     on_progress = None
@@ -707,7 +733,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send({'ok': True})
             if route == '/api/packages/action':
                 with LOCK:
-                    if editor_ai_for(storage()).busy():raise ValueError('编辑器 AI 正在处理，请先等待或停止')
+                    if editor_ai_for(storage()).busy() or document_assistant_for(storage()).busy():raise ValueError('AI 正在处理，请先等待或停止')
                     if pages_for(storage()).busy():raise ValueError('请等待修改效果预览编译完成后再处理宏包')
                     if STATE['running']:
                         raise ValueError('正在编译，请等待完成后再修改宏包缓存')
@@ -774,7 +800,7 @@ class Handler(BaseHTTPRequestHandler):
                     raise ValueError('请选择有效的 .tex 主文档')
                 with LOCK:
                     if pages_for(storage()).busy():raise ValueError('请等待修改效果预览编译完成')
-                    if editor_ai_for(storage()).busy():raise ValueError('编辑器 AI 正在处理，请先等待或停止')
+                    if editor_ai_for(storage()).busy() or document_assistant_for(storage()).busy():raise ValueError('AI 正在处理，请先等待或停止')
                     if package_busy():
                         raise ValueError('宏包任务尚未完成，请等待后再编译')
                     if STATE['running']:

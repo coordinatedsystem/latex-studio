@@ -15,11 +15,19 @@ def verify_app(repo, app):
     bad.extend(str(p.relative_to(app))+' (unexpected)' for p in app.rglob('*') if p.is_file() and p.relative_to(app) not in expected)
     if bad:raise ValueError('Application payload missing or changed: '+', '.join(bad))
     return len(expected)
+def verify_python(payload):
+    required=['python.exe','pythonw.exe','python313.dll','python313.zip','python313._pth',
+              'Lib/site-packages/pypdf/__init__.py','Lib/site-packages/pypdfium2/__init__.py',
+              'Lib/site-packages/pdfplumber/__init__.py','Lib/site-packages/PIL/__init__.py']
+    missing=[name for name in required if not (Path(payload)/'python'/name).is_file()]
+    if missing:raise ValueError('Standalone Python payload missing: '+', '.join(missing))
+
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--runtime',required=True);parser.add_argument('--tex-cache',required=True);parser.add_argument('--payload',required=True);parser.add_argument('--iscc',required=True)
     args=parser.parse_args();repo=Path(__file__).resolve().parents[1];payload=Path(args.payload).resolve();runtime=Path(args.runtime).resolve();cache=Path(args.tex_cache).resolve()
     info=json.loads((repo/'version.json').read_text('utf8'));version=info['version']
     audit(repo)
+    verify_python(payload)
     app=payload/'app';app.mkdir(parents=True,exist_ok=True)
     for folder in ['web','vendor','assets']:shutil.copytree(repo/folder,app/folder,dirs_exist_ok=True)
     names=['server.py','studio_version.py','bootstrap_install.py','launch.ps1','Launch.vbs','version.json','README.md','CHANGELOG.md','THIRD_PARTY_NOTICES.md']

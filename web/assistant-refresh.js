@@ -1,6 +1,7 @@
 /* Local candidate compilation is automatic; model requests stay explicit. */
 const assistantPreview={key:null,timer:null};
 function assistantQueuePreview(){
+ if(typeof studioAssistant!=='undefined'&&studioAssistant.surface==='conversation')return;
  if(writing.applied||writing.stale||!writing.context||!writing.selected.size){clearTimeout(assistantPreview.timer);return;}
  if(writing.busy||state?.running||state?.packageBusy||writing.job?.running||writing.preview?.running||writingSamePreview())return;
  if(writing.requestSignature&&writing.requestSignature!==writingRequestSignature())return;

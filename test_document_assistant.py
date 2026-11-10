@@ -1,0 +1,98 @@
+import base64,json,tempfile,threading,time,unittest
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
+from studio_document_assistant import DocumentAssistant
+
+class AssistantTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory(prefix='studio-conversation-');self.addCleanup(self.tmp.cleanup);self.base=Path(self.tmp.name).resolve();self.root=self.base/'project';self.root.mkdir()
+        self.original=b'\xef\xbb\xbf\\documentclass{article}\r\n\\begin{document}\r\nHello \\textbff{world}.\r\n\\end{document}\r\n';(self.root/'main.tex').write_bytes(self.original)
+        self.storage=SimpleNamespace(data=self.base/'data',cache=self.base/'cache',runtime=self.base/'runtime',tex_cache=self.base/'cache/tex',preview_path=lambda r:self.base/'missing.pdf');self.ai=DocumentAssistant(self.storage)
+        config=patch('studio_ai.assistant_for',return_value=SimpleNamespace(config=lambda raw=False:{'deepseek':{'configured':True,'model':'mock','key':'mock-only'}}));config.start();self.addCleanup(config.stop)
+    def response(self,tool=None,args=None,message='继续',done=False,**extra):
+        return {'choices':[{'finish_reason':'stop','message':{'content':json.dumps({'message':message,'calls':[{'tool':tool,'args':args or {}}] if tool else [],'done':done,**extra})}}],'usage':{'total_tokens':30,'prompt_tokens':20,'completion_tokens':10,'prompt_cache_hit_tokens':5}}
+    def run_job(self,responses,mode='agent',**extra):
+        with patch('studio_ai.request_json',side_effect=responses):
+            s=self.ai.start(self.root,'main.tex',{'mode':mode,'question':'修复错误，保留正文','stepLimit':12,**extra});return self.wait(s['id'])
+    def wait(self,ident):
+        end=time.monotonic()+5
+        while self.ai.busy() and time.monotonic()<end:threading.Event().wait(.01)
+        self.assertFalse(self.ai.busy());return self.ai.status(self.root,ident)
+    def compiler(self,s,clone,n):
+        if 'textbff' in (clone/'main.tex').read_text('utf-8-sig'):return False,'Undefined control sequence textbff'
+        pdf=self.ai.folder(s['root'],s['id'],True)/'candidate.pdf';pdf.parent.mkdir(parents=True,exist_ok=True);pdf.write_bytes(b'%PDF-1.5 test');return True,'ok'
+    def edit_responses(self):return [self.response('read_file',{'path':'main.tex'}),self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),self.response('compile'),self.response(message='已解决',done=True)]
+    def test_agent_reads_edits_verifies_then_applies_and_undoes_exactly(self):
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler):j=self.run_job(self.edit_responses())
+        self.assertTrue(j['verified']);self.assertTrue(j['success']);self.assertEqual(j['requestCount'],4);self.assertEqual(j['usage']['cached_tokens'],20);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+        self.ai.apply(self.root,j['id']);self.assertNotIn(b'textbff',(self.root/'main.tex').read_bytes());self.ai.apply(self.root,j['id'],True);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+    def test_chat_cannot_modify_or_compile(self):
+        with patch.object(self.ai,'compile_copy') as compiler:j=self.run_job([self.response('read_file',{'path':'main.tex'}),self.response('edit',{'path':'main.tex','before':'Hello','after':'Changed'}),self.response('compile'),self.response(message='Chat 只讨论',done=True)],'chat')
+        compiler.assert_not_called();self.assertFalse(j['changedPaths']);self.assertEqual((self.root/'main.tex').read_bytes(),self.original);self.assertEqual(sum(e['status']=='failed' for e in j['events']),2)
+    def test_compile_failure_is_returned_to_agent_and_fixed(self):
+        responses=[self.response('read_file',{'path':'main.tex'}),self.response('compile'),self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),self.response('compile'),self.response(message='修复完成',done=True)]
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler) as compiler:j=self.run_job(responses)
+        self.assertEqual(compiler.call_count,2);self.assertTrue(j['verified']);self.assertTrue(j['success'])
+    def test_done_cannot_bypass_failed_verification(self):
+        with patch.object(self.ai,'compile_copy',return_value=(False,'bad')):j=self.run_job(self.edit_responses()+[self.response(message='完成',done=True)]*10)
+        self.assertFalse(j['verified']);self.assertFalse(j['success']);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+        with self.assertRaises(ValueError):self.ai.apply(self.root,j['id'])
+    def test_edit_requires_read_and_rejects_project_escape(self):
+        j=self.run_job([self.response('edit',{'path':'main.tex','before':'Hello','after':'Changed'}),self.response('read_file',{'path':'../outside.txt'}),self.response(message='需要有效范围',done=True)])
+        self.assertEqual(sum(e['status']=='failed' for e in j['events']),2);self.assertFalse(j['changedPaths'])
+    def test_identical_tools_stop_instead_of_burning_budget(self):
+        j=self.run_job([self.response('list_files')]*4);self.assertEqual(j['requestCount'],3);self.assertFalse(j['success']);self.assertIn('重复',j['error'])
+    def test_compile_result_reused_until_an_edit_changes_revision(self):
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler) as compiler:j=self.run_job([self.response('compile'),self.response('compile'),self.response(message='需修改',done=True)])
+        self.assertEqual(compiler.call_count,1)
+    def test_attachment_access_is_explicit_and_project_scoped(self):
+        a=self.ai.attachment(self.root,{'name':'notes.txt','content':base64.b64encode(b'Guidance').decode()})
+        other=self.base/'other';other.mkdir()
+        with self.assertRaises(ValueError):self.ai.attachment_meta(other,a['id'])
+        j=self.run_job([self.response('read_attachment',{'id':a['id']}),self.response(message='附件可读',done=True)],'chat',attachments=[a['id']]);self.assertTrue(j['success'])
+    def test_pending_candidates_survive_follow_up_without_writing_original(self):
+        first=self.run_job([self.response('read_file',{'path':'main.tex'}),self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),self.response(message='还需确认细节',question=True)])
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler):second=self.run_job([self.response('compile'),self.response(message='完成',done=True)],resume=first['id'])
+        self.assertTrue(second['verified']);self.assertEqual(second['changedPaths'],['main.tex']);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+    def test_stale_candidate_cannot_overwrite_later_source(self):
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler):j=self.run_job(self.edit_responses())
+        (self.root/'main.tex').write_text('later work','utf8')
+        with self.assertRaises(ValueError):self.ai.apply(self.root,j['id'])
+    def test_cancellation_discards_late_model_output(self):
+        entered=threading.Event();release=threading.Event()
+        def remote(*a,**k):entered.set();release.wait(3);return self.response('edit',{'path':'main.tex','before':'Hello','after':'Changed'})
+        with patch('studio_ai.request_json',side_effect=remote):
+            job=self.ai.start(self.root,'main.tex',{'mode':'agent','question':'修改正文'});self.assertTrue(entered.wait(2));self.ai.cancel(self.root,job['id']);j=self.wait(job['id']);release.set()
+        self.assertFalse(j['success']);self.assertFalse(j['changedPaths']);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+    def test_chat_history_is_compacted_locally_and_keeps_latest_question(self):
+        first=self.run_job([self.response(message='上下文已了解',done=True)],'chat')
+        with patch('studio_ai.request_json',return_value=self.response(message='继续回答',done=True)) as remote:
+            job=self.ai.start(self.root,'main.tex',{'mode':'chat','question':'后续问题','resume':first['id']});j=self.wait(job['id'])
+        messages=remote.call_args.args[1]['messages'];self.assertIn('后续问题',messages[-1]['content']);self.assertTrue(any(m['content']=='上下文已了解' for m in messages));self.assertEqual(j['requestCount'],1)
+
+    def test_mixed_tool_batch_executes_read_before_edit_and_compile(self):
+        batch=self.response();batch['choices'][0]['message']['content']=json.dumps({'message':'读取后修改并验证','calls':[{'tool':'read_file','args':{'path':'main.tex'}},{'tool':'edit','args':{'path':'main.tex','before':'textbff','after':'textbf'}},{'tool':'compile','args':{}}]})
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler):j=self.run_job([batch,self.response(message='完成',done=True)])
+        self.assertTrue(j['verified']);self.assertEqual(j['requestCount'],2)
+    def test_bad_json_can_be_corrected_without_restarting_the_task(self):
+        bad={'choices':[{'finish_reason':'stop','message':{'content':'not json'}}]}
+        j=self.run_job([bad,self.response(message='已纠正格式',done=True)],'chat')
+        self.assertTrue(j['success']);self.assertEqual(j['requestCount'],2)
+
+    def test_attachment_images_are_downscaled_before_model_input(self):
+        import io
+        from PIL import Image
+        from studio_document_assistant import image_payload
+        path=self.base/'large.png';Image.new('RGB',(3200,2400),'white').save(path)
+        encoded=image_payload(path);raw=base64.b64decode(encoded.split(',',1)[1])
+        with Image.open(io.BytesIO(raw)) as image:self.assertEqual(image.size,(1600,1200))
+        self.assertLess(len(raw),path.stat().st_size)
+    def test_chat_can_discuss_pending_agent_changes_without_write_permission(self):
+        first=self.run_job([self.response('read_file',{'path':'main.tex'}),self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),self.response(message='需要继续',question=True)])
+        second=self.run_job([self.response('read_file',{'path':'main.tex'}),self.response(message='解释候选',done=True)],'chat',resume=first['id'])
+        self.assertTrue(second['changedPaths'])
+        with self.assertRaisesRegex(ValueError,'Chat'):self.ai.apply(self.root,second['id'])
+        self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+
+if __name__=='__main__':unittest.main()

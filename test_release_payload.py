@@ -30,3 +30,7 @@ class PayloadTests(unittest.TestCase):
             (app/'web/terms-desk.js').write_text('fixture',encoding='utf8')
             (app/'stale.py').write_text('old module',encoding='utf8')
             with self.assertRaisesRegex(ValueError,'unexpected'):verify_app(repo,app)
+    def test_missing_standalone_runtime_is_rejected_before_build(self):
+        from build_release import verify_python
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError,'Standalone Python'):verify_python(tmp)
