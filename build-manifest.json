@@ -1,5 +1,5 @@
 {
-  "version": "1.6.2",
+  "version": "1.6.3",
   "files": [
     {
       "path": "Launch.vbs",
@@ -13,8 +13,8 @@
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 11922,
-      "sha256": "81b548d2bdd68b09061edda0dda5218b2f819b42906e3338962f1a143e94ca6d"
+      "size": 12581,
+      "sha256": "63c6ed9f9a8b71e3184ed416fb80c24add5244817ea87a29bd4ee8d4c4497044"
     },
     {
       "path": "app/launch.ps1",
@@ -29,7 +29,7 @@
     {
       "path": "app/README.md",
       "size": 8890,
-      "sha256": "662accb57de3c3c159b37b10d4fe8db0959beef53c25f8a901ddeac722ba5f21"
+      "sha256": "ab6b33fb33e26a2bfec2ccdc983db6f28c3309de136940429b9e66aec9f2e14c"
     },
     {
       "path": "app/server.py",
@@ -45,6 +45,11 @@
       "path": "app/studio_ai_quality.py",
       "size": 9894,
       "sha256": "e0f3b0e6de561240383f6d76e4c25b8fee9d72a5876150cf5749f62d84e5185e"
+    },
+    {
+      "path": "app/studio_assistant_context.py",
+      "size": 2445,
+      "sha256": "b97778e0f5b39b68b92c2fdf4e952d510c9c37b7be9ec4369c2c4edf5548eb77"
     },
     {
       "path": "app/studio_assistant_protocol.py",
@@ -63,8 +68,8 @@
     },
     {
       "path": "app/studio_document_assistant.py",
-      "size": 32900,
-      "sha256": "c5ca67db672cc6b711e788f477c2130707483269b6cfd5067156d1f4a0ce6222"
+      "size": 34647,
+      "sha256": "a5b35719cfe791c43192b43fbaf8d4f6264a3fd2a508c9108874ba59ff3b94d5"
     },
     {
       "path": "app/studio_document_context.py",
@@ -164,7 +169,7 @@
     {
       "path": "app/version.json",
       "size": 128,
-      "sha256": "02803d5ef40f4294b4802e353e8ac33c9babbc7c326b8ba87a33f13d575263b3"
+      "sha256": "dfef95a35f4fa88489a361d24e4bf23f84052076f20af9b06330dbd8c1f15a58"
     },
     {
       "path": "app/assets/studio.ico",
@@ -3073,8 +3078,8 @@
     },
     {
       "path": "app/web/document-assistant.js",
-      "size": 24315,
-      "sha256": "af5c1e448b9bd36ce3be4655db4fc3e9b5af5d8f3462b0b2a682c6073015024f"
+      "size": 24344,
+      "sha256": "200eb253b2b1e0054927631211df9e9949b0b167db96f9cde4c8461537b7ad08"
     },
     {
       "path": "app/web/editor-ai.css",

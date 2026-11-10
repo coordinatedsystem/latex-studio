@@ -11,7 +11,7 @@ function conversationControls(){
  $('#conversationSend').hidden=running;$('#conversationStop').hidden=!running;$('#conversationStop').disabled=!!studioAssistant.stopping;$('#conversationStop').setAttribute('aria-label',studioAssistant.stopping?'正在停止':'停止生成');$('#conversationStop').title=studioAssistant.stopping?'正在停止后续操作':'停止 · Esc';$('#conversationSend').disabled=studioAssistant.sending||!$('#conversationInput').value.trim();
  $('#conversationHistory').disabled=running;$('#conversationContext').disabled=running;$('#conversationUpload').disabled=running;$('#conversationNew').disabled=running;$('#conversationInput').disabled=false;
  $('#conversationModeHint').textContent=studioAssistant.mode==='chat'?'围绕文档讨论':'完成任务并验证结果';
- const job=studioAssistant.job;$('#conversationApply').hidden=job?.chatMode!=='agent'||job?.success!==true||!job?.verified||!job?.changedPaths?.length||job?.applied||running;$('#conversationApply').disabled=!!job?.stale;
+ const job=studioAssistant.job;$('#conversationApply').hidden=job?.chatMode!=='agent'||job?.success!==true||job?.candidateReady===false||!job?.verified||!job?.changedPaths?.length||job?.applied||running;$('#conversationApply').disabled=!!job?.stale;
  $('#conversationUndo').hidden=!job?.applied;$('#conversationUndo').disabled=!job?.canUndo||running;
  $('#conversationPreview').hidden=!job?.verified||!job?.changedPaths?.length||running;
  $('#conversationUsage').textContent=job?`${(job.tokens||0).toLocaleString()} tokens · ${job.requestCount||0} 次请求`+(job.usage?.cached_tokens?` · 缓存 ${job.usage.cached_tokens.toLocaleString()}`:''):'';

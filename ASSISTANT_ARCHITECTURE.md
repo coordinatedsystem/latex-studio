@@ -20,3 +20,5 @@ Verification: deterministic mode/tool/transaction/cancellation tests; UI state a
 Layout checks seed a short preamble and local PDF geometry before requesting model analysis. Findings remain available when a later request fails. Natural final answers do not require a JSON completion flag.
 
 Cancellation covers creation-pending UI state, monotonic job revisions, retryable stop requests, and checkpoints between tools and PDF pages. Per-tool operational summaries are generated locally; model reasoning fields are never surfaced. Conversation focus is independent of the document splitter. Browser validation for 1.6.2 used a synthetic project and delayed mock transport, with no provider requests.
+
+Current-turn policy is isolated in studio_assistant_context.py: explicit layout intent, bounded history retaining the latest reply ending, and trusted current mode. Verified candidate PDFs may be reused for follow-up discussion; conversation success is separate from candidate readiness. Only modifications made in the current turn force a new candidate compilation, and unverified inherited candidates cannot be applied.

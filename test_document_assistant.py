@@ -126,4 +126,29 @@ class AssistantTests(unittest.TestCase):
         inspect_pdf(pdf,checkpoint=lambda:checked.append(True));self.assertEqual(len(checked),2)
         with self.assertRaisesRegex(ValueError,'stopped'):inspect_pdf(pdf,checkpoint=lambda:(_ for _ in ()).throw(ValueError('stopped')))
 
+    def test_discussing_verified_changes_does_not_compile_them_again(self):
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler):first=self.run_job(self.edit_responses())
+        with patch.object(self.ai,'compile_copy') as compiler,patch('studio_ai.request_json',return_value=self.response(message='简短说明：只修复命令拼写。',done=True)):
+            job=self.ai.start(self.root,'main.tex',{'mode':'agent','question':'刚才的回复简短一点，不要改文档','resume':first['id']});second=self.wait(job['id'])
+        compiler.assert_not_called();self.assertTrue(second['verified']);self.assertTrue(second['candidateReady']);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+    def test_changed_source_does_not_block_a_follow_up_discussion(self):
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler):first=self.run_job(self.edit_responses())
+        (self.root/'main.tex').write_text('User later changes','utf8')
+        second=self.run_job([self.response(message='讨论当前版本',done=True)],'chat',resume=first['id'])
+        self.assertTrue(second['success']);self.assertFalse(second['changedPaths']);self.assertEqual((self.root/'main.tex').read_text('utf8'),'User later changes')
+    def test_follow_up_does_not_automatically_repeat_prior_layout_review(self):
+        first=self.run_job([self.response(message='已完成排版检查',done=True)],'chat')
+        with patch.object(self.ai,'compile_copy') as compiler,patch.object(self.ai,'tool') as tool:
+            second=self.run_job([self.response(message='缩短配套文件说明',done=True)],resume=first['id'],question='配套文件与复现方法不用说这么仔细')
+        compiler.assert_not_called();tool.assert_not_called();self.assertTrue(second['success'])
+
+    def test_discussing_unverified_candidates_does_not_force_compilation_or_allow_apply(self):
+        first=self.run_job([self.response('read_file',{'path':'main.tex'}),self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),self.response(message='待继续',question=True)])
+        with patch.object(self.ai,'compile_copy') as compiler:second=self.run_job([self.response(message='简短解释候选修改',done=True)],resume=first['id'],question='只解释刚才的修改，不要执行')
+        compiler.assert_not_called();self.assertTrue(second['success']);self.assertFalse(second['candidateReady']);self.assertFalse(second['verified'])
+        with self.assertRaises(ValueError):self.ai.apply(self.root,second['id'])
+    def test_inspection_can_report_a_compile_error_without_being_forced_to_edit(self):
+        with patch.object(self.ai,'compile_copy',return_value=(False,'Undefined control sequence')):j=self.run_job([self.response('compile'),self.response(message='编译失败，命令拼写有误。未修改文档。',done=True)],question='只检查能否编译，不要修改')
+        self.assertTrue(j['success']);self.assertFalse(j['changedPaths']);self.assertFalse(j['verified'])
+
 if __name__=='__main__':unittest.main()
