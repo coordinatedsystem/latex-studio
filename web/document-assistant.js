@@ -131,9 +131,10 @@ async function conversationDiff(path){
 async function conversationPreview(){
  const id=studioAssistant.id,project=state.projectId;const effects=await api('ai/assistant/effects?id='+id);if(id!==studioAssistant.id||project!==state.projectId)return;
  writingSetView('content');$('#writingContent').hidden=true;const host=$('#conversationPdf');host.hidden=false;
- host.innerHTML=`<div class="conversation-pdf-toolbar"><button type="button" id="conversationReturn">返回文档</button><label>页次 <select id="conversationPdfPage">${Array.from({length:effects.afterPages||1},(_,i)=>`<option>${i+1}</option>`).join('')}</select></label></div><div class="conversation-pdf-pair"><figure><figcaption>修改前</figcaption><img id="conversationPdfBefore" alt="修改前" ${effects.beforePages?'':'hidden'}></figure><figure><figcaption>候选修改</figcaption><img id="conversationPdfAfter" alt="候选修改"></figure></div>`;
- const paint=()=>{const n=Number($('#conversationPdfPage').value);for(const side of ['Before','After']){const image=$('#conversationPdf'+side);image.hidden=side==='Before'&&n>(effects.beforePages||0);image.src='/api/ai/assistant/effect-image?id='+id+'&which='+side.toLowerCase()+'&page='+n+'&project='+encodeURIComponent(project);}};
- $('#conversationReturn').onclick=()=>writingSetView('content');$('#conversationPdfPage').onchange=paint;paint();
+ const total=Math.max(effects.afterPages||0,effects.beforePages||0,1);
+ const image=(side,n)=>n>(effects[side+'Pages']||0)?'<p class="conversation-pdf-missing">本版本无此页</p>':`<img loading="lazy" decoding="async" width="794" height="1123" alt="${side==='before'?'修改前':'候选修改'}第 ${n} 页" src="/api/ai/assistant/effect-image?id=${id}&which=${side}&page=${n}&project=${encodeURIComponent(project)}">`;
+ host.innerHTML=`<div class="conversation-pdf-toolbar"><button type="button" id="conversationReturn">返回文档</button><span>连续预览 · 共 ${total} 页 · 向下滚动浏览</span></div>${Array.from({length:total},(_,i)=>`<section class="conversation-pdf-pair" aria-label="第 ${i+1} 页对比"><figure><figcaption>修改前 · 第 ${i+1} 页</figcaption>${image('before',i+1)}</figure><figure><figcaption>候选修改 · 第 ${i+1} 页</figcaption>${image('after',i+1)}</figure></section>`).join('')}`;
+ $('#conversationReturn').onclick=()=>writingSetView('content');
 }
 async function conversationApply(undo=false){
  if([...models.values()].some(i=>i.dirty))throw new Error('请先保存当前文件');

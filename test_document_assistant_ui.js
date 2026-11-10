@@ -55,3 +55,11 @@ test('stop failure permits retry instead of leaving the control disabled',async(
 test('empty conversation renders without dereferencing a missing work log',()=>{
  const f=fixture(),list=f.$('#conversationMessages');Object.assign(list,{scrollHeight:0,scrollTop:0,clientHeight:300,querySelector:()=>null,insertAdjacentHTML(position,html){this.innerHTML+=html;}});f.c.realRender();assert.match(list.innerHTML,/conversation-empty/);
 });
+
+test('candidate preview shows every page continuously without compiling',async()=>{
+ const f=fixture();f.c.assistant.id='job';f.c.writingSetView=()=>{};f.c.api=async(path)=>{f.calls.push(path);return {beforePages:2,afterPages:3};};
+ await f.c.conversationPreview();const html=f.$('#conversationPdf').innerHTML;
+ assert.equal((html.match(/class="conversation-pdf-pair"/g)||[]).length,3);
+ assert.equal((html.match(/loading="lazy"/g)||[]).length,5);assert.match(html,/本版本无此页/);
+ assert.ok(!html.includes('<select'));assert.equal(f.calls.length,1);assert.match(f.calls[0],/effects/);
+});

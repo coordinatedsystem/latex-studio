@@ -27,6 +27,36 @@ class AssistantTests(unittest.TestCase):
         with patch.object(self.ai,'compile_copy',side_effect=self.compiler):j=self.run_job(self.edit_responses())
         self.assertTrue(j['verified']);self.assertTrue(j['success']);self.assertEqual(j['requestCount'],4);self.assertEqual(j['usage']['cached_tokens'],20);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
         self.ai.apply(self.root,j['id']);self.assertNotIn(b'textbff',(self.root/'main.tex').read_bytes());self.ai.apply(self.root,j['id'],True);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+    def test_continue_preserves_goal_and_read_permission(self):
+        first=self.run_job([self.response('search',{'query':'Hello'}),self.response('read_file',{'path':'main.tex'})],question='删除讲义相关内容',stepLimit=2)
+        self.assertFalse(first['success'])
+        captured=[]
+        responses=iter([self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),self.response('compile'),self.response(message='候选已完成',done=True)])
+        def remote(url,payload,headers):
+            captured.append(payload['messages']);return next(responses)
+        with patch('studio_ai.request_json',side_effect=remote),patch.object(self.ai,'compile_copy',side_effect=self.compiler):
+            job=self.ai.start(self.root,'main.tex',{'mode':'agent','question':'继续','resume':first['id'],'stepLimit':6});job=self.wait(job['id'])
+        self.assertTrue(job['verified']);self.assertTrue(job['success'])
+        self.assertIn('删除讲义相关内容',json.dumps(captured[0],ensure_ascii=False))
+        self.assertIn('Hello',json.dumps(captured[0],ensure_ascii=False))
+        self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+
+    def test_alternating_repeated_reads_stop_without_reexecuting(self):
+        calls=[self.response('search',{'query':'Hello'}),self.response('read_file',{'path':'main.tex'})]*3
+        with patch.object(self.ai,'tool',wraps=self.ai.tool) as tool:job=self.run_job(calls)
+        self.assertFalse(job['success']);self.assertIn('重复',job['error'])
+        self.assertEqual(tool.call_count,2)
+
+    def test_false_completion_requires_real_candidate(self):
+        job=self.run_job([self.response(message='已删除讲义相关内容',done=True),self.response(message='已删除讲义相关内容',done=True)])
+        self.assertFalse(job['success']);self.assertFalse(job['changedPaths']);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+
+    def test_continue_does_not_reuse_reads_after_external_change(self):
+        first=self.run_job([self.response('read_file',{'path':'main.tex'}),self.response('search',{'query':'Hello'})],stepLimit=2)
+        (self.root/'main.tex').write_text('Changed externally','utf8')
+        job=self.run_job([self.response('edit',{'path':'main.tex','before':'Changed','after':'Different'}),self.response(message='需要重新读取',done=True)],resume=first['id'],question='继续')
+        self.assertFalse(job['changedPaths']);self.assertTrue(any(e['tool']=='edit' and e['status']=='failed' for e in job['events']))
+
     def test_chat_cannot_modify_or_compile(self):
         with patch.object(self.ai,'compile_copy') as compiler:j=self.run_job([self.response('read_file',{'path':'main.tex'}),self.response('edit',{'path':'main.tex','before':'Hello','after':'Changed'}),self.response('compile'),self.response(message='Chat 只讨论',done=True)],'chat')
         compiler.assert_not_called();self.assertFalse(j['changedPaths']);self.assertEqual((self.root/'main.tex').read_bytes(),self.original);self.assertEqual(sum(e['status']=='failed' for e in j['events']),2)

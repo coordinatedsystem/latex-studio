@@ -92,3 +92,5 @@
 .conversation-focus .conversation-messages{padding:26px 60px 12px}
 .conversation-focus #conversationComposer{margin:0 48px 5px}
 @media(max-width:760px){.conversation-focus .conversation-messages{padding:18px}.conversation-focus #conversationComposer{margin:0 12px 5px}}
+
+.conversation-pdf-pair img{height:auto;aspect-ratio:794/1123;object-fit:contain}.conversation-pdf-missing{min-height:160px;display:grid;place-items:center;color:#8590a0}.conversation-pdf-pair{border-bottom:1px solid #e5e9ef}
