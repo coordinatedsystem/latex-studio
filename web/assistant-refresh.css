@@ -1,8 +1,47 @@
-#aiPage{background:#f4f6fa}#aiPage .ai-heading h1{font-size:25px;letter-spacing:-.5px}#aiPage .ai-container{max-width:1720px;padding:20px 24px}
-#writingWorkbench .writing-grid{gap:14px;grid-template-columns:minmax(0,1fr) minmax(350px,35%)}#writingWorkbench .writing-canvas,#writingWorkbench .writing-review{border:1px solid #dde3ec;border-radius:14px;box-shadow:0 4px 22px #15254306}
-#writingWorkbench .writing-review{background:#fff}#writingWorkbench .writing-request{padding:18px;background:#f9fafc;border-bottom:1px solid #e5e9f0}#writingWorkbench .writing-request.compact .assistant-intro{display:none}
-.assistant-intro{display:grid;gap:7px;margin-bottom:14px}.assistant-intro>span{font-size:18px;font-weight:600;color:#172438}.assistant-intro small{font-size:12px;line-height:1.6;color:#596779}.assistant-presets{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}.assistant-presets button{border:1px solid #d9e1ef;background:#fff;color:#354866;border-radius:18px;font-size:12px;padding:6px 10px}.assistant-presets button:hover{background:#eaf1ff;border-color:#8baff4}
-#writingWorkbench #writingInstruction{min-height:100px;background:#fff;border:1px solid #d6dfec;border-radius:10px;padding:12px;line-height:1.65;transition:border-color .15s,box-shadow .15s}#writingWorkbench #writingInstruction:focus{outline:0;border-color:#6096ed;box-shadow:0 0 0 3px #1464ed12}
-#writingWorkbench .writing-edit{border:1px solid #e2e8f1;border-radius:10px;margin:10px 0;overflow:hidden}#writingWorkbench .writing-edit.chosen{border-color:#9dbcef;box-shadow:0 0 0 1px #d9e7ff}#writingWorkbench .writing-edit>label{background:#f8faff;padding:12px}#writingWorkbench .writing-edit-diff{padding:12px;line-height:1.7}#writingWorkbench .writing-summary{color:#39495f;line-height:1.75}
-#writingWorkbench .writing-next-action{border-top:1px solid #e3e9f1;padding:14px 16px;background:#f8faff}#writingWorkbench .writing-next-action>.primary{border-radius:9px;min-height:40px}#writingWorkbench .writing-results{padding:0 16px}#writingWorkbench .writing-error{border-radius:9px;line-height:1.6}
-@media(max-width:900px){#writingWorkbench .writing-grid{grid-template-columns:1fr}#aiPage .ai-container{padding:14px}#writingWorkbench .writing-request{padding:14px}}
+/* Compact progress rail and an uninterrupted, resizable document workspace. */
+#aiPage{background:#f7f8fa}
+#aiPage .ai-container{max-width:2200px;padding:14px 18px 18px}
+#aiPage .ai-heading{margin-bottom:12px;min-height:34px}
+#aiPage .ai-heading h1{font-size:23px;letter-spacing:0}
+#writingWorkbench{display:grid;grid-template-columns:54px minmax(0,1fr);gap:12px;align-items:start}
+#writingWorkbench .writing-steps{display:flex;flex-direction:column;align-items:stretch;gap:8px;width:54px;height:auto;margin:0;padding:12px 0;border:0;border-radius:10px;background:transparent!important}
+#writingWorkbench .writing-steps li{flex:none;display:flex;flex-direction:column;justify-content:center;gap:7px;min-height:58px;padding:8px 2px;border-radius:8px;font-size:11px;font-weight:400;color:#89919d;white-space:nowrap}
+#writingWorkbench .writing-steps li:after{display:none}
+#writingWorkbench .writing-steps li>span{width:7px;height:7px;border:0;background:#cdd3dc;box-shadow:none}
+#writingWorkbench .writing-steps li.current{background:#eaf0fb;color:#285ca8;font-weight:600}
+#writingWorkbench .writing-steps li.current>span{background:#3975cc;box-shadow:0 0 0 4px #3975cc12}
+#writingWorkbench .writing-steps li.done{color:#707e90}
+#writingWorkbench .writing-steps li.done>span{background:#9aadc6}
+#writingWorkbench .writing-grid{grid-template-columns:minmax(0,1fr) 12px minmax(300px,var(--review-width,32%));gap:0;height:calc(100dvh - 158px);min-height:360px;max-height:none;min-width:0}
+#writingWorkbench .writing-canvas,#writingWorkbench .writing-review{min-width:0;min-height:0;border:1px solid #dce1e8;border-radius:9px;box-shadow:0 2px 8px #24344b04;background:#fff}
+#writingWorkbench .writing-panel-heading{min-height:40px;padding:8px 14px;border-color:#e6e9ef}
+#writingWorkbench .writing-panel-heading h2{font-size:14px;font-weight:550}
+#writingWorkbench .writing-request{padding:10px 14px 12px;background:#fff!important;border-color:#e6e9ef;flex-shrink:0}
+#writingWorkbench .writing-request-heading{margin-bottom:7px}
+#writingWorkbench .writing-request-heading button{font-size:12px!important}
+#writingWorkbench .writing-options{gap:8px;margin-bottom:9px;flex-wrap:wrap}
+#writingWorkbench .writing-options label{font-size:12px;flex:1 1 95px}
+#writingWorkbench .writing-options select{font-size:13px;padding:6px 8px;border:1px solid #d6dce5;border-radius:6px;background:#fbfcfd}
+#writingWorkbench #writingInstruction{min-height:64px;max-height:150px;resize:vertical;padding:9px 10px;font-size:13px;line-height:1.6;border:1px solid #d6dce5;border-radius:7px;background:#fff}
+#writingWorkbench #writingInstruction:focus{outline:0;border-color:#7b9ed1;box-shadow:0 0 0 2px #3975cc0d}
+#writingWorkbench .writing-request.compact{padding:8px 14px}
+#writingWorkbench .writing-result-heading{min-height:32px;padding:7px 14px}
+#writingWorkbench .writing-results{padding:8px 12px;min-height:40px;scrollbar-gutter:stable;flex:1;overflow:auto}
+#writingWorkbench .writing-result-empty{padding:18px 2px;gap:6px}
+#writingWorkbench .writing-result-empty strong{font-size:13px;font-weight:450;color:#717c8c}
+#writingWorkbench .writing-edit{border:1px solid #e0e5ec;border-radius:7px;margin:8px 0;box-shadow:none}
+#writingWorkbench .writing-edit.chosen{border-color:#b9ccec}
+#writingWorkbench .writing-edit>label{padding:9px;background:#f8fafd}
+#writingWorkbench .writing-edit-diff{padding:9px;line-height:1.65}
+#writingWorkbench .writing-next-action{padding:9px 14px;gap:7px;background:#fff;border-color:#e6e9ef}
+#writingWorkbench .writing-action-meta{min-height:16px;gap:6px}
+#writingWorkbench #writingActionHint{font-size:12px;line-height:1.5;max-width:70%;color:#647084}
+#writingWorkbench #writingCost{font-size:11px;padding:2px 5px}
+#writingWorkbench #writingPrimaryAction{min-width:0;min-height:36px;padding:7px 10px;font-size:13px;border-radius:7px}
+#writingWorkbench .writing-canvas-head{padding:7px 10px;min-height:44px;flex-wrap:wrap}
+#writingWorkbench .writing-content-toolbar{padding:6px 9px;min-height:36px;gap:5px}
+#writingWorkbench .writing-content-toolbar button,#writingWorkbench .writing-content-toolbar select{font-size:12px}
+#writingWorkbench .writing-pdf-scroll{padding:18px 22px}
+#writingWorkbench .writing-canvas-footer{font-size:11px;padding:6px 10px}
+@media(max-width:1000px){#aiPage .ai-container{padding:12px}#writingWorkbench{grid-template-columns:42px minmax(0,1fr);gap:8px}#writingWorkbench .writing-steps{width:42px}#writingWorkbench .writing-grid{grid-template-columns:minmax(0,1fr) 10px minmax(280px,var(--review-width,34%))}}
+@media(max-width:760px){#writingWorkbench{grid-template-columns:32px minmax(0,1fr);gap:6px}#writingWorkbench .writing-steps{width:32px;position:sticky;top:8px}#writingWorkbench .writing-steps li{font-size:10px;min-height:48px}#writingWorkbench .writing-grid{display:flex;flex-direction:column;gap:12px;height:auto;min-height:0}#writingPaneResize{display:none}#writingWorkbench .writing-canvas{height:58dvh;min-height:320px;flex:none}#writingWorkbench .writing-review{min-height:360px;max-height:80dvh;flex:none}#writingWorkbench .writing-view-tabs button{font-size:11px!important}#writingWorkbench .writing-pdf-scroll{padding:12px}}

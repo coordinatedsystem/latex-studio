@@ -1,5 +1,5 @@
 {
-  "version": "1.5.4",
+  "version": "1.5.5",
   "files": [
     {
       "path": "Launch.vbs",
@@ -13,8 +13,8 @@
     },
     {
       "path": "app/CHANGELOG.md",
-      "size": 9291,
-      "sha256": "9e9706844cede14a360a2fa92dfa989f24ebf3b106e1e03578d336caf8eca5ae"
+      "size": 9570,
+      "sha256": "8cf8a9996babc22562bf85534275a25b3f610d1998f6b2ccc16224719590169a"
     },
     {
       "path": "app/launch.ps1",
@@ -29,7 +29,7 @@
     {
       "path": "app/README.md",
       "size": 7818,
-      "sha256": "34411c032b8f20bb9c78a756f98e077ed6059810eee0b436bccd29a1f7e87b82"
+      "sha256": "11c59c5c7a87dc24304c0c69115ca5c283d67202b3387320baf67e8271248d56"
     },
     {
       "path": "app/server.py",
@@ -154,7 +154,7 @@
     {
       "path": "app/version.json",
       "size": 128,
-      "sha256": "61e940d1fa0f769ea0c404b7d4a5c992edd4b0ede5499bf518389a98d95661d8"
+      "sha256": "6a147ec95304e785bd30357ac874b832160f0fccc89bc2a4a5bd8023a9d4bf8f"
     },
     {
       "path": "app/assets/studio.ico",
@@ -3038,13 +3038,13 @@
     },
     {
       "path": "app/web/assistant-refresh.css",
-      "size": 2245,
-      "sha256": "86eb3148e37ab92e7186a77c5d94f909199e57efff6ccf833bed3e1c6a371b97"
+      "size": 5180,
+      "sha256": "be3d8941c9bd9cbb3847ef6155c474708aa588a30ba4960963edc51a8d7a84ae"
     },
     {
       "path": "app/web/assistant-refresh.js",
-      "size": 3002,
-      "sha256": "6d06c1f21b668534ab1f861216af9ffcfb092be2db47251b21cb5a78296cfcf1"
+      "size": 1671,
+      "sha256": "e72ce6a62ae6a8646e1675a69a4031beed29f16fbdf576546e22c6f1062edc2a"
     },
     {
       "path": "app/web/document-analysis.css",
