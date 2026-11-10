@@ -18,3 +18,5 @@ Design references (independent implementation, no copied framework code):
 Verification: deterministic mode/tool/transaction/cancellation tests; UI state and project-race tests; HTTP route and project-isolation checks; real API tests on synthetic two-file documents, with an attachment, compiler error recovery, rendered PDF, application and byte-exact undo. Native browser visual verification remains incomplete because the desktop automation tool could not reliably identify the browser URL.
 
 Layout checks seed a short preamble and local PDF geometry before requesting model analysis. Findings remain available when a later request fails. Natural final answers do not require a JSON completion flag.
+
+Cancellation covers creation-pending UI state, monotonic job revisions, retryable stop requests, and checkpoints between tools and PDF pages. Per-tool operational summaries are generated locally; model reasoning fields are never surfaced. Conversation focus is independent of the document splitter. Browser validation for 1.6.2 used a synthetic project and delayed mock transport, with no provider requests.

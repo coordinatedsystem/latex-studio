@@ -273,7 +273,7 @@ def inspect_geometry(width, height, chars, images, graphic_count=0, index=1, tot
             'contentBottom':round(bottom/height,3) if height else 0,'issues':issues}
 
 
-def inspect_pdf(path, pages='all'):
+def inspect_pdf(path, pages='all',checkpoint=None):
     import pdfplumber
     path=Path(path)
     if path.stat().st_size>40*1024*1024:
@@ -283,6 +283,7 @@ def inspect_pdf(path, pages='all'):
         selected=parse_pages(pages,total)
         results=[]
         for n in selected:
+            if checkpoint:checkpoint()
             page=pdf.pages[n-1]
             if page.width>5000 or page.height>5000 or page.width<=0 or page.height<=0:
                 raise ValueError('页面尺寸不受支持')

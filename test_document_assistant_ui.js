@@ -1,8 +1,8 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 function fixture(){
  const nodes=new Map(),calls=[];const $=selector=>{if(!nodes.has(selector))nodes.set(selector,{value:'',hidden:false,disabled:false,textContent:'',classList:{toggle(){}},getBoundingClientRect:()=>({height:200})});return nodes.get(selector);};
- const c=vm.createContext({console,Map,Set,JSON,Array,String,Number,Promise,encodeURIComponent,esc:text=>String(text).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'),$,$$:()=>[],state:{projectId:'p1'},prefs:{main:'main.tex'},models:new Map(),saveAll:async()=>{},setInterval:()=>1,clearInterval(){},localStorage:{setItem(){},getItem(){return null;}},api:async(path,data)=>{calls.push([path,data]);return {};}});
- let source=fs.readFileSync(__dirname+'/web/document-assistant.js','utf8');source=source.slice(0,source.indexOf('function conversationInstall'));vm.runInContext(source+';this.assistant=studioAssistant;',c);c.conversationControls=()=>{};c.conversationRender=()=>{};c.conversationNotice=()=>{};
+ const c=vm.createContext({console,Map,Set,JSON,Array,String,Number,Promise,encodeURIComponent,setTimeout,clearTimeout,esc:text=>String(text).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'),$,$$:()=>[],state:{projectId:'p1'},prefs:{main:'main.tex'},models:new Map(),saveAll:async()=>{},setInterval:()=>1,clearInterval(){},localStorage:{setItem(){},getItem(){return null;}},api:async(path,data)=>{calls.push([path,data]);return {};}});
+ let source=fs.readFileSync(__dirname+'/web/document-assistant.js','utf8');source=source.slice(0,source.indexOf('function conversationInstall'));vm.runInContext(source+';this.assistant=studioAssistant;',c);c.conversationControls=()=>{};c.realRender=c.conversationRender;c.conversationRender=()=>{};c.conversationNotice=()=>{};
  c.assistant.project='p1';return {c,$,calls};
 }
 test('sending chat carries only selected contexts and attachment IDs, not full attachments',async()=>{
@@ -34,8 +34,24 @@ test('new frontend is loaded after the document workbench and registers both mod
 });
 test('composer dragging is clamped and supports keyboard resizing',()=>{
  const f=fixture(),handle=f.$('#conversationComposerResize'),panel=f.$('#studioConversation');const values=[];panel.clientHeight=600;panel.style={setProperty:(name,value)=>values.push(value)};handle.setPointerCapture=()=>{};handle.hasPointerCapture=()=>true;handle.releasePointerCapture=()=>{};
- f.c.conversationSetupResize();handle.onpointerdown({button:0,clientY:300,pointerId:1,preventDefault(){}});handle.onpointermove({pointerId:1,clientY:-500});assert.equal(values.at(-1),'390px');handle.onkeydown({key:'Home',preventDefault(){}});assert.equal(values.at(-1),'200px');
+ f.c.conversationSetupResize();handle.onpointerdown({button:0,clientY:300,pointerId:1,preventDefault(){}});handle.onpointermove({pointerId:1,clientY:-500});assert.equal(values.at(-1),'390px');handle.onkeydown({key:'Home',preventDefault(){}});assert.equal(values.at(-1),'150px');
 });
 
-test('tool progress merges start and finish instead of counting them twice',()=>{const f=fixture();const steps=f.c.conversationToolSteps([{tool:'thinking',status:'done'},{tool:'read_file',status:'running',detail:'main.tex'},{tool:'read_file',status:'done',detail:'已完成'}]);assert.equal(steps.length,1);assert.equal(steps[0].status,'done');assert.match(steps[0].detail,/main.tex/);});
+test('tool progress merges start and finish instead of counting them twice',()=>{const f=fixture();const steps=f.c.conversationToolSteps([{tool:'thinking',status:'done'},{tool:'read_file',status:'running',detail:'main.tex'},{tool:'read_file',status:'done',detail:'已完成'}]);assert.equal(steps.length,2);assert.equal(steps[0].narrative,true);assert.equal(steps[1].status,'done');assert.match(steps[1].detail,/main.tex/);});
 test('answers show readable structure while escaping document HTML',()=>{const f=fixture();const html=f.c.conversationMessageHtml('## 检查结果\n- **字号**过小\n<script>alert(1)</script>');assert.match(html,/conversation-answer-heading/);assert.match(html,/<strong>字号<\/strong>/);assert.ok(!html.includes('<script>'));});
+
+test('stop requested before start returns is applied to the newly created job',async()=>{
+ const f=fixture();f.$('#conversationInput').value='Pending';let resolveStart,entered;const reached=new Promise(r=>entered=r);
+ f.c.api=async(path,data)=>{f.calls.push([path,data]);if(path.endsWith('/start'))return new Promise(r=>{resolveStart=r;entered();});if(path.endsWith('/cancel'))return {id:'new-job',revision:3,running:false};return {id:'new-job',revision:3,running:false};};
+ const sending=f.c.conversationSend();await reached;await f.c.conversationStop();assert.equal(f.c.assistant.stopping,true);resolveStart({id:'new-job',revision:1,running:true});await sending;assert.equal(f.calls.find(x=>x[0].endsWith('/cancel'))[1].id,'new-job');assert.equal(f.c.assistant.job.running,false);
+});
+test('older running poll cannot resurrect a cancelled job',async()=>{
+ const f=fixture();f.c.assistant.id='job';f.c.assistant.job={id:'job',revision:9,running:false};f.c.api=async()=>({id:'job',revision:2,running:true});await f.c.conversationPoll();assert.equal(f.c.assistant.job.running,false);assert.equal(f.c.assistant.job.revision,9);
+});
+test('stop failure permits retry instead of leaving the control disabled',async()=>{
+ const f=fixture();f.c.assistant.id='job';f.c.assistant.job={id:'job',running:true};f.c.api=async()=>{throw new Error('offline');};await assert.rejects(f.c.conversationStop(),/offline/);assert.equal(f.c.assistant.stopping,false);
+});
+
+test('empty conversation renders without dereferencing a missing work log',()=>{
+ const f=fixture(),list=f.$('#conversationMessages');Object.assign(list,{scrollHeight:0,scrollTop:0,clientHeight:300,querySelector:()=>null,insertAdjacentHTML(position,html){this.innerHTML+=html;}});f.c.realRender();assert.match(list.innerHTML,/conversation-empty/);
+});

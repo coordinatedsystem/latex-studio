@@ -62,3 +62,9 @@ test('source navigation recovers from an inaccessible system PDF frame',async()=
  let recovered=false;const viewer={pdfDocument:{}};const frame={get contentWindow(){if(!recovered)throw new Error('cross-origin system reader');return {PDFViewerApplication:viewer};}};
  const c=vm.createContext({editorAiPreview:null,state:{hasPdf:true,pdfVersion:3},$:()=>frame,setPdf:async()=>{recovered=true;}});vm.runInContext(code,c);assert.equal(await c.studioPdfApplication(),viewer);
 });
+
+test('removing the duplicate locator does not prevent PDF navigation binding',()=>{
+ const code=fs.readFileSync(__dirname+'/web/reference-navigation.js','utf8');const start=code.indexOf('function referenceInstallNavigation'),end=code.lastIndexOf('referenceInstallBrowser();');const nodes=new Map();let bound=0;
+ const $=selector=>{if(selector==='#workflowLocate')return null;if(!nodes.has(selector))nodes.set(selector,{classList:{toggle(){}},insertAdjacentHTML(){},addEventListener(name,fn){this[name]=fn;}});return nodes.get(selector);};
+ const c=vm.createContext({$,document:{addEventListener(){}},studioLocatePdf:async()=>{},studioPdfApplication:async()=>({}),studioBindPdfNavigation:()=>bound++,studioPickMode(){},sourceNavigation:{pick:false},editorToolOpen(){},toast(){}});vm.runInContext(code.slice(start,end),c);c.referenceInstallNavigation();assert.equal(typeof $('#syncInverse').onclick,'function');assert.equal(typeof $('#pdfFrame').load,'function');assert.equal(bound,1);
+});

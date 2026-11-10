@@ -109,4 +109,21 @@ class AssistantTests(unittest.TestCase):
         result=self.ai.partial_report({'layoutEvidence':{'pages':[1,3],'totalPages':5,'issues':[{'page':3,'message':'正文过小'}]}},'模型连接失败')
         self.assertIn('第 3 页',result);self.assertIn('正文过小',result);self.assertIn('模型连接失败',result)
 
+    def test_cancel_during_tool_does_not_run_the_next_tool_in_the_batch(self):
+        entered=threading.Event();release=threading.Event();called=[]
+        def blocked(s,clone,name,args,read):
+            called.append(name);entered.set();release.wait(2);return {'totalLines':4}
+        batch=self.response();batch['choices'][0]['message']['content']=json.dumps({'calls':[{'tool':'read_file','args':{'path':'main.tex'}},{'tool':'edit','args':{'path':'main.tex','before':'Hello','after':'Changed'}}]})
+        with patch.object(self.ai,'tool',side_effect=blocked),patch('studio_ai.request_json',return_value=batch):
+            start=self.ai.start(self.root,'main.tex',{'mode':'agent','question':'检查文件'});self.assertTrue(entered.wait(2));stopping=self.ai.cancel(self.root,start['id']);self.assertTrue(stopping['stopRequested']);release.set();j=self.wait(start['id'])
+        self.assertEqual(called,['read_file']);self.assertFalse(j['success']);self.assertIn('已停止',j['messages'][-1]['content']);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+    def test_layout_inspection_checks_cancellation_between_pages(self):
+        from pypdf import PdfWriter
+        from studio_review import inspect_pdf
+        pdf=self.base/'two-pages.pdf';writer=PdfWriter();writer.add_blank_page(600,800);writer.add_blank_page(600,800)
+        with pdf.open('wb') as f:writer.write(f)
+        checked=[]
+        inspect_pdf(pdf,checkpoint=lambda:checked.append(True));self.assertEqual(len(checked),2)
+        with self.assertRaisesRegex(ValueError,'stopped'):inspect_pdf(pdf,checkpoint=lambda:(_ for _ in ()).throw(ValueError('stopped')))
+
 if __name__=='__main__':unittest.main()

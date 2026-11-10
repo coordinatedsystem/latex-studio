@@ -39,7 +39,7 @@ class DocumentAssistant(EditorAI):
 
     def public(self,s):
         result=super().public(s)
-        result.update({k:copy.deepcopy(s.get(k)) for k in ('chatMode','messages','events','revision','questionForUser','contextInfo','usage','stepLimit','attachments','pages')})
+        result.update({k:copy.deepcopy(s.get(k)) for k in ('chatMode','messages','events','revision','questionForUser','contextInfo','usage','stepLimit','attachments','pages','stopRequested')})
         return result
 
     def history(self,root):
@@ -102,7 +102,7 @@ class DocumentAssistant(EditorAI):
                'sourceHashes':{p.relative_to(root).as_posix():sha(p) for p in files} if mode=='agent' else {},'sourceStats':{p.relative_to(root).as_posix():[p.stat().st_size,p.stat().st_mtime_ns] for p in files},
                'originals':{},'candidates':{},'running':True,'success':None,'verified':False,'stage':'准备上下文','requestCount':0,'limit':limit,'stepLimit':limit,'tokens':0,'rounds':[],
                'knownFiles':[p.relative_to(root).as_posix() for p in files],'changedPaths':[],'created':time.time(),'applied':False,'undone':False,'question':question,'line':1,'errorContext':'\n'.join((logs or [])[-30:])[-5000:],
-               'messages':history+[{'role':'user','content':question}],'events':[],'revision':0,'contexts':contexts,'pages':pages,'attachments':attachments,
+               'messages':history+[{'role':'user','content':question,'mode':mode}],'events':[],'revision':0,'contexts':contexts,'pages':pages,'attachments':attachments,
                'contextInfo':{'selections':len(contexts),'attachments':[m['name'] for m in attachments]},'usage':{'prompt_tokens':0,'completion_tokens':0,'cached_tokens':0}}
             if previous and previous.get('candidates') and not previous.get('applied'):
                 self.fresh(previous)
@@ -120,6 +120,32 @@ class DocumentAssistant(EditorAI):
         if session.get('chatMode')!='agent':raise ValueError('Chat 模式只读，请使用 Agent 确认修改')
         if not undo and session.get('success') is not True:raise ValueError('任务尚未完成，请继续处理后确认应用')
         return super().apply(root,ident,undo,snapshot)
+
+    def cancel(self,root,ident):
+        with self.lock:
+            s=self.session(root,ident)
+            if not s['running']:return self.public(s)
+            self.cancel_event.set();self.update(s,stopRequested=True,stage='正在停止…')
+            return self.public(s)
+
+    def describe_tool(self,name,args,result=None):
+        path=str(args.get('path',''))
+        if result is None:
+            if name=='read_file':return f"读取 {path} 第 {args.get('start',1)} 行起的源码，检查相关内容与设置。"
+            if name=='read_page':return f"查看 PDF 第 {args.get('page',1)} 页，"+('核对实际视觉效果。' if args.get('visual') else '获取页面文字与内容。')
+            if name=='edit':return f'在临时副本中修改 {path}，原文件暂不写入。'
+            if name=='compile':return '编译当前候选并验证 PDF 能否打开、渲染；失败时读取报错继续处理。'
+            if name=='layout_check':return '检查 PDF 页边界、小字号与异常留白，收集可定位的版面依据。'
+            if name=='search':return '检索“'+str(args.get('query',''))[:100]+'”，定位相关文件和源码。'
+            return LABELS.get(name,name)+'，取得完成当前任务所需的信息。'
+        if result.get('error'):return '未完成：'+str(result['error'])[:800]
+        if name in {'compile','resources'}:return ('编译通过，候选 PDF 已可预览。' if result.get('success') else '编译未通过，已取得报错用于修复。')
+        if name=='read_file':return f"已读取 {path} 的源码片段，文件共 {result.get('totalLines','?')} 行。"
+        if name=='layout_check':return f"已检查 {result.get('scannedPages',0)} 页，发现 {len(result.get('issues',[]))} 条版面线索；继续结合源码和页面核对。"
+        if name=='edit':return f"已生成 {result.get('edits',0)} 处候选修改，接下来需要编译验证。"
+        if name=='search':return f"找到 {len(result.get('hits',[]))} 处匹配。"
+        if name=='read_page':return '已取得该页图像，供视觉检查。' if result.get('image') else '已取得页面文字。'
+        return '已取得所需信息，继续处理当前目标。'
 
     def event(self,s,tool,status,detail=''):
         with self.lock:
@@ -167,7 +193,7 @@ class DocumentAssistant(EditorAI):
             total=len(PdfReader(pdf).pages)
             selected=args.get('pages') or s.get('pages',[])[:12] or sorted({1,min(2,total),max(1,(total+1)//2),total})
             if not isinstance(selected,list) or len(selected)>12:raise ValueError('每次检查 1～12 页')
-            selected=sorted(set(bounded_int(n,1,total) for n in selected));report=inspect_pdf(pdf,','.join(map(str,selected)))
+            selected=sorted(set(bounded_int(n,1,total) for n in selected));report=inspect_pdf(pdf,','.join(map(str,selected)),checkpoint=self.checkpoint)
             report['measurementNotes']='contentBottom 是最后一个对象距页面顶端的比例，包含页脚页码；0.89 表示89%处，不能用来计算正文留白。少量留白、末页和缺少某些论文结构不自动构成错误，小字号也要区分正文、脚注和公式。'
             report['scope']='仅检查列出的页次，未检查的页不能宣称已审核'
             s['layoutEvidence']={'pages':selected,'issues':report['issues'],'totalPages':total}
@@ -245,11 +271,11 @@ class DocumentAssistant(EditorAI):
         if stale and s['chatMode']=='agent':tools.append(('compile',{}))
         tools.append(('layout_check',{}))
         for name,args in tools:
-            self.checkpoint();self.update(s,stage=LABELS[name]);self.event(s,name,'running',args.get('path',''))
+            self.checkpoint();self.update(s,stage=LABELS[name]);self.event(s,name,'running',self.describe_tool(name,args))
             try:result=self.tool(s,clone,name,args,read)
             except (ValueError,OSError) as exc:result={'error':str(exc)}
             failed=bool(result.get('error')) or result.get('success') is False
-            self.event(s,name,'failed' if failed else 'done',result.get('error') or ('编译通过' if result.get('success') else '已获得检查依据'))
+            self.checkpoint();self.event(s,name,'failed' if failed else 'done',self.describe_tool(name,args,result))
             trail.append({'tool':name,'args':args,'summary':{k:v for k,v in result.items() if k in {'totalPages','scannedPages','success','error','totalLines'}},'content':'工具 '+name+' 返回：'+json.dumps(result,ensure_ascii=False)[:9000]})
 
     def partial_report(self,s,error):
@@ -294,7 +320,7 @@ class DocumentAssistant(EditorAI):
                         if sum(t['tool']=='verification' for t in trail)>=2:raise ValueError('AI 未完成候选验证，已暂停，原文保留')
                         trail.append({'tool':'verification','args':{},'summary':'候选尚未编译通过','content':'候选尚未通过编译，必须调用 compile 并修复错误后才能完成。'});continue
                     if not message:raise ValueError('AI 未返回有效回答')
-                    s['messages'].append({'role':'assistant','content':message});self.update(s,answer=message,summary=message[:500],questionForUser=bool(value.get('question')),success=not bool(value.get('question')),stage='需要补充信息' if value.get('question') else '待确认应用' if s['candidates'] else '完成');return
+                    s['messages'].append({'role':'assistant','content':message,'mode':s['chatMode']});self.update(s,answer=message,summary=message[:500],questionForUser=bool(value.get('question')),success=not bool(value.get('question')),stage='需要补充信息' if value.get('question') else '待确认应用' if s['candidates'] else '完成');return
                 if not calls:
                     if sum(t['tool']=='empty' for t in trail)>=1:raise ValueError('模型未返回有效回答，已保留检查结果')
                     trail.append({'tool':'empty','args':{},'summary':'响应为空','content':'请根据当前任务继续调用必要工具，或给出已经完成的具体检查结论。'});continue
@@ -305,10 +331,10 @@ class DocumentAssistant(EditorAI):
                     signature=json.dumps([name,args,s.get('editRevision',0)],ensure_ascii=False,sort_keys=True);seen[signature]=seen.get(signature,0)+1
                     if not trail or trail[-1].get('signature')!=signature:seen[signature]=1
                     if seen[signature]>=3:raise ValueError('检测到重复且无进展的工具调用，已保留结果；请补充要求后继续')
-                    self.update(s,stage=LABELS.get(name,name));self.event(s,name,'running',args.get('path',''))
-                    try:output=self.tool(s,clone,name,args,read);status='failed' if output.get('success') is False else 'done'
+                    self.update(s,stage=LABELS.get(name,name));self.event(s,name,'running',self.describe_tool(name,args))
+                    try:output=self.tool(s,clone,name,args,read);self.checkpoint();status='failed' if output.get('success') is False else 'done'
                     except (ValueError,OSError,UnicodeError) as exc:output={'error':str(exc)[:1500]};status='failed'
-                    self.event(s,name,status,output.get('error') or ('编译通过' if output.get('success') else output.get('log','')[-800:] if name in {'compile','resources'} else '已完成'))
+                    self.checkpoint();self.event(s,name,status,self.describe_tool(name,args,output))
                     summary={k:v for k,v in output.items() if k in {'error','success','edits','path','revision','totalLines','pages'}}
                     if output.get('image'):content=[{'type':'text','text':'工具 read_attachment '+json.dumps({'id':args.get('id'),'name':output['name']})},{'type':'image_url','image_url':{'url':output['image']}}]
                     else:content='工具 '+name+' '+json.dumps(args,ensure_ascii=False)+' 返回：'+json.dumps(output,ensure_ascii=False)[:9000]
@@ -318,7 +344,7 @@ class DocumentAssistant(EditorAI):
             raise ValueError('本轮步骤预算已用完，已保留结果；可继续任务，避免无效循环')
         except Exception as exc:
             text=str(exc) if isinstance(exc,(ValueError,OSError)) else '助手响应或文件处理失败，请补充要求后重试'
-            s['messages'].append({'role':'assistant','content':self.partial_report(s,text)});self.update(s,success=False,error=text,stage='已停止' if self.cancel_event.is_set() else '待继续')
+            s['messages'].append({'role':'assistant','content':'已停止。已有候选和检查记录已保留，未自动写回文件。' if self.cancel_event.is_set() else self.partial_report(s,text),'mode':s['chatMode']});self.update(s,success=False,error=text,stage='已停止' if self.cancel_event.is_set() else '待继续')
         finally:
             self.update(s,running=False,duration=round(time.time()-s['created'],1));s.pop('contexts',None)
             if clone.resolve().is_relative_to(folder.resolve()) and not clone.is_symlink():shutil.rmtree(clone,ignore_errors=True)
