@@ -57,6 +57,19 @@ class AssistantTests(unittest.TestCase):
         job=self.run_job([self.response('edit',{'path':'main.tex','before':'Changed','after':'Different'}),self.response(message='需要重新读取',done=True)],resume=first['id'],question='继续')
         self.assertFalse(job['changedPaths']);self.assertTrue(any(e['tool']=='edit' and e['status']=='failed' for e in job['events']))
 
+    def test_large_prompt_usage_does_not_interrupt_edits_before_compile(self):
+        responses=self.edit_responses()
+        for response in responses:response['usage'].update(total_tokens=40000,prompt_tokens=39990)
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler):job=self.run_job(responses)
+        self.assertTrue(job['success']);self.assertTrue(job['verified']);self.assertGreater(job['tokens'],65000)
+
+    def test_default_agent_can_finish_after_initial_steps_when_edits_progress(self):
+        responses=[self.response('read_file',{'path':'main.tex'}),self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'})]
+        responses += [self.response('edit',{'path':'main.tex','before':'Hello','after':'Hello x'}) for _ in range(23)]
+        responses += [self.response('compile'),self.response(message='候选已验证',done=True)]
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler):job=self.run_job(responses,stepLimit=24)
+        self.assertTrue(job['success']);self.assertTrue(job['verified']);self.assertGreater(job['requestCount'],24)
+
     def test_chat_cannot_modify_or_compile(self):
         with patch.object(self.ai,'compile_copy') as compiler:j=self.run_job([self.response('read_file',{'path':'main.tex'}),self.response('edit',{'path':'main.tex','before':'Hello','after':'Changed'}),self.response('compile'),self.response(message='Chat 只讨论',done=True)],'chat')
         compiler.assert_not_called();self.assertFalse(j['changedPaths']);self.assertEqual((self.root/'main.tex').read_bytes(),self.original);self.assertEqual(sum(e['status']=='failed' for e in j['events']),2)

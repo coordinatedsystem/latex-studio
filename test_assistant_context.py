@@ -18,3 +18,13 @@ class TurnContextTests(unittest.TestCase):
         self.assertIn('当前是 Agent',runtime_instruction('agent'));self.assertIn('当前是 Chat',runtime_instruction('chat'))
 
 if __name__=='__main__':unittest.main()
+
+class CompactHistoryTests(unittest.TestCase):
+    def test_executed_edit_bodies_are_not_resent_or_mutated(self):
+        from studio_assistant_context import tool_history
+        import json
+        body='private synthetic replacement '*1000
+        record={'tool':'edit','args':{'path':'main.tex','before':body,'after':body+'new'},'summary':{'edits':1},'content':body,'nativeCall':{'id':'edit1','type':'function','function':{'name':'edit','arguments':json.dumps({'before':body})}}}
+        messages=tool_history([record]);serialized=json.dumps(messages)
+        self.assertNotIn(body,serialized);self.assertLess(len(serialized),1800);self.assertEqual(record['args']['before'],body)
+        self.assertEqual(messages[1]['tool_call_id'],'edit1')
