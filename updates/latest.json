@@ -1,7 +1,7 @@
 {
-  "version": "1.7.0",
-  "file": "distribution/LaTeX-Studio-1.7.0-win64-Setup.exe",
-  "size": 74492641,
-  "sha256": "15b67b240ee5c1683a33d9f35fb8a05b41945ffda8b337fc669c174821873e9e",
-  "notes": "LaTeX Studio 1.7.0：本地编辑、PDF、宏包管理、AI 审阅与安全更新。"
+  "version": "1.8.0",
+  "file": "distribution/LaTeX-Studio-1.8.0-win64-Setup.exe",
+  "size": 74839397,
+  "sha256": "35fa6c571b516319c787507b43f0d9f823da955ea3062fa4d21351104ebfcda9",
+  "notes": "LaTeX Studio 1.8.0：本地编辑、PDF、宏包管理、AI 审阅与安全更新。"
 }

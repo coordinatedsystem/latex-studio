@@ -10,6 +10,7 @@
 | pdfplumber / pdfminer.six | https://github.com/jsvine/pdfplumber | MIT，安装环境 dist-info 中保留许可 |
 | pypdfium2 / PDFium | https://github.com/pypdfium2-team/pypdfium2 | Apache-2.0/BSD-3-Clause 及依赖许可，包内保留 notices |
 | Pillow / cryptography 等 Python 依赖 | 各包 dist-info/METADATA | 原始许可证保留在运行环境中 |
+| KaTeX 0.16.22 | https://github.com/KaTeX/KaTeX | MIT，离线渲染器与字体来自官方 npm 包；许可见 vendor/katex/LICENSE |
 | Inter | https://github.com/rsms/inter | SIL OFL 1.1，见 web/fonts/Inter-LICENSE.txt |
 | Source Han Sans | https://github.com/adobe-fonts/source-han-sans | SIL OFL 1.1，见 web/fonts/SourceHanSans-LICENSE.txt |
 | TeX 基础资源 | https://data1.fullyjustified.net/tlextras-2022.0r0.tar | 见 assets/licenses/ 中的 LPPL 与 TeX Live 许可；来自 Tectonic/TeX Live 资源分发，各文件保持原始许可与版权说明；可从原始分发取得完整源码与文档 |

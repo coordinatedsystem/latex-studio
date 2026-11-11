@@ -15,6 +15,7 @@ function conversationControls(){
  $('#conversationUndo').hidden=!job?.applied;$('#conversationUndo').disabled=!job?.canUndo||running;
  $('#conversationPreview').hidden=!job?.verified||!job?.changedPaths?.length||running;
  $('#conversationUsage').textContent=job?`${(job.tokens||0).toLocaleString()} tokens · ${job.requestCount||0} 次请求`+(job.usage?.cached_tokens?` · 缓存 ${job.usage.cached_tokens.toLocaleString()}`:''):'';
+ if(typeof catComparisonTabs==='function')catComparisonTabs();
  $('#conversationStage').textContent=studioAssistant.stopping?'正在停止…':studioAssistant.sending?'准备中…':job?.running?job.stage:'';
  $('#conversationContextList').innerHTML=[...studioAssistant.contexts.map((c,i)=>`<span>${esc(c.path)} · 选区<button type="button" data-context-remove="${i}" aria-label="移除选区">×</button></span>`),...studioAssistant.pages.map((n,i)=>`<span>第 ${n} 页<button type="button" data-page-remove="${i}" aria-label="移除页面">×</button></span>`),...studioAssistant.attachments.map((a,i)=>`<span>${esc(a.name)}<button type="button" data-attachment-remove="${i}" aria-label="移除附件">×</button></span>`)].join('');
 }
@@ -30,8 +31,9 @@ function conversationToolSteps(events){
 }
 function conversationMessageHtml(text){
  const inline=line=>line.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>');
- return esc(text).split(/(```[\s\S]*?```)/g).map(part=>{
+ return esc(text).split(/(```[\s\S]*?```|\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\]|\\begin\{(?:align\*?|equation\*?|gather\*?)\}[\s\S]*?\\end\{(?:align\*?|equation\*?|gather\*?)\})/g).map(part=>{
   if(part.startsWith('```'))return '<pre class="conversation-code">'+part.replace(/^```[^\n]*\n?|```$/g,'')+'</pre>';
+  if(part.startsWith('$$')||part.startsWith('\\[')||part.startsWith('\\begin{'))return '<div class="cat-math-raw">'+part+'</div>';
   const blocks=[];let paragraph=[],items=[],ordered=false;
   const flushParagraph=()=>{if(paragraph.length){blocks.push('<p>'+paragraph.map(inline).join('<br>')+'</p>');paragraph=[];}};
   const flushItems=()=>{if(items.length){const tag=ordered?'ol':'ul';blocks.push('<'+tag+'>'+items.map(item=>'<li>'+inline(item)+'</li>').join('')+'</'+tag+'>');items=[];}};
@@ -52,12 +54,13 @@ function conversationRender(){
  const previousLog=list.querySelector('.conversation-tools'),workOpen=previousLog&&previousLog.dataset.job===job?.id?previousLog.open:!!job?.running;
  const allMessages=job?.messages||[],finalMessage=!job?.running&&allMessages.at(-1)?.role==='assistant'?allMessages.at(-1):null;
  const messages=finalMessage?allMessages.slice(0,-1):allMessages;
- list.innerHTML=messages.length?messages.map(m=>`<article class="conversation-message ${m.role==='user'?'from-user':'from-assistant'}"><header>${m.role==='user'?'你':'Studio'}${m.mode?' · '+(m.mode==='agent'?'Agent':'Chat'):''}</header><div>${conversationMessageHtml(m.content)}</div></article>`).join(''):'<div class="conversation-empty"><span>✦</span><p>从文档开始对话</p></div>';
+ list.innerHTML=messages.length?messages.map(m=>`<article class="conversation-message ${m.role==='user'?'from-user':'from-assistant'}"><header>${m.role==='user'?'你':'<img class="cat-avatar" src="/cat-avatar.svg" alt="">66Catzzz'}${m.mode?' · '+(m.mode==='agent'?'Agent':'Chat'):''}</header><div>${conversationMessageHtml(m.content)}</div></article>`).join(''):'<div class="conversation-empty"><span>✦</span><p>从文档开始对话</p></div>';
  const steps=conversationToolSteps(job?.events||[]);
  if(steps.length){list.insertAdjacentHTML('beforeend',`<details class="conversation-tools" data-job="${esc(job.id)}" ${workOpen?'open':''}><summary>${job.running?'<span class="spinner"></span> ':''}${job.running?esc(job.stage):job.stopRequested?'已停止的工作记录':'查看工作记录'}</summary><ol>${steps.map(e=>`<li data-event-index="${e.index}" class="${e.status}"><span class="conversation-step-icon" aria-hidden="true">${e.status==='running'?'◌':e.status==='failed'?'!':'✓'}</span><div><strong>${e.narrative?'工作说明':esc(e.label)}</strong>${e.detail?`<p>${esc(e.detail)}</p>`:''}</div></li>`).join('')}</ol></details>`);}
- if(finalMessage)list.insertAdjacentHTML('beforeend',`<article class="conversation-message from-assistant"><header>Studio${finalMessage.mode?' · '+(finalMessage.mode==='agent'?'Agent':'Chat'):''}</header><div>${conversationMessageHtml(finalMessage.content)}</div></article>`);
+ if(finalMessage)list.insertAdjacentHTML('beforeend',`<article class="conversation-message from-assistant"><header><img class="cat-avatar" src="/cat-avatar.svg" alt="">66Catzzz${finalMessage.mode?' · '+(finalMessage.mode==='agent'?'Agent':'Chat'):''}</header><div>${conversationMessageHtml(finalMessage.content)}</div></article>`);
  if(job?.changedPaths?.length)list.insertAdjacentHTML('beforeend',`<div class="conversation-changes">${job.changedPaths.map(path=>`<button type="button" data-assistant-diff="${esc(path)}">${esc(path)} <span>查看修改</span></button>`).join('')}</div>`);
  if(job?.running)list.insertAdjacentHTML('beforeend',`<div class="conversation-working"><span class="spinner"></span>${esc(job.stage)}</div>`);
+ conversationTypeset(list);
  list.scrollTop=nearBottom?list.scrollHeight:scrollTop;
 }
 async function conversationPoll(){
@@ -119,22 +122,12 @@ async function conversationUpload(files){
   if(project!==state.projectId||ticket!==studioAssistant.ticket)return;studioAssistant.attachments.push(result);conversationControls();
  }
 }
-async function conversationHistory(){
- const project=state.projectId,history=await api('ai/assistant/history');if(project!==state.projectId)return;
- modal('最近对话',`<div class="conversation-history">${history.map(j=>`<button type="button" data-conversation-history="${j.id}"><strong>${esc(j.question?.slice(0,100)||'对话')}</strong><span>${j.chatMode==='agent'?'Agent':'Chat'} · ${esc(j.stage)}</span></button>`).join('')||'<p>暂无对话</p>'}</div>`);
- $$('[data-conversation-history]').forEach(b=>b.onclick=conversationWatch(async()=>{if(project!==state.projectId)return;studioAssistant.id=b.dataset.conversationHistory;studioAssistant.job=null;studioAssistant.contexts=[];studioAssistant.pages=[];studioAssistant.attachments=[];studioAssistant.ticket++;closeModal();conversationRemember();await conversationPoll();if(studioAssistant.job?.running){clearInterval(studioAssistant.timer);studioAssistant.timer=setInterval(conversationPoll,1200);}}));
-}
-async function conversationDiff(path){
- const id=studioAssistant.id,project=state.projectId;const diff=await api('ai/assistant/diff?id='+id+'&path='+encodeURIComponent(path));if(id!==studioAssistant.id||project!==state.projectId)return;
- modal(path,`<div class="conversation-diff"><section><h3>修改前</h3><pre>${esc(diff.before)}</pre></section><section><h3>候选修改</h3><pre>${esc(diff.after)}</pre></section></div>`);
-}
-async function conversationPreview(){
- const id=studioAssistant.id,project=state.projectId;const effects=await api('ai/assistant/effects?id='+id);if(id!==studioAssistant.id||project!==state.projectId)return;
- writingSetView('content');$('#writingContent').hidden=true;const host=$('#conversationPdf');host.hidden=false;
- const total=Math.max(effects.afterPages||0,effects.beforePages||0,1);
- const image=(side,n)=>n>(effects[side+'Pages']||0)?'<p class="conversation-pdf-missing">本版本无此页</p>':`<img loading="lazy" decoding="async" width="794" height="1123" alt="${side==='before'?'修改前':'候选修改'}第 ${n} 页" src="/api/ai/assistant/effect-image?id=${id}&which=${side}&page=${n}&project=${encodeURIComponent(project)}">`;
- host.innerHTML=`<div class="conversation-pdf-toolbar"><button type="button" id="conversationReturn">返回文档</button><span>连续预览 · 共 ${total} 页 · 向下滚动浏览</span></div>${Array.from({length:total},(_,i)=>`<section class="conversation-pdf-pair" aria-label="第 ${i+1} 页对比"><figure><figcaption>修改前 · 第 ${i+1} 页</figcaption>${image('before',i+1)}</figure><figure><figcaption>候选修改 · 第 ${i+1} 页</figcaption>${image('after',i+1)}</figure></section>`).join('')}`;
- $('#conversationReturn').onclick=()=>writingSetView('content');
+async function conversationHistory(){return conversationHistoryPanel();}
+async function conversationDiff(path){writingSetView('diff');if(path)await catShowDiff(path);}
+async function conversationPreview(){writingSetView('comparison');}
+function conversationTypeset(root){
+ if(typeof renderMathInElement!=='function')return;
+ renderMathInElement(root,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false},{left:'$',right:'$',display:false},{left:'\\begin{align}',right:'\\end{align}',display:true},{left:'\\begin{equation}',right:'\\end{equation}',display:true},{left:'\\begin{align*}',right:'\\end{align*}',display:true},{left:'\\begin{equation*}',right:'\\end{equation*}',display:true},{left:'\\begin{gather}',right:'\\end{gather}',display:true},{left:'\\begin{gather*}',right:'\\end{gather*}',display:true}],throwOnError:false,trust:false,maxSize:20,maxExpand:1000,strict:'ignore',ignoredTags:['script','noscript','style','textarea','pre','code','option']});
 }
 async function conversationApply(undo=false){
  if([...models.values()].some(i=>i.dirty))throw new Error('请先保存当前文件');
@@ -150,8 +143,8 @@ function conversationSetupResize(){
  handle.onkeydown=e=>{if(['ArrowUp','ArrowDown','Home'].includes(e.key)){e.preventDefault();const height=e.key==='Home'?150:Math.max(120,Math.min(panel.clientHeight*.65,$('#conversationComposer').clientHeight+(e.key==='ArrowUp'?16:-16)));panel.style.setProperty('--composer-height',height+'px');}};
 }
 function conversationInstall(){
- $('.ai-heading h1').textContent='AI 助手';$('.ai-heading-actions').insertAdjacentHTML('afterbegin','<div class="conversation-surface"><button type="button" data-assistant-surface="conversation" class="active">对话</button><button type="button" data-assistant-surface="review">审阅工具</button></div>');
- $('.writing-review').insertAdjacentHTML('beforeend',`<section id="studioConversation" aria-label="AI 对话"><header class="conversation-header"><div role="group" aria-label="助手模式"><button type="button" data-assistant-mode="chat" class="active" aria-pressed="true">Chat</button><button type="button" data-assistant-mode="agent" aria-pressed="false">Agent</button></div><button type="button" id="conversationHistory" class="text-button">历史</button><button type="button" id="conversationNew" class="text-button" aria-label="新对话" title="新对话">＋</button><button id="conversationFocus" type="button" class="text-button" aria-label="展开对话" title="展开对话">⤢</button><details class="conversation-info"><summary aria-label="对话用量" title="对话信息">•••</summary><div id="conversationUsage"></div></details></header><div id="conversationMessages" class="conversation-messages" aria-live="polite"></div><div class="conversation-result-actions"><button id="conversationPreview" hidden>查看效果</button><button id="conversationApply" class="primary" hidden>确认应用</button><button id="conversationUndo" hidden>撤销应用</button></div><div id="conversationComposerResize" role="separator" tabindex="0" aria-label="调整输入区高度" aria-orientation="horizontal"></div><div id="conversationComposer"><div id="conversationContextList" class="conversation-context-list"></div><textarea id="conversationInput" placeholder="向 Studio 提问，或描述要完成的任务" aria-label="对话内容" maxlength="8000"></textarea><div class="conversation-send-row"><details id="conversationAttachMenu" class="conversation-attach"><summary aria-label="关联内容" title="关联内容与附件">＋</summary><div><button id="conversationContext" type="button">关联所选内容</button><button id="conversationUpload" type="button">上传附件</button></div></details><span id="conversationModeHint"></span><button type="button" id="conversationSend" class="primary" title="发送 · Enter" aria-label="发送">↑</button><button type="button" id="conversationStop" title="停止 · Esc" aria-label="停止生成" hidden>■</button></div></div><p id="conversationError" role="alert" hidden></p><footer class="conversation-status"><span id="conversationStage">就绪</span></footer><input id="conversationFiles" type="file" accept=".tex,.bib,.sty,.cls,.txt,.md,.csv,.json,.pdf,.docx,.png,.jpg,.jpeg,.webp" multiple hidden></section>`);
+ $('.ai-heading h1').innerHTML='<img class="cat-brand-avatar" src="/cat-avatar.svg" alt="猫与坐标系头像">66Catzzz';$('.ai-heading-actions').insertAdjacentHTML('afterbegin','<div class="conversation-surface"><button type="button" data-assistant-surface="conversation" class="active">对话</button><button type="button" data-assistant-surface="review">审阅工具</button></div>');
+ $('.writing-review').insertAdjacentHTML('beforeend',`<section id="studioConversation" aria-label="AI 对话"><header class="conversation-header"><div role="group" aria-label="助手模式"><button type="button" data-assistant-mode="chat" class="active" aria-pressed="true">Chat</button><button type="button" data-assistant-mode="agent" aria-pressed="false">Agent</button></div><button type="button" id="conversationHistory" class="text-button">历史</button><button type="button" id="conversationNew" class="text-button" aria-label="新对话" title="新对话">＋</button><button id="conversationFocus" type="button" class="text-button" aria-label="展开对话" title="展开对话">⤢</button><details class="conversation-info"><summary aria-label="对话用量" title="对话信息">•••</summary><div id="conversationUsage"></div></details></header><div id="conversationMessages" class="conversation-messages" aria-live="polite"></div><div class="conversation-result-actions"><button id="conversationPreview" hidden>查看效果</button><button id="conversationApply" class="primary" hidden>确认应用</button><button id="conversationUndo" hidden>撤销应用</button></div><div id="conversationComposerResize" role="separator" tabindex="0" aria-label="调整输入区高度" aria-orientation="horizontal"></div><div id="conversationComposer"><div id="conversationContextList" class="conversation-context-list"></div><textarea id="conversationInput" placeholder="向 66Catzzz 提问，或描述要完成的任务" aria-label="对话内容" maxlength="8000"></textarea><div class="conversation-send-row"><details id="conversationAttachMenu" class="conversation-attach"><summary aria-label="关联内容" title="关联内容与附件">＋</summary><div><button id="conversationContext" type="button">关联所选内容</button><button id="conversationUpload" type="button">上传附件</button></div></details><span id="conversationModeHint"></span><button type="button" id="conversationSend" class="primary" title="发送 · Enter" aria-label="发送">↑</button><button type="button" id="conversationStop" title="停止 · Esc" aria-label="停止生成" hidden>■</button></div></div><p id="conversationError" role="alert" hidden></p><footer class="conversation-status"><span id="conversationStage">就绪</span></footer><input id="conversationFiles" type="file" accept=".tex,.bib,.sty,.cls,.txt,.md,.csv,.json,.pdf,.docx,.png,.jpg,.jpeg,.webp" multiple hidden></section>`);
  $('#writingDiff').insertAdjacentHTML('afterend','<div id="conversationPdf" hidden></div>');
  $$('[data-assistant-surface]').forEach(b=>b.onclick=()=>conversationSurface(b.dataset.assistantSurface));
  $$('[data-assistant-mode]').forEach(b=>b.onclick=()=>{studioAssistant.mode=b.dataset.assistantMode;conversationRemember();conversationControls();});
@@ -166,6 +159,7 @@ function conversationInstall(){
  $('#conversationHistory').onclick=conversationWatch(conversationHistory);$('#conversationPreview').onclick=conversationWatch(conversationPreview);$('#conversationApply').onclick=conversationWatch(()=>conversationApply());$('#conversationUndo').onclick=conversationWatch(()=>conversationApply(true));
  conversationSetupResize();conversationSurface('conversation');conversationRender();if(state?.projectId)conversationProject(state).catch(e=>conversationNotice(e.message));
 }
-writingSetView=uiPatchRegistry.wrap('writingSetView',writingSetView,'document-assistant.js',previous=>function(view){if($('#conversationPdf'))$('#conversationPdf').hidden=true;return previous(view);});
+writingSetView=uiPatchRegistry.wrap('writingSetView',writingSetView,'document-assistant.js',previous=>function(view){if($('#conversationPdf'))return catSetView(view,previous);return previous(view);});
+writingControls=uiPatchRegistry.wrap('writingControls',writingControls,'document-assistant.js',previous=>function(){previous();if(typeof catComparisonTabs==='function')catComparisonTabs();});
 hubNotifyState=uiPatchRegistry.wrap('hubNotifyState',hubNotifyState,'document-assistant.js',previous=>function(next){previous(next);conversationProject(next).catch(e=>conversationNotice(e.message));});
 conversationInstall();

@@ -338,12 +338,22 @@ class Handler(BaseHTTPRequestHandler):
                 return self.file(editor_ai_for(storage()).effect_image(ROOT,query.get('id',[''])[0],query.get('which',[''])[0],query.get('page',['1'])[0]))
             if path.startswith('/api/ai/assistant/'):
                 manager=document_assistant_for(storage());ident=query.get('id',[''])[0]
+                if path.endswith('/history-tree'):
+                    from studio_assistant_history import tree as assistant_history_tree
+                    return self.send(assistant_history_tree(manager,ROOT))
+                if path.endswith('/comparison'):
+                    from studio_assistant_comparison import comparison
+                    return self.send(comparison(manager,ROOT,ident))
                 if path.endswith('/history'):return self.send(manager.history(ROOT))
                 if path.endswith('/job'):
                     with manager.lock:
                         session=manager.session(ROOT,ident)
                         if query.get('revision',[''])[0]==str(session.get('revision')) and session.get('running'):return self.send({'unchanged':True,'id':ident,'running':True})
-                        return self.send(manager.public(session))
+                        result=manager.public(session)
+                        if query.get('full',[''])[0]=='1':
+                            from studio_assistant_history import messages
+                            result['messages']=messages(manager,ROOT,session)
+                        return self.send(result)
                 if path.endswith('/diff'):return self.send(manager.changes(ROOT,ident,query.get('path',[''])[0]))
                 if path.endswith('/preview.pdf'):return self.file(manager.preview(ROOT,ident))
                 if path.endswith('/effects'):return self.send(manager.effects(ROOT,ident))
@@ -512,6 +522,16 @@ class Handler(BaseHTTPRequestHandler):
                     if route.endswith('/start'):
                         require_idle()
                         return self.send(manager.start(ROOT,data.get('main') or STATE['main'],data,STATE['lines']))
+                    if route.endswith('/delete-conversation'):
+                        from studio_assistant_history import delete
+                        from studio_assistant_history import project_root
+                        target=project_root(manager,ROOT,data.get('projectId'))
+                        return self.send(delete(manager,target,data.get('conversationId')))
+                    if route.endswith('/restore-conversation'):
+                        from studio_assistant_history import restore
+                        from studio_assistant_history import project_root
+                        target=project_root(manager,ROOT,data.get('projectId'),data.get('token'))
+                        return self.send(restore(manager,target,data.get('token')))
                     if route.endswith('/attachment'):return self.send(manager.attachment(ROOT,data))
                     if route.endswith('/cancel'):return self.send(manager.cancel(ROOT,data.get('id')))
                     if route.endswith('/apply') or route.endswith('/undo'):

@@ -56,10 +56,11 @@ test('empty conversation renders without dereferencing a missing work log',()=>{
  const f=fixture(),list=f.$('#conversationMessages');Object.assign(list,{scrollHeight:0,scrollTop:0,clientHeight:300,querySelector:()=>null,insertAdjacentHTML(position,html){this.innerHTML+=html;}});f.c.realRender();assert.match(list.innerHTML,/conversation-empty/);
 });
 
-test('candidate preview shows every page continuously without compiling',async()=>{
- const f=fixture();f.c.assistant.id='job';f.c.writingSetView=()=>{};f.c.api=async(path)=>{f.calls.push(path);return {beforePages:2,afterPages:3};};
- await f.c.conversationPreview();const html=f.$('#conversationPdf').innerHTML;
- assert.equal((html.match(/class="conversation-pdf-pair"/g)||[]).length,3);
- assert.equal((html.match(/loading="lazy"/g)||[]).length,5);assert.match(html,/本版本无此页/);
- assert.ok(!html.includes('<select'));assert.equal(f.calls.length,1);assert.match(f.calls[0],/effects/);
+test('candidate effect and source actions route to the interactive document tabs',async()=>{
+ const f=fixture(),views=[];f.c.writingSetView=view=>views.push(view);f.c.catShowDiff=async path=>f.calls.push(path);
+ await f.c.conversationPreview();await f.c.conversationDiff('main.tex');assert.deepEqual(views,['comparison','diff']);assert.equal(f.calls[0],'main.tex');
+});
+test('display math keeps multiline formulas intact and code remains escaped',()=>{
+ const f=fixture(),html=f.c.conversationMessageHtml('Formula:\n\\[\n\\frac{1}{2} + x^2\n\\]\n```tex\n<script>\n```');
+ assert.match(html,/cat-math-raw/);assert.match(html,/fraction|frac/);assert.ok(!html.includes('<script>'));
 });
