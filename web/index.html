@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light"><title>LaTeX Studio</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231b725c'/%3E%3Ctext x='8' y='29' font-family='Georgia' font-style='italic' font-size='28' fill='white'%3EL%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%232563eb'/%3E%3Ctext x='8' y='29' font-family='Georgia' font-style='italic' font-size='28' fill='white'%3EL%3C/text%3E%3C/svg%3E">
   <link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/vendor/katex/katex.min.css">
   <link rel="stylesheet" href="/style.css">
@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/editor-dock-resize.css">
 <link rel="stylesheet" href="/usability.css">
 <link rel="stylesheet" href="/history-quality.css">
-<link rel="stylesheet" href="/terms-desk.css"><link rel="stylesheet" href="/assistant-refresh.css"><link rel="stylesheet" href="/document-assistant.css">
+<link rel="stylesheet" href="/terms-desk.css"><link rel="stylesheet" href="/assistant-refresh.css"><link rel="stylesheet" href="/document-assistant.css"><link rel="stylesheet" href="/studio-minimal.css">
 </head>
 <body data-view="home">
   <header class="app-header">
@@ -152,7 +152,7 @@
           <div class="review-tool-header"><div><h2>先看修改效果，再决定应用</h2><p>一次只处理一个 PDF 页面。关联源码后生成修改，在临时副本中编译比较。</p></div><div class="review-toolbar"><button id="pageEditResume" class="secondary">恢复最近任务</button><button id="pageEditMap" class="secondary">保存并编译生成映射</button></div></div>
           <div class="page-edit-setup review-card"><div class="page-edit-controls"><label>PDF 物理页次<input id="pageEditPage" type="number" min="1" value="1"></label><button id="pageEditPrepare" class="secondary">关联本页源码</button><label id="pageEditFileLabel" hidden>来源文件<select id="pageEditFile"></select></label><span id="pageEditContextInfo" class="review-muted">尚未关联源码</span></div><details id="pageEditSourceDetails"><summary>查看本页关联的源码范围</summary><textarea id="pageEditSource" rows="7" readonly spellcheck="false" aria-label="当前单页关联的源码"></textarea></details><label class="page-edit-note-label">希望如何修改<textarea id="pageEditNotes" rows="2" maxlength="1600" placeholder="例如：正文恢复正常字号，修复重复词；保持数据、公式与引用不变。"></textarea></label><div class="page-edit-run"><button id="pageEditGenerate" class="primary" disabled>生成源码修改 · 1 次 AI 请求</button><button id="pageEditStop" class="secondary" hidden>停止 AI</button><span id="pageEditStatus" role="status">关联源码和生成效果预览均不调用 AI。</span></div></div>
           <div id="pageEditResult" class="review-card" hidden><div class="review-card-heading"><h3>可应用修改</h3><button id="pageEditSourceDiff" class="secondary">源码差异对比</button></div><p id="pageEditSummary"></p><div id="pageEditRejected" class="page-edit-rejected" hidden></div><div class="page-edit-select"><label><input id="pageEditAll" type="checkbox" checked>选择全部修改</label><span id="pageEditSelectionInfo"></span></div><div id="pageEditEdits"></div><div class="page-edit-actionbar"><button id="pageEditPreview" class="secondary">编译前后效果 · 不调用 AI</button><button id="pageEditApply" class="primary" disabled>应用修改并更新 PDF</button><button id="pageEditUndo" class="secondary" hidden>撤销本次应用</button></div></div>
-          <div id="pageEditComparison" class="review-card" hidden><div class="review-card-heading"><h3>真实 PDF 效果对比</h3><span id="pageEditPreviewMeta" class="review-muted"></span></div><div class="page-edit-comparison-grid"><figure><figcaption>修改前</figcaption><img id="pageEditBefore" alt="修改前的当前 PDF 页面"></figure><figure><figcaption>候选修改 · 尚未应用</figcaption><img id="pageEditAfter" alt="临时副本编译得到的修改后页面"></figure></div><p class="review-footnote">两张图片均由实际 PDF 渲染。只有点击应用才写回源码；重排可能影响页数，应用后可在阅读器中检查。</p></div>
+          <div id="pageEditComparison" class="review-card" hidden><div class="review-card-heading"><h3>真实 PDF 效果对比</h3><span id="pageEditPreviewMeta" class="review-muted"></span></div><div class="page-edit-comparison-grid"><figure><figcaption>修改前</figcaption><img id="pageEditBefore" alt="修改前的当前 PDF 页面"></figure><figure><figcaption>候选修改 · 尚未应用</figcaption><img id="pageEditAfter" alt="临时副本编译得到的修改后页面"></figure></div><div id="pageEditLayout" class="page-edit-layout" role="status" hidden></div><p class="review-footnote">两张图片均由实际 PDF 渲染。只有点击应用才写回源码；重排可能影响页数，应用后可在阅读器中检查。</p></div>
         </section>
         <section id="review-references" class="review-tool" hidden>
           <div class="review-tool-header"><div><h2>引用检查</h2><p>追踪主文档包含的 .tex 与 .bib，定位重复标签、缺失引用及文献条目。</p></div><button id="referencesScan" class="primary">检查当前项目</button></div>
@@ -233,4 +233,5 @@
 <script src="/usability.js"></script>
 <script src="/history-quality.js"></script>
 <script src="/terms-desk.js"></script><script src="/assistant-refresh.js"></script><script src="/assistant-comparison.js"></script><script src="/assistant-history.js"></script><script src="/document-assistant.js"></script>
+<script src="/studio-controls.js"></script>
 </body></html>

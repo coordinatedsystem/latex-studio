@@ -61,8 +61,10 @@ class Updates:
         if value.get('file')!='distribution/'+name or not re.fullmatch(r'[0-9a-f]{64}',str(value.get('sha256',''))):raise ValueError('更新清单的文件或 SHA256 无效')
         if not isinstance(value.get('size'),int) or not 0<value['size']<100*1024*1024:raise ValueError('安装包大小无效')
         if not re.fullmatch(r'[0-9a-f]{40}',commit):raise ValueError('发布提交无效')
+        latest,current=version_tuple(version),version_tuple(VERSION)
+        relation='newer' if latest>current else 'older' if latest<current else 'same'
         return {'version':version,'file':value['file'],'sha256':value['sha256'],'size':value['size'],'commit':commit,
-                'notes':str(value.get('notes',''))[:4000],'available':version_tuple(version)>version_tuple(VERSION),
+                'notes':str(value.get('notes',''))[:4000],'available':relation=='newer','relation':relation,
                 'url':'https://github.com/'+REPOSITORY+'/blob/'+commit+'/'+value['file']}
     def check(self):
         with self.lock:
@@ -71,7 +73,8 @@ class Updates:
         try:
             commit=self.json('git/ref/heads/main')['object']['sha']
             release=self.validate(self.json('contents/updates/latest.json?ref='+commit,True),commit)
-            with self.lock:self.release=release;self.installer=None;self.job.update(stage='发现新版本' if release['available'] else '已是最新版本')
+            stage={'newer':'发现新版本','same':'已是最新版本','older':'本机版本高于已发布版本'}[release['relation']]
+            with self.lock:self.release=release;self.installer=None;self.job.update(stage=stage)
         except Exception as e:
             with self.lock:self.job.update(stage='检查未完成',error=str(e) if isinstance(e,ValueError) else '版本服务响应无效')
             raise ValueError(self.job['error']) from None

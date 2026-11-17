@@ -14,7 +14,7 @@ class PayloadTests(unittest.TestCase):
             root=Path(tmp);repo=root/'repo';app=root/'app'
             repo.mkdir();app.mkdir()
             for folder in ('web','vendor','assets'):(repo/folder).mkdir()
-            names=('server.py','bootstrap_install.py','launch.ps1','Launch.vbs','version.json','README.md','CHANGELOG.md','THIRD_PARTY_NOTICES.md','studio_terms.py','web/terms-desk.js')
+            names=('server.py','bootstrap_install.py','select_project.py','launch.ps1','Launch.vbs','version.json','README.md','CHANGELOG.md','THIRD_PARTY_NOTICES.md','studio_terms.py','web/terms-desk.js')
             for name in names:
                 for base in (repo,app):
                     (base/name).parent.mkdir(parents=True,exist_ok=True)

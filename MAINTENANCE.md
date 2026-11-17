@@ -12,6 +12,8 @@ git restore --source=v1.7.0 --worktree -- distribution/LaTeX-Studio-1.7.0-win64-
 
 ## 日常检查
 
+1.9.1 增加了明确列出的 `build-1.8.1` 至 `build-1.9.0` 和 `release-1.5.x`、`release-1.8.x`、`release-1.9.0`、`release-1.9.1` 测试环境清理范围。只有这些专用开发目录会被处理，仍执行原有路径、活动任务、用户数据哈希和状态备份检查；当前构建和实际应用的数据、项目、助手候选缓存不在范围内。安装升级仅删除列出的旧头像、旧图标、未使用样式及开发辅助脚本，`select_project.py` 作为运行依赖保留并正式打包。
+
 ```powershell
 python -B tools/maintain_workspace.py
 python -B tools/audit_release.py .

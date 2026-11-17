@@ -1,5 +1,5 @@
 'use strict';
-const catComparison={key:null,data:null,parts:[],index:0,full:false,zoom:150,ticket:0,diffs:new Map()};
+const catComparison={key:null,data:null,parts:[],index:0,full:false,zoom:100,ticket:0,diffs:new Map()};
 function catComparisonKey(){return state.projectId+':'+studioAssistant.id;}
 function catComparisonTabs(){
  const job=studioAssistant.job,active=studioAssistant.surface==='conversation';if(!active)return;

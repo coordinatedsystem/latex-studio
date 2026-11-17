@@ -56,12 +56,22 @@ def environment_problem(log):
 
 
 def cached_resource_missing(log,cache):
-    """Only the pinned public bundle can authorize an automatic download."""
-    names={a or b for a,b in re.findall(r"(?:File\s+[`'\"]([^`'\"]+)[`'\"]\s+not found|I can't find file\s+[`'\"]([^`'\"]+)[`'\"])",log,re.I)}
+    """Only the pinned public bundle can authorize an automatic download.
+
+    Covers missing files and missing font metrics: a 12pt document needs size12.clo and
+    lmroman12-* while an offline cache usually only holds what earlier documents used.
+    """
+    names=set()
+    for a,b in re.findall(r"(?:File\s+[`'\"]([^`'\"\s]+)[`'\"]\s+not found|I can't find file\s+[`'\"]([^`'\"\s]+)[`'\"])",log,re.I):names.add(a or b)
+    names.update(re.findall(r"=\[([\w.+-]+)\]",log))
+    names.update(re.findall(r'\bfont\s+[`\'"]([\w.+-]+)[`\'"]\s+(?:cannot be found|not found)',log,re.I))
+    names={name for name in names if name and '/' not in name and '\\' not in name}
+    if not names:return []
     indices=list((Path(cache)/'bundles/data').glob('*.index'))
     if len(indices)!=1:return []
     known={line.rsplit(' ',2)[0] for line in indices[0].read_text('utf8').splitlines() if len(line.rsplit(' ',2))==3}
-    return sorted(name for name in names if name in known and '/' not in name and '\\' not in name)
+    stems={Path(name).stem for name in known}
+    return sorted(name for name in names if name in known or name in stems)
 
 
 def excerpt(full,line,selection=None):
@@ -225,9 +235,15 @@ class EditorAI:
                 except subprocess.TimeoutExpired:continue
         finally:self.process=None
         pdf=folder/(Path(s['main']).stem+'.pdf');success=process.returncode==0 and pdf.exists() and pdf.read_bytes().startswith(b'%PDF-')
+        s['previewFailure']=None
         if success:
             from studio_ai_quality import verify_preview_pdf
-            verify_preview_pdf(pdf)
+            try:verify_preview_pdf(pdf)
+            except ValueError as exc:
+                # The source compiled; only the local renderer refused the PDF. Keep the log and
+                # say so, otherwise the caller reports a source error and the model edits blindly.
+                s['previewFailure']=str(exc)
+                return False,output[-16000:]+'\n[预览校验] 编译已生成 PDF，但本地渲染组件无法打开它：'+str(exc)+'\n这不是源码错误；请重试编译，若仍失败请重启应用。'
             shutil.copy2(pdf,self.folder(s['root'],s['id'],True)/'candidate.pdf')
             s['candidatePdfHash']=sha(self.folder(s['root'],s['id'],True)/'candidate.pdf')
             saved=self.folder(s['root'],s['id'],True)/'candidate.pdf';s['candidatePdfStamp']=[saved.stat().st_size,saved.stat().st_mtime_ns]
@@ -241,6 +257,7 @@ class EditorAI:
         system=((REQUESTED_POLICY if editable else POLICY)+'你是 LaTeX 编译修复与代码解释助手。只能修改提供的源码范围，不能读取项目以外文件或执行外部命令。'
           '当前编译器为 Tectonic（XeTeX/XeLaTeX 内核），不支持切换为 pdfLaTeX、LuaLaTeX 或 shell-escape。'
           '遇到引擎不兼容，给出兼容当前内核的实际源码替换；缺少字体时优先选择给定的已安装字体。'
+          '不要假设任意宏包都存在：新增宏包、类或字体前确认它属于固定 Tectonic bundle 或已安装字体，否则会被本地兼容性检查拒绝。'
           '修复报错时不要通过隐藏错误或删除无关内容绕过编译；用户明确要求的删改应执行。compilerError 有错误时修复临时候选，不要重复已完成的修改。'
           '返回 JSON 对象：{"summary":"简洁概述","answer":"解释与原因","edits":[{"before":"逐字原文","after":"替换内容","line":1,"reason":"原因"}]}。'
           'before 必须存在且可唯一定位，line 为片段内行号。可确定的代码错误必须在 edits 给出实际替换，不要仅口头建议。'
@@ -280,11 +297,29 @@ class EditorAI:
         edits,changed=studio_ai.validate_edits(text,proposed,allow_content_changes=editable)
         if not edits:raise ValueError('AI 没有给出可安全应用的修改；原文件保留')
         original=Path(s['root'])/path
-        if path not in s['originals']:s['originals'][path]=base64.b64encode(original.read_bytes()).decode('ascii')
         full=(clone/path).read_text(encoding='utf-8-sig');candidate=full[:lo]+changed+full[hi:]
+        if s.get('chatMode')=='agent' and Path(path).suffix.lower() in {'.py','.json'}:
+            try:
+                if Path(path).suffix.lower()=='.py':__import__('ast').parse(candidate,filename=path)
+                else:json.loads(candidate)
+            except (SyntaxError,ValueError) as exc:raise ValueError('配套文件语法检查未通过：'+str(exc)[:350]) from None
         combined=edit_problem(full,candidate,s['mode'],s['question'])
         if combined:raise ValueError(combined+'，未应用修改')
+        # Local, authoritative guard against invented packages or pdfTeX-only constructs.
+        # Only reject problems the edit introduces; pre-existing issues are left to the user.
+        try:
+            from studio_tex_reference import compatibility,local_resources
+            local=local_resources(clone)
+            before_errors={i['message'] for i in compatibility(full,self.storage.tex_cache,path,local)['issues'] if i['severity']=='error'} if Path(path).suffix.lower() in EDITABLE else set()
+            introduced=[i for i in (compatibility(candidate,self.storage.tex_cache,path,local)['issues'] if Path(path).suffix.lower() in EDITABLE else [])
+                        if i['severity']=='error' and i['message'] not in before_errors]
+        except (OSError,UnicodeError,ImportError):
+            introduced=[]
+        if introduced:
+            first=introduced[0]
+            raise ValueError('修改会引入当前编译器无法使用的内容（第 '+str(first['line'])+' 行）：'+first['message']+' 请改用固定 bundle 中存在的写法')
         if not editable and (studio_ai.protected_values(full)!=studio_ai.protected_values(candidate) or studio_ai.fact_numbers(full)!=studio_ai.fact_numbers(candidate)):raise ValueError('修改超出请求范围')
+        if path not in s['originals']:s['originals'][path]=base64.b64encode(original.read_bytes()).decode('ascii')
         s['candidateRange']=[lo,lo+len(changed)]
         (clone/path).write_text(candidate,encoding='utf-8');s['candidates'][path]=candidate
         s['quality']=report(text,changed,s['mode'],instruction=s['question']);s['changedPaths']=sorted(s['candidates']);return len(edits)
@@ -329,9 +364,11 @@ class EditorAI:
                     lo,hi,text=0,len(full),full
                 else:lo,hi,text=excerpt(full,line,s.get('candidateRange',selection) if s['mode']=='edit' else selection)
                 s['contextStartLine']=full.count('\n',0,lo)+1
+                from studio_tex_reference import ENGINE,installed_font_families
+                families=installed_font_families()
                 s['readOnlyContext']={'before':full[max(0,lo-1800):lo],'after':full[hi:hi+1800],
-                    'engine':'Tectonic / XeLaTeX','projectFiles':sorted(s['sourceHashes']),
-                    'installedFonts':[family for filename,family in [('arial.ttf','Arial'),('times.ttf','Times New Roman'),('simsun.ttc','SimSun'),('msyh.ttc','Microsoft YaHei'),('simhei.ttf','SimHei')] if (Path(os.environ.get('WINDIR',r'C:\Windows'))/'Fonts'/filename).is_file()],
+                    'engine':'Tectonic / XeLaTeX','engineRules':ENGINE['features'],'projectFiles':sorted(s['sourceHashes']),
+                    'installedFonts':[name for name in ('Times New Roman','Arial','Cambria','SimSun','SimHei','Microsoft YaHei','KaiTi','FangSong','Consolas','Cambria Math') if any(name.casefold() in family.casefold() for family in families)],
                     'previousAttempts':s.get('repairFeedback',[])[-2:]}
                 self.update(s,path=path,stage='分析报错 · 第 '+str(number)+' 轮' if s['mode']=='repair' else '解释代码' if s['mode']=='explain' else '生成修改建议')
                 result=self.model(s,text,path,log);s['summary']=str(result.get('summary','建议已生成'))[:2000];s['answer']=str(result.get('answer',''))[:8000]
@@ -353,7 +390,16 @@ class EditorAI:
                 success,newlog=self.compile_copy(s,clone,number);record.update(status='passed' if success else 'failed',log=newlog[-7000:])
                 self.update(s,verified=success)
                 if success:
-                    s.setdefault('quality',{})['preview']='compiled-and-rendered'
+                    quality=s.setdefault('quality',{});quality['preview']='compiled-and-rendered'
+                    try:
+                        from studio_ai_quality import layout_report
+                        before_pdf=self.folder(s['root'],s['id'],True)/'before.pdf'
+                        candidate_pdf=self.folder(s['root'],s['id'],True)/'candidate.pdf'
+                        if before_pdf.is_file() and candidate_pdf.is_file():
+                            layout=layout_report(before_pdf,candidate_pdf,newlog)
+                            quality['layout']=layout
+                            quality['warnings']=list(dict.fromkeys(quality.get('warnings',[])+layout.get('warnings',[])))
+                    except (OSError,ValueError):pass
                     self.update(s,success=True,stage='编译通过，等待确认');return
                 s.setdefault('repairFeedback',[]).append({'problem':'候选编译未通过，请修复下面的错误后重新验证。','log':newlog[-3000:]})
                 signature=lambda value:re.sub(r'(?:compile-\d+|project[/\\])','',value[-3500:])
@@ -381,7 +427,8 @@ class EditorAI:
             if s['running']:raise ValueError('请等待验证完成')
             if undo:
                 if not s.get('applied') or not self.public(s)['canUndo']:raise ValueError('应用后源码已变化，请使用文件历史；未覆盖后续修改')
-                changes=[(Path(root)/p,base64.b64decode(raw)) for p,raw in s['originals'].items()]
+                changed=set(s.get('appliedHashes') or s.get('candidates',{}))
+                changes=[(Path(root)/p,base64.b64decode(raw)) for p,raw in s['originals'].items() if p in changed]
             else:
                 self.fresh(s)
                 if s.get('applied') or not s.get('verified') or not s['candidates'] or not self.public(s)['verified']:raise ValueError('只有通过编译的候选修改才能应用')

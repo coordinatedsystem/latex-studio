@@ -5,6 +5,7 @@ from collections import Counter,defaultdict
 import gzip
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -21,7 +22,7 @@ from studio_change_focus import edit_key
 import studio_task_history as task_history
 
 SKIP={'.git','.codex','.agents','latex-studio','latex-portable','build','__pycache__'}
-ALLOWED={'.tex','.bib','.sty','.cls','.bst','.bbl','.cfg','.def','.clo','.fd','.tikz','.py','.txt','.csv','.json',
+ALLOWED={'.tex','.bib','.sty','.cls','.bst','.bbl','.cfg','.def','.clo','.fd','.tikz','.py','.txt','.md','.csv','.json',
          '.png','.jpg','.jpeg','.webp','.pdf','.eps','.svg','.otf','.ttf','.tfm','.pfb','.map'}
 
 
@@ -29,13 +30,18 @@ def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 def project_files(root):
-    root=Path(root).resolve();result=[]
-    for path in root.rglob('*'):
-        relative=path.relative_to(root)
-        if any(p.startswith('.') or p in SKIP for p in relative.parts) or path.is_symlink():continue
-        if path.is_file() and path.suffix.lower() in ALLOWED:result.append(path)
-        if len(result)>3000:raise ValueError('项目文件过多，无法生成比较副本')
-    if sum(p.stat().st_size for p in result)>200*1024*1024:raise ValueError('比较副本暂支持 200 MB 以内的项目素材')
+    root=Path(root).resolve();result=[];size=0
+    for folder,dirs,names in os.walk(root,followlinks=False):
+        # Prune before traversal: vendor/build trees must not be walked and discarded afterwards.
+        dirs[:]=[name for name in dirs if not name.startswith('.') and name not in SKIP
+                 and not (Path(folder)/name).is_symlink() and not getattr(Path(folder)/name,'is_junction',lambda:False)()]
+        for name in names:
+            if name.startswith('.'):continue
+            path=Path(folder)/name
+            if path.suffix.lower() not in ALLOWED or path.is_symlink() or not path.is_file():continue
+            result.append(path);size+=path.stat().st_size
+            if len(result)>3000:raise ValueError('项目文件过多，无法生成比较副本')
+            if size>200*1024*1024:raise ValueError('比较副本暂支持 200 MB 以内的项目素材')
     return result
 
 
@@ -305,8 +311,16 @@ class PageEdits(BatchEditsMixin):
                 comparisons.append({'page':number,'shownPage':shown,'changed':changed,'bounds':normalized});images[str(number)]={'before':str(before),'after':str(after)}
             with self.lock:
                 s['candidate']=candidate;s['candidatePdf']=str(pdf);s['imagePages']=images;s['images']=images[str(s['page'])]
-                from studio_ai_quality import pdf_report
-                s['preview']['quality']={'status':'passed','warnings':[]}
+                from studio_ai_quality import pdf_report,layout_report
+                before_pdf=Path(s['folder'])/'before.pdf'
+                content=pdf_report(before_pdf,pdf)
+                layout=layout_report(before_pdf,pdf,result.stdout+'\n'+result.stderr,s.get('pages',[s['page']]))
+                warnings=list(dict.fromkeys(content.get('warnings',[])+layout.get('warnings',[])))
+                quality={'status':'review' if warnings else 'checked','warnings':warnings,'layout':layout,
+                         'beforePages':content.get('beforePages'),'afterPages':content.get('afterPages',total),
+                         'checks':['修改范围','候选编译预览','改后版面复核'],
+                         'note':'自动检查不替代对原意、术语与版面的人工审阅'}
+                s['preview']['quality']=quality
                 s['preview'].update(running=False,success=True,stage='编译通过，等待确认',changed=any(p['changed'] for p in comparisons),totalPages=total,shownPage=comparisons[0]['shownPage'],pages=comparisons)
                 self.remember(s)
             cached=sorted((p for p in Path(s['folder']).iterdir() if p.is_dir() and re.fullmatch(r'[a-f0-9]{32}',p.name)),key=lambda p:p.stat().st_mtime_ns,reverse=True)

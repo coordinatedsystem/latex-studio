@@ -110,19 +110,21 @@ def _entry_at_source(data,path,line,column):
 def _text_box(pdf,needle,page_numbers):
     if len(needle)<4:return None
     import pypdfium2 as pdfium
-    document=pdfium.PdfDocument(str(pdf));matches=[]
-    try:
-        for n in page_numbers:
-            page=document[n-1];text=page.get_textpage();search=text.search(needle)
-            try:
-                while (found:=search.get_next()) is not None:
-                    start,count=found;boxes=[text.get_charbox(i) for i in range(start,start+count)]
-                    l=min(b[0] for b in boxes);b=min(b[1] for b in boxes);r=max(b[2] for b in boxes);t=max(b[3] for b in boxes);w,h=page.get_size();bbox=[max(0,l/w),max(0,1-t/h),min(1,r/w),min(1,1-b/h)]
-                    matches.append({'page':n,'x':bbox[0],'y':bbox[1],'bbox':bbox})
-                    if len(matches)>1:return None
-            finally:search.close();text.close();page.close()
-    finally:document.close()
-    return matches[0] if len(matches)==1 else None
+    from studio_pdfium import LOCK
+    with LOCK:
+        document=pdfium.PdfDocument(str(pdf));matches=[]
+        try:
+            for n in page_numbers:
+                page=document[n-1];text=page.get_textpage();search=text.search(needle)
+                try:
+                    while (found:=search.get_next()) is not None:
+                        start,count=found;boxes=[text.get_charbox(i) for i in range(start,start+count)]
+                        l=min(b[0] for b in boxes);b=min(b[1] for b in boxes);r=max(b[2] for b in boxes);t=max(b[3] for b in boxes);w,h=page.get_size();bbox=[max(0,l/w),max(0,1-t/h),min(1,r/w),min(1,1-b/h)]
+                        matches.append({'page':n,'x':bbox[0],'y':bbox[1],'bbox':bbox})
+                        if len(matches)>1:return None
+                finally:search.close();text.close();page.close()
+        finally:document.close()
+        return matches[0] if len(matches)==1 else None
 
 def _usage_for_link(data,points,link,kind):
     usages=[]

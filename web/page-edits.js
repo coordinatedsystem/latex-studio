@@ -19,7 +19,7 @@ async function pageEditPrepare(path=null){
  pageEditContext=context;pageEditResult=null;pageEditJob=null;pageEditPreviewState=null;pageEditSelected.clear();pageEditApplied=false;
  $('#pageEditSource').value=context.source;$('#pageEditFile').innerHTML=context.candidates.map(f=>`<option value="${esc(f)}">${esc(f)}</option>`).join('');$('#pageEditFile').value=context.path;$('#pageEditFileLabel').hidden=context.candidates.length<2;
  $('#pageEditContextInfo').textContent=context.path+' · 第 '+context.startLine+'–'+context.endLine+' 行 · 仅第 '+context.page+' 页';
- $('#pageEditResult').hidden=true;$('#pageEditComparison').hidden=true;$('#pageEditStatus').textContent='本页源码已关联。点击生成时仅发送这一个页面及上方源码片段。';pageEditControls();
+ $('#pageEditResult').hidden=true;$('#pageEditComparison').hidden=true;$('#pageEditLayout').hidden=true;$('#pageEditStatus').textContent='本页源码已关联。点击生成时仅发送这一个页面及上方源码片段。';pageEditControls();
 }
 async function pageEditGenerate(){
  pageEditGuard();pageEditCleanBuffers();if(pageEditJob?.running)return;
@@ -39,11 +39,20 @@ async function pageEditPoll(){
    if(!result.running){clearInterval(pageEditTimer);if(!result.success)throw new Error(result.error||'比较预览编译失败');
     const base='/api/ai/page-image?id='+encodeURIComponent(pageEditContext.id)+'&project='+encodeURIComponent(pageEditContext.projectId)+'&v='+result.id;
     $('#pageEditBefore').src=base+'&which=before';$('#pageEditAfter').src=base+'&which=after';$('#pageEditComparison').hidden=false;
-    $('#pageEditPreviewMeta').textContent='编译通过 · 第 '+pageEditContext.page+' 页 · '+(result.changed?'已检测到可见变化':'未检测到可见像素变化')+' · 修改后共 '+result.totalPages+' 页';
+    $('#pageEditPreviewMeta').textContent='编译通过 · 第 '+pageEditContext.page+' 页 · '+(result.changed?'已检测到可见变化':'未检测到可见像素变化')+' · 修改后共 '+result.totalPages+' 页'+pageEditLayoutNote(result.quality);
+    pageEditLayout(result.quality);
     $('#pageEditStatus').textContent='候选副本已编译，可查看前后效果；原文件尚未修改。';}
   }
  }catch(e){reviewError(e.message);if(pageEditJob&&!pageEditJob.running||pageEditPreviewState&&!pageEditPreviewState.running||pageEditContext?.projectId!==state?.projectId){clearInterval(pageEditTimer);}else $('#pageEditStatus').textContent='状态读取中断，正在重试；AI 不会自动重发。';}
  finally{pageEditPolling=false;pageEditControls();}
+}
+function pageEditLayout(quality){
+ const el=$('#pageEditLayout');if(!el)return;const warnings=quality?.warnings||[];
+ el.hidden=!warnings.length;el.classList.toggle('needs-review',!!warnings.length);
+ el.innerHTML=warnings.length?'<strong>改后版面需要确认</strong><ul>'+[...new Set(warnings)].map(w=>'<li>'+esc(w)+'</li>').join('')+'</ul>':'';
+}
+function pageEditLayoutNote(quality){
+ const count=quality?.warnings?.length||0;return count?' · 版面复核：'+count+' 项需确认':' · 版面复核通过';
 }
 function pageEditRender(){
  $('#pageEditResult').hidden=false;$('#pageEditSummary').textContent=pageEditResult.summary;
@@ -54,7 +63,7 @@ function pageEditRender(){
 }
 async function pageEditPreview(){
  pageEditGuard();pageEditCleanBuffers();if(!pageEditSelected.size)throw new Error('请至少选择一项修改');
- pageEditPreviewState=await api('ai/page-preview',{id:pageEditContext.id,selected:[...pageEditSelected]});$('#pageEditComparison').hidden=true;
+ pageEditPreviewState=await api('ai/page-preview',{id:pageEditContext.id,selected:[...pageEditSelected]});$('#pageEditComparison').hidden=true;$('#pageEditLayout').hidden=true;
  clearInterval(pageEditTimer);pageEditTimer=setInterval(pageEditPoll,700);pageEditControls();await pageEditPoll();
 }
 async function pageEditApply(undo=false){
@@ -82,7 +91,7 @@ async function pageEditResume(){
  pageEditPreviewState=c.preview?.id?{...c.preview,running:false}:null;pageEditSelected=new Set(c.preview?.selected||pageEditResult.edits.map((_,i)=>i));
  $('#pageEditPage').value=c.page;$('#pageEditSource').value=c.source;$('#pageEditFile').innerHTML=c.candidates.map(f=>`<option value="${esc(f)}">${esc(f)}</option>`).join('');$('#pageEditFile').value=c.path;$('#pageEditFileLabel').hidden=c.candidates.length<2;
  $('#pageEditContextInfo').textContent=c.path+' · 第 '+c.startLine+'–'+c.endLine+' 行 · 仅第 '+c.page+' 页';pageEditRender();
- if(c.preview?.success){const base='/api/ai/page-image?id='+encodeURIComponent(c.id)+'&project='+c.projectId+'&v='+c.preview.id;$('#pageEditBefore').src=base+'&which=before';$('#pageEditAfter').src=base+'&which=after';$('#pageEditComparison').hidden=false;$('#pageEditPreviewMeta').textContent='已恢复编译通过的前后对比 · 第 '+c.page+' 页';}
+ if(c.preview?.success){const base='/api/ai/page-image?id='+encodeURIComponent(c.id)+'&project='+c.projectId+'&v='+c.preview.id;$('#pageEditBefore').src=base+'&which=before';$('#pageEditAfter').src=base+'&which=after';$('#pageEditComparison').hidden=false;$('#pageEditPreviewMeta').textContent='已恢复编译通过的前后对比 · 第 '+c.page+' 页'+pageEditLayoutNote(c.preview.quality);pageEditLayout(c.preview.quality);}
  pageEditControls();
 }
 async function pageEditOpen(page,notes=''){

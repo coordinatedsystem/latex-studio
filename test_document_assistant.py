@@ -65,7 +65,8 @@ class AssistantTests(unittest.TestCase):
 
     def test_default_agent_can_finish_after_initial_steps_when_edits_progress(self):
         responses=[self.response('read_file',{'path':'main.tex'}),self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'})]
-        responses += [self.response('edit',{'path':'main.tex','before':'Hello','after':'Hello x'}) for _ in range(23)]
+        # Each step changes different text: identical repeats are not progress and are no longer re-executed.
+        responses += [self.response('edit',{'path':'main.tex','before':'Hello'+(' '+str(i) if i else ''),'after':'Hello '+str(i+1)}) for i in range(23)]
         responses += [self.response('compile'),self.response(message='候选已验证',done=True)]
         with patch.object(self.ai,'compile_copy',side_effect=self.compiler):job=self.run_job(responses,stepLimit=24)
         self.assertTrue(job['success']);self.assertTrue(job['verified']);self.assertGreater(job['requestCount'],24)
@@ -193,5 +194,37 @@ class AssistantTests(unittest.TestCase):
     def test_inspection_can_report_a_compile_error_without_being_forced_to_edit(self):
         with patch.object(self.ai,'compile_copy',return_value=(False,'Undefined control sequence')):j=self.run_job([self.response('compile'),self.response(message='编译失败，命令拼写有误。未修改文档。',done=True)],question='只检查能否编译，不要修改')
         self.assertTrue(j['success']);self.assertFalse(j['changedPaths']);self.assertFalse(j['verified'])
+
+    def test_a_batch_of_thirteen_tool_calls_is_executed_instead_of_rejected(self):
+        # A model that returns many independent calls in one response used to be told
+        # "工具调用格式无效" and the whole turn ended without doing any work.
+        calls=[{'tool':'search','args':{'query':'q'+str(n)}} for n in range(13)]
+        batch=self.response();batch['choices'][0]['message']['content']=json.dumps({'message':'批量检索','calls':calls})
+        j=self.run_job([batch,self.response(message='批量检索完成',done=True)],'chat')
+        self.assertTrue(j['success']);self.assertFalse(any('工具调用格式无效' in str(e.get('detail')) for e in j['events']))
+        self.assertEqual(sum(e['tool']=='search' and e['status']=='done' for e in j['events']),13);self.assertEqual(j['requestCount'],2)
+    def test_calls_beyond_the_single_step_cap_are_deferred_not_failed(self):
+        calls=[{'tool':'search','args':{'query':'z'+str(n)}} for n in range(30)]
+        batch=self.response();batch['choices'][0]['message']['content']=json.dumps({'message':'超大批量','calls':calls})
+        j=self.run_job([batch,self.response(message='已完成本批检索',done=True)],'chat')
+        self.assertTrue(j['success']);self.assertEqual(sum(e['tool']=='search' and e['status']=='done' for e in j['events']),24)
+        self.assertTrue(any('单步上限' in str(e.get('detail')) for e in j['events']))
+    def test_a_single_dict_call_is_normalized_and_a_non_list_gets_one_retry(self):
+        one=self.response();one['choices'][0]['message']['content']=json.dumps({'message':'单项','calls':{'tool':'search','args':{'query':'Hello'}}})
+        wrong=self.response();wrong['choices'][0]['message']['content']=json.dumps({'message':'格式错误','calls':'not-an-array'})
+        j=self.run_job([one,wrong,self.response(message='格式已纠正',done=True)],'chat')
+        self.assertTrue(j['success']);self.assertEqual(sum(e['tool']=='search' and e['status']=='done' for e in j['events']),1)
+        self.assertTrue(any(e['tool']=='response' and e['status']=='failed' for e in j['events']));self.assertEqual(j['requestCount'],3)
+    def test_layout_task_cannot_finish_after_content_edits_without_rechecking_layout(self):
+        from test_fixture_pdf import write_fixture_pdf
+        def compiler(s,clone,n):
+            pdf=self.ai.folder(s['root'],s['id'],True)/'candidate.pdf';pdf.parent.mkdir(parents=True,exist_ok=True);write_fixture_pdf(pdf);return True,'ok'
+        setup=lambda:[self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),self.response('compile')]
+        with patch.object(self.ai,'compile_copy',side_effect=compiler):
+            blocked=self.run_job(setup()+[self.response(message='已修改，完成',done=True)]*3,question='检查排版并修复命令')
+            passed=self.run_job(setup()+[self.response('layout_check',{}),self.response(message='已复核版面',done=True)],question='检查排版并修复命令')
+        self.assertFalse(blocked['success']);self.assertIn('复核版面',blocked['error'])
+        self.assertTrue(passed['success']);self.assertTrue(passed['verified'])
+        self.assertTrue(any(e['tool']=='layout_check' and e['status']=='done' for e in passed['events']))
 
 if __name__=='__main__':unittest.main()

@@ -6,10 +6,11 @@ const vm=require('node:vm');
 const source=fs.readFileSync(__dirname+'/web/app.js','utf8');
 const setPdfCode='async function setPdf('+source.split('async function setPdf(')[1].split('\nfunction themePdf')[0];
 
-function fixture({status=200,body='%PDF-1.5\n',missingViewer=false}={}){
+function fixture({status=200,body='%PDF-1.5\n',missingViewer=false,initialZoom=undefined}={}){
  const events=[],errors=[],phases=[],requests=[],handlers=new Map(),frameListeners=new Map();let pagesReady=false;
  const bus={on(name,fn){const group=handlers.get(name)||new Set();group.add(fn);handlers.set(name,group);},off(name,fn){handlers.get(name)?.delete(fn);},emit(name,event={}){for(const fn of [...(handlers.get(name)||[])])fn(event);}};
- const viewer={set currentScaleValue(value){assert.ok(pagesReady,'Do not set scale before pagesinit');events.push('scale');}};
+ let zoom=initialZoom;
+ const viewer={get currentScaleValue(){return zoom},set currentScaleValue(value){assert.ok(pagesReady,'Do not set scale before pagesinit');zoom=value;events.push('scale');}};
  const app={page:1,pdfDocument:{numPages:24},initializedPromise:Promise.resolve(),eventBus:bus,pdfViewer:viewer,
   async open(){events.push('open');setTimeout(()=>{pagesReady=true;events.push('pagesinit');bus.emit('pagesinit');setTimeout(()=>{events.push('pagerendered');bus.emit('pagerendered');},0);},0);}};
  const frame={contentWindow:{PDFViewerApplication:missingViewer?null:app},
@@ -25,17 +26,22 @@ function fixture({status=200,body='%PDF-1.5\n',missingViewer=false}={}){
   deadline:promise=>promise,
  };
  vm.createContext(sandbox);vm.runInContext(setPdfCode,sandbox);
- return {sandbox,events,errors,phases,handlers,requests};
+ return {sandbox,events,errors,phases,handlers,requests,viewer};
 }
 
 test('waits for pagesinit and a rendered page before showing the page count',async()=>{
  const f=fixture();await f.sandbox.setPdf(1);
  assert.equal(f.phases.at(-1).phase,'ready');assert.equal(f.phases.at(-1).message,'24 页');
- assert.ok(f.events.indexOf('pagesinit')<f.events.indexOf('scale'));
+ assert.ok(!f.events.includes('scale'),'opening a document must not apply a preset zoom');
  assert.ok(f.events.indexOf('pagerendered')<f.events.indexOf('ready'));
  assert.equal(f.errors.length,0);assert.equal(f.handlers.get('pagesinit').size,0);
  assert.equal(f.requests[0].options.headers['X-Studio-Project'],'project-test');
  assert.equal(f.handlers.get('pagerendered').size,0);
+});
+
+test('recompilation preserves a zoom chosen by the reader instead of forcing page width',async()=>{
+ const f=fixture({initialZoom:'1.25'});await f.sandbox.setPdf(10);
+ assert.equal(f.viewer.currentScaleValue,'1.25');assert.ok(f.events.indexOf('pagesinit')<f.events.indexOf('scale'));
 });
 test('a stale session shows an explicit recovery message instead of a blank viewer',async()=>{
  const f=fixture({status:401});await f.sandbox.setPdf(2);

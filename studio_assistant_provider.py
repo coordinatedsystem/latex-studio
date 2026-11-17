@@ -2,7 +2,7 @@
 
 Ported architecture from DeepSeek Harness (MIT, see third-party notice).
 """
-import copy,json,re,threading
+import copy,json,re,threading,time
 import studio_ai
 from studio_assistant_protocol import decode
 
@@ -28,7 +28,10 @@ class DeepSeekProvider:
                 if latest!=header:journal.append('request/header',header)
                 journal.append('request/start',{'number':s['requestCount'],'attempt':attempt,'headerHash':digest(header)})
             threading.Thread(target=send,daemon=True).start()
-            while not done.wait(.1):owner.checkpoint()
+            deadline=time.monotonic()+90
+            while not done.wait(.1):
+                owner.checkpoint()
+                if time.monotonic()>deadline:raise ValueError('模型服务超过 90 秒没有响应，已保留进度；本次请求不会自动重复发送')
             owner.checkpoint()
             if 'error' not in result:break
             error=result['error']

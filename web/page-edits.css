@@ -8,4 +8,8 @@
 .page-edit-actionbar { margin-top:18px; border-top:1px solid #d5dfd8; padding-top:17px; }
 .page-edit-comparison-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; }.page-edit-comparison-grid figure { margin:0; min-width:0; }.page-edit-comparison-grid figcaption { padding:12px; border:1px solid #c7d2cb; border-radius:8px 8px 0 0; background:#f6f9f7; color:#151d18; font-size:13px; font-weight:600; }.page-edit-comparison-grid img { width:100%; display:block; border:1px solid #c7d2cb; border-top:0; }
 #pageEditSummary { color:#18271e; font-size:14px; line-height:1.9; }.page-edit-rejected { border:1px solid #e4cfaf; background:#fff8ee; color:#815a30; padding:12px; font-size:12px; line-height:1.9; border-radius:8px; }
+.page-edit-layout { margin:14px 0 0; padding:13px 15px; border:1px solid #e6cfae; border-left:3px solid #c9873a; border-radius:8px; background:#fffaf1; color:#795324; font-size:12.5px; line-height:1.9; }
+.page-edit-layout strong { display:block; margin-bottom:5px; font-size:13px; color:#6d4515; }
+.page-edit-layout ul { margin:0; padding-left:20px; }.page-edit-layout li+li { margin-top:4px; }
+.page-edit-layout:not(.needs-review) { border-color:#c6dccb; border-left-color:#4a8a5c; background:#f3faf5; color:#2d5a3b; }
 @media(max-width:760px){.page-edit-comparison-grid { grid-template-columns:1fr; }.page-edit-controls { align-items:flex-start; }.page-edit-controls label { flex-wrap:wrap; }.page-edit-actionbar button { flex:1; }.page-edit-run .primary { width:100%; }}

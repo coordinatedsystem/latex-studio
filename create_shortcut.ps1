@@ -1,11 +1,11 @@
-param(
+﻿param(
     [Parameter(Mandatory=$true)][string]$HomeDirectory,
     [string]$DesktopDirectory = [Environment]::GetFolderPath('Desktop')
 )
 $ErrorActionPreference = 'Stop'
 $resolvedHome = [System.IO.Path]::GetFullPath($HomeDirectory)
 $launcher = Join-Path $resolvedHome 'Launch.vbs'
-$iconFile = Join-Path $resolvedHome 'app\assets\studio.ico'
+$iconFile = Join-Path $resolvedHome 'app\assets\studio-blue.ico'
 if (-not (Test-Path -LiteralPath $launcher)) { throw 'The installed launcher is missing.' }
 if (-not (Test-Path -LiteralPath $iconFile)) { throw 'The desktop icon is missing.' }
 $desktopTarget = [System.IO.Path]::GetFullPath($DesktopDirectory)

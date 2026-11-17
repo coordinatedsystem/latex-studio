@@ -115,3 +115,153 @@ class HarnessIntegrationTests(unittest.TestCase):
             job=self.ai.start(self.root,'main.tex',{'mode':'agent','question':'继续','resume':first['id'],'stepLimit':8});job=self.wait(job['id'])
         self.assertTrue(job['success']);self.assertEqual(seen[0][:len(old)],old)
         self.assertIn('继续',seen[0][len(old)]['content'])
+
+
+class RepeatedCallProgressTests(unittest.TestCase):
+    """Regressions for the stalled-edit turn: repeats redirect, they do not hand the task back."""
+    setUp=fixtures.AssistantTests.setUp;response=fixtures.AssistantTests.response;run_job=fixtures.AssistantTests.run_job;wait=fixtures.AssistantTests.wait;compiler=fixtures.AssistantTests.compiler
+
+    def test_elided_edit_arguments_are_absent_instead_of_fake_anchors(self):
+        from studio_assistant_context import compact_tool,ELIDED_MARK
+        body='x'*900
+        record={'tool':'edit','args':{'path':'main.tex','before':body,'after':'short'},'summary':{'edits':1},'content':body}
+        compact=compact_tool(record)
+        self.assertNotIn('before',compact['args']);self.assertNotIn(body,json.dumps(compact,ensure_ascii=False))
+        self.assertNotIn(ELIDED_MARK,json.dumps(compact,ensure_ascii=False))
+        self.assertEqual(record['args']['before'],body)
+        short={'tool':'edit','args':{'path':'main.tex','before':'Hello','after':'Bye'},'summary':{'edits':1},'content':'ok'}
+        self.assertEqual(compact_tool(short)['args']['before'],'Hello')
+
+    def test_placeholder_edit_is_rejected_with_a_specific_instruction(self):
+        calls=[self.response('read_file',{'path':'main.tex'}),
+               self.response('edit',{'path':'main.tex','before':'[已执行的历史替换内容，共 32 字符]','after':'x'}),
+               self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),
+               self.response('compile'),self.response(message='已完成',done=True)]
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler) as compiler:job=self.run_job(calls)
+        self.assertTrue(job['success']);self.assertTrue(job['verified'])
+        failed=next(e for e in job['events'] if e['tool']=='edit' and e['status']=='failed')
+        self.assertIn('占位',failed['detail'])
+
+    def test_identical_edit_retry_is_skipped_and_the_turn_still_compiles(self):
+        calls=[self.response('read_file',{'path':'main.tex'}),
+               self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),
+               self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),
+               self.response('compile'),self.response(message='已修复并通过验证',done=True)]
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler) as compiler:
+            with patch.object(self.ai,'tool',wraps=self.ai.tool) as tool:job=self.run_job(calls)
+        self.assertTrue(job['success']);self.assertTrue(job['verified']);self.assertTrue(job['candidateReady'])
+        self.assertEqual(compiler.call_count,1)
+        self.assertEqual(sum(e['tool']=='edit' and e['status']=='done' for e in job['events']),1)
+        self.assertEqual(tool.call_count,4) # automatic recovery compile, then a cached model compile
+
+    def test_a_real_loop_is_still_stopped(self):
+        calls=[self.response('list_files')]*6
+        with patch.object(self.ai,'tool',wraps=self.ai.tool) as tool:job=self.run_job(calls)
+        self.assertFalse(job['success']);self.assertIn('重复',job['error'])
+        self.assertEqual(tool.call_count,1)
+
+    def test_follow_up_reference_keeps_previous_answer_and_read_evidence(self):
+        advice='一、确定偏僵硬（建议改写）\n1. 第 196 行：“虽……但……”建议只陈述数字。\n2. 第 202 行：删去“不宜据此推断”。'
+        first=self.run_job([self.response('read_file',{'path':'main.tex'}),self.response(message=advice,done=True)],question='文章有没有僵硬的表达')
+        self.assertTrue(first['success'])
+        seen=[];responses=iter([self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),self.response('compile'),self.response(message='已按建议修改',done=True)])
+        def remote(url,payload,headers):seen.append(json.dumps(payload['messages'],ensure_ascii=False));return next(responses)
+        with patch('studio_ai.request_json',side_effect=remote),patch.object(self.ai,'compile_copy',side_effect=self.compiler):
+            job=self.ai.start(self.root,'main.tex',{'mode':'agent','question':'把你建议改写的改一下','resume':first['id'],'stepLimit':8});job=self.wait(job['id'])
+        self.assertTrue(job['success']);self.assertIn('第 202 行',seen[0]);self.assertIn('inspectedEarlier',seen[0])
+        self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+
+
+class PdfRenderSafetyTests(unittest.TestCase):
+    """PDFium is process-global and not thread-safe: concurrent use poisoned every later load."""
+    setUp=fixtures.AssistantTests.setUp;response=fixtures.AssistantTests.response;run_job=fixtures.AssistantTests.run_job;wait=fixtures.AssistantTests.wait;compiler=fixtures.AssistantTests.compiler
+
+    def test_preview_verification_and_page_rendering_share_one_lock(self):
+        import threading,tempfile
+        from pathlib import Path
+        from studio_pdfium import LOCK
+        from studio_ai_quality import verify_preview_pdf
+        from studio_review import page_image
+        from test_fixture_pdf import write_fixture_pdf
+        tmp=tempfile.TemporaryDirectory();self.addCleanup(tmp.cleanup);pdf=Path(tmp.name)/'doc.pdf';write_fixture_pdf(pdf)
+        errors=[];stop=threading.Event()
+        def verify():
+            while not stop.is_set():
+                try:verify_preview_pdf(pdf)
+                except Exception as exc:errors.append(repr(exc)[:120]);return
+        def render():
+            while not stop.is_set():
+                try:page_image(pdf,Path(tmp.name)/'pages','0123456789abcdef0123',1,pdf.stat().st_mtime_ns)
+                except Exception as exc:errors.append(repr(exc)[:120]);return
+        threads=[threading.Thread(target=verify) for _ in range(2)]+[threading.Thread(target=render) for _ in range(2)]
+        for thread in threads:thread.start()
+        stop.wait(3);stop.set()
+        for thread in threads:thread.join(10)
+        self.assertEqual(errors,[])
+        self.assertEqual(verify_preview_pdf(pdf),3)
+        self.assertIs(LOCK,__import__('studio_pdfium',fromlist=['LOCK']).LOCK)
+
+    def test_render_failure_is_not_reported_as_a_source_error(self):
+        responses=[self.response('read_file',{'path':'main.tex'}),
+                   self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),
+                   self.response('compile'),self.response(message='需要重启渲染组件',question=True)]
+        with patch.object(self.ai,'compile_copy',side_effect=self._render_fail):
+            job=self.run_job(responses)
+        self.assertFalse(job['verified']);self.assertFalse(job['candidateReady'])
+        self.assertIn('重启',job['answer'])
+        event=next(e for e in job['events'] if e['tool']=='compile' and e['status']=='failed')
+        self.assertIn('渲染',event['detail'])
+
+    @staticmethod
+    def _render_fail(s,clone,n):
+        s['previewFailure']='候选 PDF 无法预览'
+        return False,'compiled but render failed'
+
+    def test_diagnostics_reports_the_newest_attempt_and_its_location(self):
+        from studio_document_assistant import DocumentAssistant
+        s={'main':'main.tex','chatMode':'agent','editRevision':3,'compiledRevision':3,'lastCompiled':False,'previewFailure':None,
+           'lastLog':'error: main.tex:12: Undefined control sequence \foo\n'}
+        ai=self.ai;clone=self.root
+        result=ai.capabilities.execute(s,clone,'diagnostics',{},set())
+        self.assertFalse(result['stale']);self.assertEqual(result['errorLine'],12);self.assertIn('main.tex',result['next'])
+
+
+class CompileFailureGuidanceTests(unittest.TestCase):
+    """The same compiler error after an edit means the edit missed; say so instead of repeating."""
+    setUp=fixtures.AssistantTests.setUp;response=fixtures.AssistantTests.response;run_job=fixtures.AssistantTests.run_job;wait=fixtures.AssistantTests.wait
+
+    def test_same_tex_error_after_edits_is_named_and_eventually_stopped(self):
+        same=(False,'error: main.tex:3: Undefined control sequence \foo\n')
+        responses=[self.response('read_file',{'path':'main.tex'}),
+                   self.response('edit',{'path':'main.tex','before':'textbff','after':'textbf'}),
+                   self.response('compile'),
+                   self.response('edit',{'path':'main.tex','before':'Hello','after':'Hello!'}),
+                   self.response('compile'),
+                   self.response('edit',{'path':'main.tex','before':'Hello!','after':'Hello!!'}),
+                   self.response('compile'),
+                   self.response(message='完成',done=True)]
+        with patch.object(self.ai,'compile_copy',return_value=same):job=self.run_job(responses)
+        self.assertFalse(job['success']);self.assertIn('同一个编译错误',job['error'])
+        self.assertTrue(any(e['tool']=='compile' and '第 3 行' in (e['detail'] or '') for e in job['events']))
+
+    def test_failed_anchor_names_the_closest_line_or_escaping_problem(self):
+        root=self.root
+        body='\\documentclass{article}\n\\begin{document}\nHello \\textbff{world}.\n\\end{document}\n'
+        (root/'main.tex').write_text(body,'utf8')
+        # The model double-escaped the backslash; the file only has single backslashes.
+        overescaped='\\\\textbff{world}'
+        result=self.run_job([self.response('read_file',{'path':'main.tex'}),
+                             self.response('edit',{'path':'main.tex','before':overescaped,'after':'x'}),
+                             self.response(message='需要重新读取',question=True)])
+        event=next(e for e in result['events'] if e['tool']=='edit' and e['status']=='failed')
+        self.assertIn('反斜杠',event['detail'])
+
+    def test_failed_anchor_points_at_the_current_line(self):
+        root=self.root
+        body='\\documentclass{article}\n\\begin{document}\nHello \\textbff{world}.\nMore text here.\n\\end{document}\n'
+        (root/'main.tex').write_text(body,'utf8')
+        result=self.run_job([self.response('read_file',{'path':'main.tex'}),
+                             self.response('edit',{'path':'main.tex','before':'Some old sentence that is gone.','after':'x'}),
+                             self.response(message='需要重新读取',question=True)])
+        event=next(e for e in result['events'] if e['tool']=='edit' and e['status']=='failed')
+        self.assertTrue('行' in event['detail'])

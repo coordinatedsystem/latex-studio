@@ -6,7 +6,10 @@ and settings snapshots are backed up and byte-verified before any cache is remov
 from pathlib import Path
 import argparse,hashlib,json,os,re,shutil,stat,subprocess,time,urllib.error,urllib.parse,urllib.request,zipfile
 
-CACHE_NAMES=('deepseek-harness-source','assistant-ui-160','release-1.6.0','terms-ui-1.4.1')
+CACHE_NAMES=('deepseek-harness-source','assistant-ui-160','release-1.6.0','terms-ui-1.4.1',
+             'build-1.8.1','build-1.8.2','build-1.8.3','build-1.9.0',
+             'release-1.5.1','release-1.5.2','release-1.5.3','release-1.5.4',
+             'release-1.8.1','release-1.8.2','release-1.9.0','release-1.9.1')
 
 def sha(path):
     value=hashlib.sha256()

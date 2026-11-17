@@ -34,6 +34,18 @@ class UpdateTests(unittest.TestCase):
         with patch('studio_updates.subprocess.Popen') as execute:
             with self.assertRaisesRegex(ValueError,'已变化'):self.up.install()
             execute.assert_not_called()
+    def test_a_newer_local_build_is_not_reported_as_the_latest_release(self):
+        older={'version':'0.9.0','file':'distribution/LaTeX-Studio-0.9.0-win64-Setup.exe','sha256':'a'*64,'size':12,'notes':''}
+        release=self.up.validate(older,'e'*40)
+        self.assertFalse(release['available']);self.assertEqual(release['relation'],'older')
+        with patch.object(self.up,'json',side_effect=[{'object':{'sha':'f'*40}},older]):
+            result=self.up.check()
+        self.assertFalse(result['release']['available']);self.assertEqual(result['job']['stage'],'本机版本高于已发布版本')
+    def test_the_same_version_is_reported_as_up_to_date(self):
+        same={**self.release,'version':VERSION,'file':f'distribution/LaTeX-Studio-{VERSION}-win64-Setup.exe'}
+        with patch.object(self.up,'json',side_effect=[{'object':{'sha':'f'*40}},same]):
+            result=self.up.check()
+        self.assertEqual(result['release']['relation'],'same');self.assertEqual(result['job']['stage'],'已是最新版本')
     def test_bad_download_is_not_runnable(self):
         release=self.up.validate(self.release,'d'*40)
         with patch.object(self.up,'open',return_value=io.BytesIO(b'corrupted')):self.up.fetch(release)

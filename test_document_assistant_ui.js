@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 function fixture(){
- const nodes=new Map(),calls=[];const $=selector=>{if(!nodes.has(selector))nodes.set(selector,{value:'',hidden:false,disabled:false,textContent:'',classList:{toggle(){}},getBoundingClientRect:()=>({height:200})});return nodes.get(selector);};
+ const nodes=new Map(),calls=[];const $=selector=>{if(!nodes.has(selector))nodes.set(selector,{value:'',hidden:false,disabled:false,textContent:'',innerHTML:'',scrollHeight:0,scrollTop:0,clientHeight:0,classList:{toggle(){}},querySelector:()=>null,insertAdjacentHTML(){},getBoundingClientRect:()=>({height:200})});return nodes.get(selector);};
  const c=vm.createContext({console,Map,Set,JSON,Array,String,Number,Promise,encodeURIComponent,setTimeout,clearTimeout,esc:text=>String(text).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'),$,$$:()=>[],state:{projectId:'p1'},prefs:{main:'main.tex'},models:new Map(),saveAll:async()=>{},setInterval:()=>1,clearInterval(){},localStorage:{setItem(){},getItem(){return null;}},api:async(path,data)=>{calls.push([path,data]);return {};}});
  let source=fs.readFileSync(__dirname+'/web/document-assistant.js','utf8');source=source.slice(0,source.indexOf('function conversationInstall'));vm.runInContext(source+';this.assistant=studioAssistant;',c);c.conversationControls=()=>{};c.realRender=c.conversationRender;c.conversationRender=()=>{};c.conversationNotice=()=>{};
  c.assistant.project='p1';return {c,$,calls};
@@ -30,7 +30,7 @@ test('dirty buffers cannot be associated as stale disk selections',async()=>{
  const f=fixture();f.c.models.set('main.tex',{dirty:true});await assert.rejects(f.c.conversationContext(),/保存/);
 });
 test('new frontend is loaded after the document workbench and registers both modes',()=>{
- const html=fs.readFileSync(__dirname+'/web/index.html','utf8'),js=fs.readFileSync(__dirname+'/web/document-assistant.js','utf8');assert.ok(html.indexOf('src="/document-assistant.js"')>html.indexOf('src="/writing-continuous.js"'));assert.match(js,/data-assistant-mode="chat"/);assert.match(js,/data-assistant-mode="agent"/);assert.match(js,/role="separator"/);
+ const html=fs.readFileSync(__dirname+'/web/index.html','utf8'),js=fs.readFileSync(__dirname+'/web/document-assistant.js','utf8');assert.ok(html.indexOf('src="/document-assistant.js"')>html.indexOf('src="/writing-continuous.js"'));assert.ok(html.indexOf('/studio-minimal.css')>html.indexOf('/document-assistant.css'));assert.match(js,/data-assistant-mode="chat"/);assert.match(js,/data-assistant-mode="agent"/);assert.match(js,/role="separator"/);
 });
 test('composer dragging is clamped and supports keyboard resizing',()=>{
  const f=fixture(),handle=f.$('#conversationComposerResize'),panel=f.$('#studioConversation');const values=[];panel.clientHeight=600;panel.style={setProperty:(name,value)=>values.push(value)};handle.setPointerCapture=()=>{};handle.hasPointerCapture=()=>true;handle.releasePointerCapture=()=>{};
@@ -52,8 +52,8 @@ test('stop failure permits retry instead of leaving the control disabled',async(
  const f=fixture();f.c.assistant.id='job';f.c.assistant.job={id:'job',running:true};f.c.api=async()=>{throw new Error('offline');};await assert.rejects(f.c.conversationStop(),/offline/);assert.equal(f.c.assistant.stopping,false);
 });
 
-test('empty conversation renders without dereferencing a missing work log',()=>{
- const f=fixture(),list=f.$('#conversationMessages');Object.assign(list,{scrollHeight:0,scrollTop:0,clientHeight:300,querySelector:()=>null,insertAdjacentHTML(position,html){this.innerHTML+=html;}});f.c.realRender();assert.match(list.innerHTML,/conversation-empty/);
+test('empty conversation renders quick starts without dereferencing a missing work log',()=>{
+ const f=fixture(),list=f.$('#conversationMessages');Object.assign(list,{scrollHeight:0,scrollTop:0,clientHeight:300,querySelector:()=>null,insertAdjacentHTML(position,html){this.innerHTML+=html;}});f.c.realRender();assert.match(list.innerHTML,/conversation-empty/);assert.equal((list.innerHTML.match(/data-conversation-suggestion=/g)||[]).length,3);assert.match(list.innerHTML,/检查排版/);
 });
 
 test('candidate effect and source actions route to the interactive document tabs',async()=>{

@@ -1,12 +1,19 @@
 'use strict';
 let updatePoll=null;
+function updateReleaseText(release,current){
+ const version='v'+release.version,relation=release.relation||(release.available?'newer':'same');
+ const label=relation==='newer'?'可更新至 '+version
+  :relation==='older'?'已发布 '+version+'，本机 v'+current+' 更高'
+  :'最新版本 '+version;
+ return label+(release.notes?'\n'+release.notes:'');
+}
 async function showUpdates(){
  const s=await api('updates');
  modal('版本与更新',`<div class="update-product"><strong>LaTeX Studio</strong><span>v${esc(s.version)} · 稳定版</span></div><div class="update-status" id="updateStatus" role="status">${esc(s.job.stage)}</div><div id="updateRelease"></div><div class="update-actions"><button type="button" id="updateCheck" class="primary">检查更新</button><button type="button" id="updateDownload" class="secondary" hidden>下载安装包</button><button type="button" id="updateInstall" class="primary" hidden>运行安装包</button></div><details class="update-config"><summary>更新设置</summary><label class="field-row"><span>启动时检查</span><input id="updateAutomatic" type="checkbox" ${s.automatic?'checked':''}></label><label class="field"><span>GitHub 只读凭据（可选）${s.configured?'（已保存）':''}</span><input id="updateToken" type="password" autocomplete="new-password" placeholder="留空保留已保存的凭据"></label><p>公开仓库无需填写。私有仓库仅需 Contents 读取权限，本机加密保存。</p><button id="updateSave" type="button" class="secondary">保存设置</button><button id="updateClear" type="button" class="text-button">清除凭据</button></details><a href="https://github.com/coordinatedsystem/latex-studio" target="_blank" rel="noreferrer">项目仓库 ↗</a>`);
  const render=s=>{
   if(!$('#updateStatus'))return;
   $('#updateStatus').textContent=s.job.error||s.job.stage+(s.job.size?' · '+Math.round((s.job.downloaded||0)/s.job.size*100)+'%':'');
-  $('#updateRelease').textContent=s.release?(s.release.available?'可更新至 v':'最新版本 v')+s.release.version+(s.release.notes?'\n'+s.release.notes:''):'';
+  $('#updateRelease').textContent=s.release?updateReleaseText(s.release,s.version):'';
   $('#updateCheck').disabled=s.job.running;$('#updateDownload').hidden=!s.release?.available||s.ready;$('#updateDownload').disabled=s.job.running;$('#updateInstall').hidden=!s.ready;
  };
  const watch=fn=>async()=>{try{render(await fn())}catch(e){if($('#updateStatus'))$('#updateStatus').textContent=e.message}};

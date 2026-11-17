@@ -10,7 +10,7 @@ def verify_app(repo, app):
     repo,app=Path(repo),Path(app)
     expected={p.relative_to(repo) for folder in ('web','vendor','assets') for p in (repo/folder).rglob('*') if p.is_file()}
     expected.update(Path(p.name) for p in repo.glob('studio_*.py'))
-    expected.update(map(Path, ('server.py','bootstrap_install.py','launch.ps1','Launch.vbs','version.json','README.md','CHANGELOG.md','THIRD_PARTY_NOTICES.md')))
+    expected.update(map(Path, ('server.py','bootstrap_install.py','select_project.py','launch.ps1','Launch.vbs','version.json','README.md','CHANGELOG.md','THIRD_PARTY_NOTICES.md')))
     bad=[str(p) for p in sorted(expected) if not (app/p).is_file() or sha(repo/p)!=sha(app/p)]
     bad.extend(str(p.relative_to(app))+' (unexpected)' for p in app.rglob('*') if p.is_file() and p.relative_to(app) not in expected)
     if bad:raise ValueError('Application payload missing or changed: '+', '.join(bad))
@@ -30,7 +30,7 @@ def main():
     verify_python(payload)
     app=payload/'app';app.mkdir(parents=True,exist_ok=True)
     for folder in ['web','vendor','assets']:shutil.copytree(repo/folder,app/folder,dirs_exist_ok=True)
-    names=['server.py','studio_version.py','bootstrap_install.py','launch.ps1','Launch.vbs','version.json','README.md','CHANGELOG.md','THIRD_PARTY_NOTICES.md']
+    names=['server.py','studio_version.py','bootstrap_install.py','select_project.py','launch.ps1','Launch.vbs','version.json','README.md','CHANGELOG.md','THIRD_PARTY_NOTICES.md']
     names+= [p.name for p in repo.glob('studio_*.py') if p.name not in names]
     for name in names:shutil.copy2(repo/name,app/name)
     verify_app(repo,app)

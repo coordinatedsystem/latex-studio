@@ -111,5 +111,24 @@ class PageContextTests(unittest.TestCase):
         target.write_bytes(b'external change')
         with self.assertRaises(ValueError):self.manager.apply_data(self.context['id'],self.root,self.pdf,result['id'],undo=True)
 
+    def test_preview_rechecks_layout_and_surfaces_overfull_warnings(self):
+        from PIL import Image
+        base=Path(self.temp.name).resolve();image=base/'page.png'
+        Image.new('RGB',(12,12),'white').save(image)
+        source=self.context['source'];edits=validate_edits(source,[{'before':'eror','after':'error'}])[0]
+        self.manager.attach(self.context['id'],self.root,edits)
+        def compile_fake(command,**kwargs):
+            output=Path(command[command.index('--outdir')+1]);shutil.copyfile(self.pdf,output/'main.pdf')
+            return SimpleNamespace(returncode=0,stdout='Overfull \\hbox (6.0pt too wide) in paragraph at lines 4--5\n',stderr='')
+        with patch('studio_page_edits.subprocess.run',side_effect=compile_fake),patch('studio_page_edits.engine_environment',return_value={}),patch('studio_page_edits.page_image',return_value=image):
+            self.manager.preview(self.context['id'],self.root,self.pdf,[0])
+            deadline=time.monotonic()+4
+            while self.manager.busy() and time.monotonic()<deadline:threading.Event().wait(.01)
+        result=self.manager.status(self.context['id'],self.root);quality=result['quality']
+        self.assertTrue(result['success']);self.assertEqual(quality['status'],'review')
+        self.assertTrue(any('Overfull' in warning for warning in quality['warnings']))
+        self.assertIn('改后版面复核',quality['checks'])
+        self.assertEqual(quality['layout']['details']['overfull'],1)
+
 
 if __name__=='__main__':unittest.main()

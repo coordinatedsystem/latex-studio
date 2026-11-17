@@ -1,7 +1,7 @@
 """Bounded text windows and image evidence shared by Studio capabilities."""
 import base64,io
 
-TEXT={'.tex','.bib','.sty','.cls','.txt','.md','.csv','.json','.bbl','.cfg','.def'}
+TEXT={'.tex','.bib','.sty','.cls','.txt','.md','.csv','.json','.bbl','.cfg','.def','.py','.bst','.tikz'}
 
 def bounded_int(value,low,high):
     if isinstance(value,bool) or not isinstance(value,int) or not low<=value<=high:raise ValueError('参数范围无效')

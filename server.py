@@ -224,7 +224,18 @@ def compile_job(main, offline, job):
         code = PROCESS.wait()
         pdf = work / (Path(main).stem + '.pdf')
         if code != 0 or not pdf.exists():
-            raise RuntimeError('编译已停止' if code < 0 else '编译失败，请查看错误信息；右侧保留上次成功预览。')
+            if code < 0:
+                raise RuntimeError('编译已停止')
+            missing = []
+            if offline:
+                try:
+                    from studio_editor_ai import cached_resource_missing
+                    missing = cached_resource_missing('\n'.join(STATE['lines']), storage().tex_cache)
+                except Exception:
+                    missing = []
+            if missing:
+                raise RuntimeError('离线缓存缺少官方公共资源：' + '、'.join(missing[:5]) + '。可在设置中关闭“离线编译”后重新编译，或让助手补齐这些资源；右侧保留上次成功预览。')
+            raise RuntimeError('编译失败，请查看错误信息；右侧保留上次成功预览。')
         # App-private PDF is never held open by an external desktop PDF reader.
         target = storage().preview_path(ROOT)
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -483,7 +494,7 @@ class Handler(BaseHTTPRequestHandler):
                     threading.Thread(target=self.server.shutdown, daemon=True).start()
                 return
             context = self.headers.get('X-Studio-Project')
-            if context and context != project_id(ROOT) and (route.startswith(('/api/ai/', '/api/review/','/api/editor-ai/')) or route in {'/api/history-checkpoint','/api/save','/api/create','/api/upload','/api/rename','/api/delete','/api/compile','/api/search'}):
+            if context and context != project_id(ROOT) and (route.startswith(('/api/ai/', '/api/review/','/api/editor-ai/','/api/projects/sync')) or route in {'/api/history-checkpoint','/api/save','/api/create','/api/upload','/api/rename','/api/delete','/api/compile','/api/search'}):
                 return self.send({'error': '项目已在其他窗口切换，未覆盖任何文件。请先保存副本，再重新打开项目。'}, 409)
             if route == '/api/updates/settings':
                 return self.send(updates_for(storage()).configure(data))
@@ -533,6 +544,9 @@ class Handler(BaseHTTPRequestHandler):
                         target=project_root(manager,ROOT,data.get('projectId'),data.get('token'))
                         return self.send(restore(manager,target,data.get('token')))
                     if route.endswith('/attachment'):return self.send(manager.attachment(ROOT,data))
+                    if route.endswith('/permission'):
+                        from studio_assistant_policy import decide
+                        return self.send(decide(manager,ROOT,data.get('id'),data.get('requestId'),data.get('decision')))
                     if route.endswith('/cancel'):return self.send(manager.cancel(ROOT,data.get('id')))
                     if route.endswith('/apply') or route.endswith('/undo'):
                         require_idle();return self.send(manager.apply(ROOT,data.get('id'),route.endswith('/undo'),snapshot))
@@ -723,6 +737,14 @@ class Handler(BaseHTTPRequestHandler):
                     editor_ai_for(store).sessions.clear()
                     select_project(store.active_project())
                     return self.send(store.describe())
+            if route.startswith('/api/projects/sync'):
+                with LOCK:
+                    require_idle()
+                    from studio_project_sync import connect,synchronize,disconnect
+                    if route=='/api/projects/sync/connect':return self.send(connect(storage(),ROOT,data.get('path','')))
+                    if route=='/api/projects/sync/disconnect':return self.send(disconnect(storage(),ROOT))
+                    if route=='/api/projects/sync':return self.send(synchronize(storage(),ROOT,data.get('resolution')))
+                    raise ValueError('同步接口不存在')
             if route == '/api/projects/open':
                 with LOCK:
                     require_idle()

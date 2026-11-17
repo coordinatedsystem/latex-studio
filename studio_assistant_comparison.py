@@ -76,16 +76,18 @@ def source_diff(before,after):
 def visual_changes(before,after,pairs,old_pages,new_pages):
     import pypdfium2 as pdfium
     from PIL import Image,ImageChops
-    old=pdfium.PdfDocument(before);new=pdfium.PdfDocument(after);changes=[]
-    try:
-        for pair in (pairs or [{'beforePage':n,'afterPage':n} for n in range(1,min(old_pages,new_pages)+1)])[:40]:
-            a=old[pair['beforePage']-1];b=new[pair['afterPage']-1];ba=a.render(scale=.8);bb=b.render(scale=.8)
-            try:
-                ia=ba.to_pil().convert('RGB');ib=bb.to_pil().convert('RGB');size=(max(ia.width,ib.width),max(ia.height,ib.height));left=Image.new('RGB',size,'white');right=Image.new('RGB',size,'white');left.paste(ia);right.paste(ib)
-                box=ImageChops.difference(left,right).convert('L').point(lambda n:255 if n>35 else 0).getbbox()
-                if box:
-                    norm=lambda image:[max(0,min(1,box[0]/image.width)),max(0,min(1,box[1]/image.height)),max(0,min(1,box[2]/image.width)),max(0,min(1,box[3]/image.height))]
-                    changes.append({'id':len(changes)+1,'kind':'visual','before':[{'page':pair['beforePage'],'boxes':[norm(ia)],'text':'版面 / 样式变化'}],'after':[{'page':pair['afterPage'],'boxes':[norm(ib)],'text':'版面 / 样式变化'}],'beforeAnchor':None,'afterAnchor':None})
-            finally:ba.close();bb.close();a.close();b.close()
-    finally:old.close();new.close()
-    return changes
+    from studio_pdfium import LOCK
+    with LOCK:
+        old=pdfium.PdfDocument(before);new=pdfium.PdfDocument(after);changes=[]
+        try:
+            for pair in (pairs or [{'beforePage':n,'afterPage':n} for n in range(1,min(old_pages,new_pages)+1)])[:40]:
+                a=old[pair['beforePage']-1];b=new[pair['afterPage']-1];ba=a.render(scale=.8);bb=b.render(scale=.8)
+                try:
+                    ia=ba.to_pil().convert('RGB');ib=bb.to_pil().convert('RGB');size=(max(ia.width,ib.width),max(ia.height,ib.height));left=Image.new('RGB',size,'white');right=Image.new('RGB',size,'white');left.paste(ia);right.paste(ib)
+                    box=ImageChops.difference(left,right).convert('L').point(lambda n:255 if n>35 else 0).getbbox()
+                    if box:
+                        norm=lambda image:[max(0,min(1,box[0]/image.width)),max(0,min(1,box[1]/image.height)),max(0,min(1,box[2]/image.width)),max(0,min(1,box[3]/image.height))]
+                        changes.append({'id':len(changes)+1,'kind':'visual','before':[{'page':pair['beforePage'],'boxes':[norm(ia)],'text':'版面 / 样式变化'}],'after':[{'page':pair['afterPage'],'boxes':[norm(ib)],'text':'版面 / 样式变化'}],'beforeAnchor':None,'afterAnchor':None})
+                finally:ba.close();bb.close();a.close();b.close()
+        finally:old.close();new.close()
+        return changes

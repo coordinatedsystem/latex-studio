@@ -328,15 +328,17 @@ def page_image(pdf, data, project, page, version):
         else:
             try:import pypdfium2 as pdfium
             except ImportError:raise ValueError('没有找到 PDF 页面渲染工具，请重新安装运行组件') from None
-            document=pdfium.PdfDocument(str(pdf))
-            try:
-                sheet=document[page-1]
+            from studio_pdfium import LOCK
+            with LOCK:
+                document=pdfium.PdfDocument(str(pdf))
                 try:
-                    bitmap=sheet.render(scale=1400/max(sheet.get_width(),sheet.get_height()))
-                    try:bitmap.to_pil().save(target)
-                    finally:bitmap.close()
-                finally:sheet.close()
-            finally:document.close()
+                    sheet=document[page-1]
+                    try:
+                        bitmap=sheet.render(scale=1400/max(sheet.get_width(),sheet.get_height()))
+                        try:bitmap.to_pil().save(target)
+                        finally:bitmap.close()
+                    finally:sheet.close()
+                finally:document.close()
     if pdf.stat().st_mtime_ns!=int(version):
         raise ValueError('渲染期间 PDF 已更新，请重新加载')
     cached=sorted((p for p in folder.glob('*.png') if re.fullmatch(r'\d+-p\d+\.png',p.name)),key=lambda p:p.stat().st_mtime_ns,reverse=True)

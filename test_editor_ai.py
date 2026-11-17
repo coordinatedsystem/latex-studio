@@ -67,6 +67,13 @@ class EditorAITests(unittest.TestCase):
             self.start();job=self.wait();call.assert_not_called()
         self.assertTrue(job['resourceRecovered']);self.assertTrue(job['verified']);self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
 
+    def test_accept_rejects_a_package_that_is_not_in_the_pinned_bundle(self):
+        index=self.storage.tex_cache/'bundles/data/pinned.index';index.parent.mkdir(parents=True);index.write_text('article.cls 0 10\nctex.sty 0 10\n','utf8')
+        response=self.response('Hello','\\usepackage{invented-package}\nHello')
+        with patch.object(self.ai,'compile_copy',side_effect=self.compiler),patch('studio_ai.request_json',return_value=response):self.start();job=self.wait()
+        self.assertFalse(job['success']);self.assertFalse(job['changedPaths']);self.assertIn('无法使用',job['error'])
+        self.assertEqual((self.root/'main.tex').read_bytes(),self.original)
+
     def test_font_failure_reaches_ai_instead_of_only_showing_advice(self):
         (self.root/'main.tex').write_text('\\documentclass{article}\n\\usepackage{fontspec}\n\\setmainfont{UnavailableFamily}\n\\begin{document}Hello\\end{document}','utf8')
         with patch.object(self.ai,'compile_copy',side_effect=[(False,'font cannot be found'),(True,'passed')]),patch('studio_ai.request_json',return_value=self.response('UnavailableFamily','Arial')) as call:

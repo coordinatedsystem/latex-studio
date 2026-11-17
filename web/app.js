@@ -128,9 +128,9 @@ async function setPdf(version,force=false,native=false,requestedPage=null,previe
   if(bytes.length<5||String.fromCharCode(...bytes.subarray(0,5))!=='%PDF-')throw new Error('服务返回的内容不是有效的 PDF。');
   const oldBlob=pdfBlobUrl;pdfBlobUrl=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));if(oldBlob)URL.revokeObjectURL(oldBlob);
   if(native){useNativePreview();return;}
-  const frame=$('#pdfFrame');let page=requestedPage||1;try{if(!requestedPage)page=frame.contentWindow?.PDFViewerApplication?.page||1;}catch{}
+  const frame=$('#pdfFrame');let page=requestedPage||1,previousZoom=null;try{const previous=frame.contentWindow?.PDFViewerApplication;if(previous?.pdfDocument)previousZoom=previous.pdfViewer?.currentScaleValue;if(!requestedPage)page=previous?.page||1;}catch{}
   const loaded=new Promise((resolve,reject)=>{const done=()=>{frame.removeEventListener('load',onLoad);frame.removeEventListener('error',onError);};const onLoad=()=>{done();resolve();};const onError=()=>{done();reject(new Error('PDF 阅读器资源未能加载。'));};frame.addEventListener('load',onLoad);frame.addEventListener('error',onError);});
-  frame.src='/vendor/pdfjs/web/viewer.html?file=&studio=1&v=compat2-'+version+'#zoom=page-width&pagemode=none&page='+page;
+  frame.src='/vendor/pdfjs/web/viewer.html?file=&studio=1&v=compat2-'+version+'#pagemode=none&page='+page;
   await deadline(loaded,15000,'阅读器启动超时。');if(ticket!==pdfTicket)return;
   const app=frame.contentWindow?.PDFViewerApplication;if(!app)throw new Error(previewLastError||'浏览器未能启动 PDF 阅读器。');
   await deadline(app.initializedPromise,15000,'PDF 阅读器初始化超时。');if(ticket!==pdfTicket)return;
@@ -138,7 +138,7 @@ async function setPdf(version,force=false,native=false,requestedPage=null,previe
   if(typeof writingTrackPdf==='function')writingTrackPdf(app,ticket,project);
   let renderedHandler,pagesHandler;const pagesInitialized=new Promise(resolve=>{pagesHandler=resolve;app.eventBus.on('pagesinit',pagesHandler);});
   const rendered=new Promise((resolve,reject)=>{renderedHandler=event=>{if(event.error)reject(new Error(event.error.message||'页面绘制失败'));else resolve();};app.eventBus.on('pagerendered',renderedHandler);});rendered.catch(()=>{});
-  try{await deadline(app.open({data:bytes,filename:prefs.main.replace(/.*\//,'').replace(/\.tex$/,'.pdf')}),20000,'PDF 文档解析超时。');if(ticket!==pdfTicket)return;await deadline(pagesInitialized,15000,'PDF 页面初始化超时。');if(ticket!==pdfTicket)return;pdfPages=app.pdfDocument.numPages;app.pdfViewer.currentScaleValue='page-width';app.page=Math.min(page,pdfPages);await deadline(rendered,15000,'页面绘制超时。');}finally{app.eventBus.off('pagerendered',renderedHandler);app.eventBus.off('pagesinit',pagesHandler);}
+  try{await deadline(app.open({data:bytes,filename:prefs.main.replace(/.*\//,'').replace(/\.tex$/,'.pdf')}),20000,'PDF 文档解析超时。');if(ticket!==pdfTicket)return;await deadline(pagesInitialized,15000,'PDF 页面初始化超时。');if(ticket!==pdfTicket)return;pdfPages=app.pdfDocument.numPages;if(previousZoom)app.pdfViewer.currentScaleValue=previousZoom;app.page=Math.min(page,pdfPages);await deadline(rendered,15000,'页面绘制超时。');}finally{app.eventBus.off('pagerendered',renderedHandler);app.eventBus.off('pagesinit',pagesHandler);}
   if(ticket===pdfTicket&&typeof studioBindPdfNavigation==='function')studioBindPdfNavigation();
   if(ticket===pdfTicket)previewStatus('ready',previewSource?'候选预览 · 未应用 · '+pdfPages+' 页':pdfPages+' 页');
  }catch(error){if(ticket!==pdfTicket||error.name==='AbortError')return;logPreviewError(error.message);if(pdfBlobUrl&&!/会话|HTTP|不是有效/.test(error.message)){useNativePreview(true);}else previewStatus('error','加载失败',error.message);}
@@ -177,7 +177,8 @@ function resetProjectModels(){
  clearTimeout(saveTimer);clearTimeout(autoTimer);clearTimeout(outlineTimer);editor?.setModel(null);for(const info of models.values())info.model?.dispose();models.clear();active=null;lastTree='';lastPdf=0;++pdfTicket;pdfAbort?.abort();if(pdfBlobUrl)URL.revokeObjectURL(pdfBlobUrl);pdfBlobUrl='';pdfPages=0;$('#pdfFrame').src='about:blank';$('#projectQuery').value='';$('#searchResults').innerHTML='';collapsedFolders.clear();renderTabs();renderOutline();previewStatus('idle','等待编译');
 }
 async function checkExternalChanges(){
- for(const [path,info] of models){if(!info.model||info.dirty||info.saving)continue;try{const data=await api('file?path='+encodeURIComponent(path));if(data.revision!==info.revision){const view=path===active?editor.saveViewState():null;info.model.pushEditOperations([],[{range:info.model.getFullModelRange(),text:data.content}],()=>null);info.revision=data.revision;info.dirty=false;if(view)editor.restoreViewState(view);renderTabs();setSaveStatus('已同步外部修改');}}catch{}}
+ const project=state?.projectId;
+ for(const [path,info] of models){if(!info.model||info.saving)continue;try{const data=await api('file?path='+encodeURIComponent(path));if(project!==state?.projectId||models.get(path)!==info)return;if(data.revision!==info.revision){if(info.dirty){if(info.externalRevision!==data.revision){info.externalRevision=data.revision;toast(path+' 已在外部修改，未覆盖编辑中的内容。请重新载入或另存副本。',true);setSaveStatus('外部修改冲突 · 编辑内容已保留',true);}continue;}const view=path===active?editor.saveViewState():null;info.model.pushEditOperations([],[{range:info.model.getFullModelRange(),text:data.content}],()=>null);info.revision=data.revision;info.dirty=false;info.externalRevision=null;if(view)editor.restoreViewState(view);renderTabs();renderOutline();setSaveStatus('已同步外部修改');}}catch{}}
 }
 function renderDiagnostics(items){
  $('#problemCount').textContent=items.length;$('#diagnosticList').innerHTML=items.length?items.map((d,i)=>`<button class="diagnostic ${d.severity}" data-diag="${i}">${d.severity==='error'?'错误':'提示'} · ${esc(d.file)}:${d.line}　${esc(d.message)}</button>`).join(''):'<div class="no-results">没有可定位到源码的问题。详细输出请查看编译日志。</div>';

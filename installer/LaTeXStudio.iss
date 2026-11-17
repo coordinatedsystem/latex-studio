@@ -1,4 +1,4 @@
-﻿#ifndef Payload
+#ifndef Payload
   #define Payload "..\build\payload"
 #endif
 #ifndef Output
@@ -26,8 +26,8 @@ DisableDirPage=no
 UsePreviousAppDir=yes
 OutputDir={#Output}
 OutputBaseFilename=LaTeX-Studio-{#AppVersion}-win64-Setup
-SetupIconFile=..\assets\studio.ico
-UninstallDisplayIcon={app}\app\assets\studio.ico
+SetupIconFile=..\assets\studio-blue.ico
+UninstallDisplayIcon={app}\app\assets\studio-blue.ico
 Compression=lzma2/fast
 SolidCompression=yes
 WizardStyle=modern
@@ -68,6 +68,15 @@ InstallingLabel=正在安装 [name]，请稍候。
 Name: "desktopicon"; Description: "创建桌面快捷方式"; Flags: checkedonce
 [InstallDelete]
 Type: files; Name: "{app}\app\studio_usage.py"
+Type: files; Name: "{app}\app\assets\studio.ico"
+Type: files; Name: "{app}\app\web\cat-avatar.svg"
+Type: files; Name: "{app}\app\web\assistant-beauty.css"
+Type: files; Name: "{app}\app\install_desktop.py"
+Type: files; Name: "{app}\app\make_icon.py"
+Type: files; Name: "{app}\app\prepare_vendor.py"
+Type: files; Name: "{app}\app\repair_pdf_vendor.py"
+Type: files; Name: "{app}\app\create_shortcut.ps1"
+Type: files; Name: "{app}\app\__pycache__\*.pyc"
 [Files]
 Source: "{#Payload}\app\*"; DestDir: "{app}\app"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#Payload}\python\*"; DestDir: "{app}\python"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -79,8 +88,8 @@ Source: "prepare-install.ps1"; Flags: dontcopy
 Name: "{app}\data"; Flags: uninsneveruninstall
 Name: "{app}\projects"; Flags: uninsneveruninstall
 [Icons]
-Name: "{group}\LaTeX Studio"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\Launch.vbs"""; WorkingDir: "{app}"; IconFilename: "{app}\app\assets\studio.ico"
-Name: "{autodesktop}\LaTeX Studio"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\Launch.vbs"""; WorkingDir: "{app}"; IconFilename: "{app}\app\assets\studio.ico"; Tasks: desktopicon
+Name: "{group}\LaTeX Studio"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\Launch.vbs"""; WorkingDir: "{app}"; IconFilename: "{app}\app\assets\studio-blue.ico"
+Name: "{autodesktop}\LaTeX Studio"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\Launch.vbs"""; WorkingDir: "{app}"; IconFilename: "{app}\app\assets\studio-blue.ico"; Tasks: desktopicon
 [Run]
 Filename: "{app}\python\python.exe"; Parameters: "-B ""{app}\app\bootstrap_install.py"" --home ""{app}"""; Flags: runhidden waituntilterminated
 Filename: "{sys}\wscript.exe"; Parameters: """{app}\Launch.vbs"""; Description: "启动 LaTeX Studio"; Flags: postinstall nowait skipifsilent

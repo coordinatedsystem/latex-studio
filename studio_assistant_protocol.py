@@ -30,4 +30,4 @@ def replay(record):
                 {'role':'tool','tool_call_id':call['id'],'content':content if isinstance(content,str) else '页面图像见下一条消息。'}]
         if not isinstance(content,str):result.append({'role':'user','content':content})
         return result
-    return [{'role':'assistant','content':json.dumps({'tool':record['tool'],'args':record['args']},ensure_ascii=False)}, {'role':'user','content':record['content']}]
+    return [{'role':'assistant','content':json.dumps({'tool':record['tool'],'args':record.get('args',{})},ensure_ascii=False)}, {'role':'user','content':record['content']}]

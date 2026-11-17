@@ -28,18 +28,20 @@ def unsafe_tex_change(before,after):
 
 def verify_preview_pdf(path):
     """Only the necessary preview check: open, count pages and render page one."""
-    import pypdfium2 as pdfium
-    document=page=bitmap=None
-    try:
-        document=pdfium.PdfDocument(str(path))
-        if not len(document):raise ValueError('候选 PDF 没有可预览页面')
-        page=document[0];bitmap=page.render(scale=min(1,900/max(1,page.get_width())))
-        if bitmap.width<=0 or bitmap.height<=0:raise ValueError('候选 PDF 无法绘制')
-        return len(document)
-    except Exception as exc:raise ValueError('候选 PDF 无法预览，原文件未改动；请重新生成或修复编译错误') from exc
-    finally:
-        for obj in (bitmap,page,document):
-            if obj is not None:obj.close()
+    from studio_pdfium import LOCK
+    with LOCK:
+        import pypdfium2 as pdfium
+        document=page=bitmap=None
+        try:
+            document=pdfium.PdfDocument(str(path))
+            if not len(document):raise ValueError('候选 PDF 没有可预览页面')
+            page=document[0];bitmap=page.render(scale=min(1,900/max(1,page.get_width())))
+            if bitmap.width<=0 or bitmap.height<=0:raise ValueError('候选 PDF 无法绘制')
+            return len(document)
+        except Exception as exc:raise ValueError('候选 PDF 无法预览，原文件未改动；请重新生成或修复编译错误') from exc
+        finally:
+            for obj in (bitmap,page,document):
+                if obj is not None:obj.close()
 
 def lock_source(text,editable=False):
     if editable:return text,{}
@@ -104,6 +106,75 @@ def report(before,after,task='edit',target='',instruction=''):
     if task=='translate' and target=='en' and re.search(r'[\u4e00-\u9fff]',_prose(after)):warnings.append('译文仍有中文正文或尾词，请检查是否漏译')
     if re.search(r'[.!?](?=[A-Z][a-z])|[A-Za-z](?=\$|\\(?:cite|ref)\b)',after):warnings.append('英文句子、公式或引用附近可能缺少空格')
     return {'status':'review' if warnings else 'checked','warnings':warnings,'checks':['修改范围','候选编译预览'],'note':'自动检查不替代对原意、术语与版面的人工审阅'}
+
+BOX_PATTERN = re.compile(r'(Overfull|Underfull) \\([hv])box \(([^)]*)\)([^\n]*)')
+BOX_LINE = re.compile(r'(?:at lines? (\d+)|detected at line (\d+))')
+
+def box_warnings(log):
+    """Read the compiler's own box warnings; no PDF parsing needed."""
+    over, under = [], []
+    for kind, axis, detail, rest in BOX_PATTERN.findall(log or ''):
+        match = BOX_LINE.search(rest)
+        line = int(match.group(1) or match.group(2)) if match else 0
+        (over if kind == 'Overfull' else under).append({'line': line, 'axis': axis, 'detail': detail[:90]})
+    return over, under
+
+
+def layout_report(before, after, log='', pages=None):
+    """Re-check layout after an edit: boxes, page count and page geometry.
+
+    Content-only edits can silently break pagination or push text past the margin.
+    The report is deliberately conservative: it names evidence, not aesthetic guesses.
+    """
+    warnings = []
+    details = {}
+    try:
+        over, under = box_warnings(log)
+        details['overfull'] = len(over)
+        details['underfull'] = len(under)
+        if over:
+            lines = ', '.join(str(item['line']) for item in over if item['line']) or '未知'
+            warnings.append('编译日志有 ' + str(len(over)) + ' 处 Overfull 盒子（文字可能超出页边距），涉及行：' + lines)
+        from pypdf import PdfReader
+        old_total = len(PdfReader(str(before)).pages)
+        new_total = len(PdfReader(str(after)).pages)
+        details['pages'] = {'before': old_total, 'after': new_total}
+        if new_total > old_total:
+            warnings.append('页数由 ' + str(old_total) + ' 增至 ' + str(new_total) + '，请检查分页、图表位置与末页留白')
+        elif new_total < old_total:
+            warnings.append('页数由 ' + str(old_total) + ' 减至 ' + str(new_total) + '，请确认没有内容被挤掉')
+        from studio_review import inspect_pdf
+        selected = [int(page) for page in (pages or []) if str(page).strip().isdigit()]
+        if not selected:
+            selected = sorted({1, max(1, (old_total + 1) // 2), old_total})
+        selected = sorted({page for page in selected if 1 <= page <= old_total})
+        if selected and old_total == new_total:
+            before_geometry = inspect_pdf(str(before), ','.join(map(str, selected)))
+            after_geometry = inspect_pdf(str(after), ','.join(map(str, selected)))
+            old_pages = {page['page']: page for page in before_geometry['pages']}
+            new_pages = {page['page']: page for page in after_geometry['pages']}
+            labels = {'outside-page': '有对象超出页面边界', 'tight-margin': '文字贴近纸边',
+                      'blank-page': '出现了空白页', 'large-whitespace': '内容集中在上半页'}
+            for number, old_page in old_pages.items():
+                new_page = new_pages.get(number)
+                if not new_page:
+                    continue
+                old_codes = {issue['code'] for issue in old_page['issues']}
+                added = {issue['code'] for issue in new_page['issues']} - old_codes
+                added = {code for code in added if code in labels}
+                if added:
+                    warnings.append('第 ' + str(number) + ' 页改后' + labels[sorted(added)[0]] + '，请检查该页排版')
+                shift = abs(new_page.get('contentBottom', 0) - old_page.get('contentBottom', 0))
+                if shift >= .18:
+                    warnings.append('第 ' + str(number) + ' 页内容纵向分布变化约 ' + str(round(shift * 100)) + '%，请检查分页与留白')
+        details['pagesChecked'] = selected
+    except Exception:
+        return {'status': 'unavailable', 'warnings': ['未能完成版面复核，请直接查看 PDF 预览'],
+                'basis': '编译日志 + PDF 页面几何'}
+    warnings = list(dict.fromkeys(warnings))[:8]
+    return {'status': 'review' if warnings else 'checked', 'warnings': warnings, 'details': details,
+            'basis': '编译日志 + PDF 页面几何'}
+
 
 def pdf_report(before,after):
     try:
